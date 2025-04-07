@@ -38,3 +38,44 @@ app.post('/api/register', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const auth = require("./middleware/auth");
+
+app.use(cookieParser());
+
+// Login
+app.post("/api/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await pool.query("SELECT * FROM Users WHERE email = $1", [email]);
+    
+    if (user.rows.length === 0 || !await bcrypt.compare(password, user.rows[0].password)) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { id: user.rows[0].id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.cookie("token", token, { httpOnly: true });
+    res.json({ message: "Logged in successfully" });
+    token 
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+// Add after auth middleware
+app.get("/api/protected", auth, (req, res) => {
+  res.json({ message: `Hello user ${req.user.id}!` });
+});
+
+const { submitQuery } = require("./controllers/queryController");
+
+// Protected query endpoint
+app.post("/api/queries", auth, submitQuery);
