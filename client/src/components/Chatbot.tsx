@@ -1,78 +1,78 @@
 import { useState, useRef, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Image, X } from "lucide-react";
 
 type Message = {
    id: number;
    text: string;
+   img: File | null;
    sender: "user" | "ai";
    timestamp: Date;
 };
 
-type FormValues = {
-   input: string;
+type Input = {
+   text: string;
+   img: File | null;
 };
-
-const FormZodSchema = z.object({
-   input: z.string()
-      .trim()
-      .nonempty({ message: "Your message cannot be empty" })
-      .max(500, { message: "Your message is too long (max 500 characters)" })
-})
 
 const initAIMsg: Message = {
    id: 1,
    text: "Hello! I'm Civic-AId. Type something and I'll repeat it back to you.",
+   img: null,
    sender: "ai",
    timestamp: new Date(),
 };
 
 export default function Chatbot() {
    const [messagesArr, setMessagesArr] = useState<Message[]>([initAIMsg]);
+
    const [isWaitingForRes, setIsWaitingForRes] = useState<boolean>(false);
 
+   const [input, setInput] = useState<Input>({ text: "", img: null });
+   const [imgPreview, setImgPreview] = useState<string | null>(null);
+
    const messagesEndRef = useRef<HTMLDivElement>(null);
+   const fileInputRef = useRef<HTMLInputElement>(null);
+   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-   const {
-      register,
-      handleSubmit,
-      reset,
-      formState: { errors, isValid, isDirty },
-   } = useForm<FormValues>({
-      resolver: zodResolver(FormZodSchema),
-      defaultValues: { input: '' },
-      mode: 'onChange',
-      reValidateMode: 'onChange',
-   });
+   async function handleSubmitQuery(e: React.FormEvent) {
 
-   async function handleSubmitMessage(dat: FormValues) {
+      e.preventDefault();
 
       try {
 
-         setIsWaitingForRes(true);
-
+         const { text, img } = input;
+         
          // Add user message
-         const userMessage: Message = {
+         const thisQuery: Message = {
             id: messagesArr.length + 1,
-            text: dat.input,
+            text,
+            img,
             sender: "user",
             timestamp: new Date(),
          };
-         setMessagesArr((prev) => [...prev, userMessage]);
-         reset();
 
+         setIsWaitingForRes(true);
+         setMessagesArr(prev => [...prev, thisQuery]);
+
+         // clear the textarea and img preview
+         setInput({ text: "", img: null });
+         setImgPreview(null);
+
+         // resize the text area
+         if (textAreaRef.current) textAreaRef.current.style.height = 'auto';
+
+         // simulate API response
          await new Promise((resolve) => setTimeout(resolve, 3000));
 
          // Add ai response
-         const botMessage: Message = {
+         const AIres: Message = {
             id: messagesArr.length + 2,
-            text: `You said: "${dat.input}"`,
+            text: `You said: "${text}" ${img ? "and sent an image" : ""}`,
+            img: null,
             sender: "ai",
             timestamp: new Date(),
          };
-         setMessagesArr((prev) => [...prev, botMessage]);
+         setMessagesArr((prev) => [...prev, AIres]);
          setIsWaitingForRes(false);
 
       } catch (error) {
@@ -100,24 +100,48 @@ export default function Chatbot() {
       }
    }
 
+   // handle img upload
+   function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+  
+      // Check if the file is an image
+      if (!file.type.startsWith('image/')) {
+         alert('Please upload an image file');
+         return;
+      }
+  
+      setInput(prev => ({ ...prev, img: file }));
+  
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (event) => {
+         setImgPreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+   };
+
+   // handle remove uploaded img
+   function removeImage() {
+      setInput(prev => ({ ...prev, img: null }));
+      setImgPreview(null);
+      if (fileInputRef.current) {
+         fileInputRef.current.value = '';
+      }
+   };
+
    // Auto-scroll to bottom when messagesArr changes
    useEffect(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
    }, [messagesArr]);
 
-
-   console.log("is valid: " + isValid)
-   console.log("is dirty: " + isDirty)
-
    return (
       <div className="flex flex-col h-screen bg-gray-100">
          <div className="w-full mx-auto flex flex-col h-full tracking-wide">
-            {/* Header */}
             <div className="bg-blue-600 text-white p-4 shadow-md">
                <h1 className="text-xl font-bold">Civic-AId</h1>
             </div>
 
-            {/* Messages container */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 text-lg">
                {messagesArr.map(msg => (
                   <div
@@ -149,39 +173,85 @@ export default function Chatbot() {
                <div ref={messagesEndRef} />
             </div>
 
-            {/* Input area */}
             <form 
-               onSubmit={handleSubmit(handleSubmitMessage)}
+               onSubmit={handleSubmitQuery}
                className=" bg-gray-200 rounded-xl p-4 m-4
-               flex flex-col"
+               flex flex-col space-y-3"
             >
+               {imgPreview && (
+                  <div className="relative w-fit">
+                     <img 
+                        src={imgPreview}
+                        alt="Image preview" 
+                        className="max-h-40 rounded-lg"
+                     />
+                     <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute -top-2 -right-2
+                        bg-black text-white rounded-full p-1 
+                        hover:bg-gray-700 
+                        hover:cursor-pointer
+                        transition duration-300 ease-in-out"
+                     >
+                        <X size={18} />
+                     </button>
+                  </div>
+               )}
+
                <textarea
-                  {...register('input', { onChange: handleTextAreaChange })}
+                  ref={textAreaRef}
                   placeholder="Ask anything"
+                  value={input.text}
                   rows={1}
-                  onKeyDown={e => {
-                     if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        if (isValid && isDirty && !isWaitingForRes) {
-                           handleSubmit(handleSubmitMessage)();
-                        }
-                     }
+                  onChange={e => {
+                     setInput(pv => ({...pv, text: e.target.value}));
+                     handleTextAreaChange(e);
                   }}
-                  className="w-full resize-none overflow-hidden focus:outline-none mb-3"
+                  className="w-full resize-none overflow-hidden focus:outline-none"
                />
 
-               <div className="ms-auto flex flex-row items-center space-x-4">
-                  <div className=" text-red-500">
-                     {errors.input?.message}
+               <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="hidden"
+               />
+
+               <div className="ms-auto flex flex-row items-center space-x-2">
+                  <div className="relative group">
+                     <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className=" 
+                           text-black bg-white rounded-full p-2 w-10 h-10 flex justify-center items-center 
+                           disabled:opacity-50 disabled:cursor-default
+                           hover:bg-gray-300 hover:cursor-pointer disabled:hover:bg-white disabled:hover:cursor-default
+                           transition duration-300 ease-in-out"
+                     >
+                        <Image strokeWidth={2} size={25} />
+                     </button>
+
+                     <div className="
+                        absolute bottom-full mb-1 left-1/2 -translate-x-1/2 
+                        bg-gray-800 text-white text-xs px-2 py-1 rounded 
+                        opacity-0 group-hover:opacity-100 
+                        transition-opacity duration-300 
+                        pointer-events-none whitespace-nowrap
+                        z-10
+                     ">
+                        Upload an image
+                     </div>
                   </div>
 
                   <button
                      type="submit"
-                     disabled={!isValid || isWaitingForRes || !isDirty}
+                     disabled={isWaitingForRes}
                      className=" 
                      bg-blue-600 text-white rounded-full p-2 w-10 h-10 flex justify-center items-center 
                      disabled:opacity-50 disabled:cursor-default 
-                     hover:bg-blue-700 hover:cursor-pointer disabled:hover:bg-blue-600 disabled:hover:cursor-default
+                     hover:bg-blue-900 hover:cursor-pointer disabled:hover:bg-blue-600 disabled:hover:cursor-default
                      transition duration-300 ease-in-out"
                   >
                      <ArrowUp strokeWidth={3} size={25}/>
