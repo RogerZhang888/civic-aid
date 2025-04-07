@@ -63,6 +63,7 @@ app.post("/api/login", async (req, res) => {
 
     res.cookie("token", token, { httpOnly: true });
     res.json({ message: "Logged in successfully" });
+    token 
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -73,3 +74,8 @@ app.post("/api/login", async (req, res) => {
 app.get("/api/protected", auth, (req, res) => {
   res.json({ message: `Hello user ${req.user.id}!` });
 });
+
+const { submitQuery } = require("./controllers/queryController");
+
+// Protected query endpoint
+app.post("/api/queries", auth, submitQuery);

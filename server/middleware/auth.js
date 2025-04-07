@@ -1,8 +1,14 @@
 const jwt = require("jsonwebtoken");
 
 const auth = (req, res, next) => {
-  const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+  // Check cookies first
+  let token = req.cookies.token;
   
+  // Fallback to Authorization header
+  if (!token && req.headers.authorization) {
+    token = req.headers.authorization.split(" ")[1]; // Bearer <token>
+  }
+
   if (!token) return res.status(401).json({ error: "Unauthorized" });
 
   try {
@@ -13,5 +19,4 @@ const auth = (req, res, next) => {
     res.status(401).json({ error: "Invalid token" });
   }
 };
-
 module.exports = auth;
