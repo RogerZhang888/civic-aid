@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { ArrowUp, Image, X } from "lucide-react";
+import clsx from "clsx";
 
 type Message = {
    id: number;
@@ -28,8 +29,6 @@ export default function Chatbot() {
    const [isWaitingForRes, setIsWaitingForRes] = useState<boolean>(false);
 
    const [input, setInput] = useState<Input>({ text: "", img: null });
-
-   const [validationError, setValidationError] = useState<string | null>(null);
 
    const [imgPreview, setImgPreview] = useState<string | null>(null);
 
@@ -138,14 +137,10 @@ export default function Chatbot() {
    // real-time input validation:
    // text between 0 and 400 charcters, inclusive
    // must have either text or image, or both, present
-   useEffect(() => {
-      if (input.text.length > 400) {
-         setValidationError("Message must be 400 characters or less");
-      } else if (!input.text.trim() && !input.img) {
-         setValidationError("Please enter a message or upload an image");
-      } else {
-         setValidationError(null);
-      }
+   const validationError = useMemo(() => {
+      if (input.text.length > 400) return "Message must be ≤400 characters";
+      if (!input.text.trim() && !input.img) return "Message or image required";
+      return null;
    }, [input]);
 
    // Auto-scroll to bottom when messagesArr changes
@@ -164,24 +159,25 @@ export default function Chatbot() {
                {messagesArr.map(msg => (
                   <div
                      key={msg.id}
-                     className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+                     className={clsx("flex", {
+                        "justify-end": msg.sender === "user",
+                        "justify-start": msg.sender === "ai"
+                     })}
                   >
                      <div className="flex flex-col max-w-[80%]">
                         <div
-                           className={`rounded-lg px-4 py-2 break-words whitespace-pre-wrap ${
-                              msg.sender === "user"
-                                 ? "bg-blue-500 text-white"
-                                 : "bg-gray-200 text-gray-800"
-                           }`}
+                           className={clsx("rounded-lg px-4 py-2 break-words whitespace-pre-wrap", {
+                              "bg-blue-500 text-white": msg.sender === "user",
+                              "bg-gray-200 text-gray-800": msg.sender === "ai"
+                           })}
                         >
                            {msg.text}
                         </div>
                         <span
-                           className={`text-xs mt-1 px-2 text-gray-500 ${
-                              msg.sender === "user"
-                                 ? "text-right"
-                                 : "text-left"
-                           }`}
+                           className={clsx("text-xs mt-1 px-2 text-gray-500", {
+                              "text-right": msg.sender === "user",
+                              "text-left": msg.sender === "ai"
+                           })}
                         >
                            {formatTime(msg.timestamp)}
                         </span>
@@ -191,9 +187,9 @@ export default function Chatbot() {
                <div ref={messagesEndRef} />
             </div>
 
-            <form 
+            <form
                onSubmit={handleSubmitQuery}
-               className=" bg-gray-200 rounded-xl p-4 my-4 w-2/3 mx-auto
+               className=" bg-gray-200 rounded-xl p-4 mt-2 w-2/3 mx-auto
                flex flex-col relative shadow-lg"
             >
                {imgPreview && (
@@ -298,6 +294,8 @@ export default function Chatbot() {
                </div>
 
             </form>
+
+            <p className="text-xs m-2 text-center text-gray-500">AI-generated, for reference only.</p>
 
          </div>
 
