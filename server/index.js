@@ -79,3 +79,19 @@ const { submitQuery } = require("./controllers/queryController");
 
 // Protected query endpoint
 app.post("/api/queries", auth, submitQuery);
+
+const { 
+  createReport, 
+  updateReportStatus,
+  getReport 
+} = require("./controllers/reportController");
+
+// Protected user endpoints
+app.post("/api/reports", auth, createReport);
+
+// Agency endpoint (add agency auth later)
+// Change from :id to :reportId for clarity
+app.patch("/api/reports/:reportId", auth, updateReportStatus);
+
+
+app.get("/api/reports/:id", auth, getReport);
