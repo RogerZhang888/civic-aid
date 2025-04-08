@@ -28,6 +28,9 @@ export default function Chatbot() {
    const [isWaitingForRes, setIsWaitingForRes] = useState<boolean>(false);
 
    const [input, setInput] = useState<Input>({ text: "", img: null });
+
+   const [validationError, setValidationError] = useState<string | null>(null);
+
    const [imgPreview, setImgPreview] = useState<string | null>(null);
 
    const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -38,28 +41,30 @@ export default function Chatbot() {
 
       e.preventDefault();
 
+      if (validationError) return;
+
+      const { text, img } = input;
+      
+      // Add user message
+      const thisQuery: Message = {
+         id: messagesArr.length + 1,
+         text,
+         img,
+         sender: "user",
+         timestamp: new Date(),
+      };
+
+      setIsWaitingForRes(true);
+      setMessagesArr(prev => [...prev, thisQuery]);
+
+      // clear the textarea and img preview
+      setInput({ text: "", img: null });
+      setImgPreview(null);
+
+      // resize the text area
+      if (textAreaRef.current) textAreaRef.current.style.height = 'auto';
+
       try {
-
-         const { text, img } = input;
-         
-         // Add user message
-         const thisQuery: Message = {
-            id: messagesArr.length + 1,
-            text,
-            img,
-            sender: "user",
-            timestamp: new Date(),
-         };
-
-         setIsWaitingForRes(true);
-         setMessagesArr(prev => [...prev, thisQuery]);
-
-         // clear the textarea and img preview
-         setInput({ text: "", img: null });
-         setImgPreview(null);
-
-         // resize the text area
-         if (textAreaRef.current) textAreaRef.current.style.height = 'auto';
 
          // simulate API response
          await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -130,6 +135,19 @@ export default function Chatbot() {
       }
    };
 
+   // real-time input validation:
+   // text between 0 and 400 charcters, inclusive
+   // must have either text or image, or both, present
+   useEffect(() => {
+      if (input.text.length > 400) {
+         setValidationError("Message must be 400 characters or less");
+      } else if (!input.text.trim() && !input.img) {
+         setValidationError("Please enter a message or upload an image");
+      } else {
+         setValidationError(null);
+      }
+   }, [input]);
+
    // Auto-scroll to bottom when messagesArr changes
    useEffect(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -175,16 +193,19 @@ export default function Chatbot() {
 
             <form 
                onSubmit={handleSubmitQuery}
-               className=" bg-gray-200 rounded-xl p-4 m-4
-               flex flex-col space-y-3"
+               className=" bg-gray-200 rounded-xl p-4 my-4 w-2/3 mx-auto
+               flex flex-col relative shadow-lg"
             >
                {imgPreview && (
-                  <div className="relative w-fit">
+                  <div className="relative w-fit mb-3 text-center bg-gray-300 rounded-lg p-1">
                      <img 
                         src={imgPreview}
                         alt="Image preview" 
-                        className="max-h-40 rounded-lg"
+                        className="max-h-35 rounded-lg"
                      />
+                     <div className="text-sm text-gray-700 truncate max-w-[100px]">
+                        {input.img?.name}
+                     </div>
                      <button
                         type="button"
                         onClick={removeImage}
@@ -208,18 +229,19 @@ export default function Chatbot() {
                      setInput(pv => ({...pv, text: e.target.value}));
                      handleTextAreaChange(e);
                   }}
-                  className="w-full resize-none overflow-hidden focus:outline-none"
+                  className="w-full h-full resize-none overflow-hidden focus:outline-none mb-10"
                />
 
-               <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleImageUpload}
-                  accept="image/*"
-                  className="hidden"
-               />
+               <div className="absolute flex flex-row space-x-2 right-2 bottom-2">
 
-               <div className="ms-auto flex flex-row items-center space-x-2">
+                  <input
+                     type="file"
+                     ref={fileInputRef}
+                     onChange={handleImageUpload}
+                     accept="image/*"
+                     className="hidden"
+                  />
+
                   <div className="relative group">
                      <button
                         type="button"
@@ -239,26 +261,46 @@ export default function Chatbot() {
                         opacity-0 group-hover:opacity-100 
                         transition-opacity duration-300 
                         pointer-events-none whitespace-nowrap
-                        z-10
-                     ">
+                        z-10"
+                     >
                         Upload an image
                      </div>
                   </div>
 
-                  <button
-                     type="submit"
-                     disabled={isWaitingForRes}
-                     className=" 
-                     bg-blue-600 text-white rounded-full p-2 w-10 h-10 flex justify-center items-center 
-                     disabled:opacity-50 disabled:cursor-default 
-                     hover:bg-blue-900 hover:cursor-pointer disabled:hover:bg-blue-600 disabled:hover:cursor-default
-                     transition duration-300 ease-in-out"
-                  >
-                     <ArrowUp strokeWidth={3} size={25}/>
-                  </button>
+                  <div className="relative group">
+                     <button
+                        type="submit"
+                        disabled={isWaitingForRes || !!validationError}
+                        className=" 
+                        bg-blue-600 text-white rounded-full p-2 w-10 h-10 flex justify-center items-center 
+                        disabled:opacity-50 disabled:cursor-default 
+                        hover:bg-blue-900 hover:cursor-pointer disabled:hover:bg-blue-600 disabled:hover:cursor-not-allowed
+                        transition duration-300 ease-in-out"
+                     >
+                        <ArrowUp strokeWidth={3} size={25}/>
+                     </button>
+
+                     {validationError && 
+                        <div className="
+                           absolute bottom-full mb-1 left-1/2 -translate-x-1/2 
+                           bg-gray-800 text-white text-xs px-2 py-1 rounded 
+                           opacity-0 group-hover:opacity-100 
+                           transition-opacity duration-300 
+                           pointer-events-none
+                           z-10 w-[150px] text-center"
+                        >
+                           {validationError}
+                        </div>
+                     }
+
+                  </div>
+
                </div>
+
             </form>
+
          </div>
+
       </div>
    );
 }
