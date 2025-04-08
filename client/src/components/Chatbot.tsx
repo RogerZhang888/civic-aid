@@ -1,36 +1,39 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { ArrowUp, Image, X } from "lucide-react";
 import clsx from "clsx";
+import toast from "react-hot-toast";
 
 type Message = {
    id: number;
    text: string;
-   img: File | null;
+   imgs: File[];
    sender: "user" | "ai";
    timestamp: Date;
 };
 
 type Input = {
    text: string;
-   img: File | null;
+   imgs: File[];
 };
 
 const initAIMsg: Message = {
    id: 1,
    text: "Hello! I'm Civic-AId. Type something and I'll repeat it back to you.",
-   img: null,
+   imgs: [],
    sender: "ai",
    timestamp: new Date(),
 };
+
+const MAX_IMAGES = 3;
 
 export default function Chatbot() {
    const [messagesArr, setMessagesArr] = useState<Message[]>([initAIMsg]);
 
    const [isWaitingForRes, setIsWaitingForRes] = useState<boolean>(false);
 
-   const [input, setInput] = useState<Input>({ text: "", img: null });
+   const [input, setInput] = useState<Input>({ text: "", imgs: [] });
 
-   const [imgPreview, setImgPreview] = useState<string | null>(null);
+   const [imgsPreview, setImgsPreview] = useState<string[]>([]);
 
    const messagesEndRef = useRef<HTMLDivElement>(null);
    const fileInputRef = useRef<HTMLInputElement>(null);
@@ -42,13 +45,13 @@ export default function Chatbot() {
 
       if (validationError) return;
 
-      const { text, img } = input;
+      const { text, imgs } = input;
       
       // Add user message
       const thisQuery: Message = {
          id: messagesArr.length + 1,
          text,
-         img,
+         imgs,
          sender: "user",
          timestamp: new Date(),
       };
@@ -56,9 +59,9 @@ export default function Chatbot() {
       setIsWaitingForRes(true);
       setMessagesArr(prev => [...prev, thisQuery]);
 
-      // clear the textarea and img preview
-      setInput({ text: "", img: null });
-      setImgPreview(null);
+      // clear the textarea and imgs preview
+      setInput({ text: "", imgs: [] });
+      setImgsPreview([]);
 
       // resize the text area
       if (textAreaRef.current) textAreaRef.current.style.height = 'auto';
@@ -71,8 +74,8 @@ export default function Chatbot() {
          // Add ai response
          const AIres: Message = {
             id: messagesArr.length + 2,
-            text: `You said: "${text}" ${img ? "and sent an image" : ""}`,
-            img: null,
+            text: `You said "${text}" and sent ${imgs.length} image(s)`,
+            imgs: [],
             sender: "ai",
             timestamp: new Date(),
          };
@@ -81,6 +84,7 @@ export default function Chatbot() {
 
       } catch (error) {
 
+         toast.error("Error during submission")
          console.error("Error during submission:", error);
          setIsWaitingForRes(false);
 
@@ -104,34 +108,37 @@ export default function Chatbot() {
       }
    }
 
-   // handle img upload
-   function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-      const file = e.target.files?.[0];
-      if (!file) return;
-  
-      // Check if the file is an image
-      if (!file.type.startsWith('image/')) {
-         alert('Please upload an image file');
+   // handle imgs upload
+   function handleImagesUpload(e: React.ChangeEvent<HTMLInputElement>) {
+      const newFiles = e.target.files;
+      if (!newFiles || newFiles.length === 0) return;
+      
+      const newImgFiles = Array.from(newFiles).filter(file => file.type.startsWith('image/'));
+      
+      if (newImgFiles.length !== newFiles.length) {
+         toast.error('Please upload only image files');
          return;
       }
-  
-      setInput(prev => ({ ...prev, img: file }));
-  
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onload = (event) => {
-         setImgPreview(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+
+      if (input.imgs.length + newImgFiles.length > MAX_IMAGES) {
+         toast.error(`Maximum ${MAX_IMAGES} images allowed`);
+         return;
+      }
+      
+      setInput(pv => ({ ...pv, imgs: [...pv.imgs, ...newImgFiles] }));
+      
+      // Create preview URLs
+      newImgFiles.forEach(file => {
+         const reader = new FileReader();
+         reader.onload = (event) => setImgsPreview(pv => [...(pv || []), event.target?.result as string]);
+         reader.readAsDataURL(file);
+      });
    };
 
-   // handle remove uploaded img
-   function removeImage() {
-      setInput(prev => ({ ...prev, img: null }));
-      setImgPreview(null);
-      if (fileInputRef.current) {
-         fileInputRef.current.value = '';
-      }
+   // handle remove uploaded imgs
+   function removeImage(idx: number) {
+      setInput(pv => ({...pv, imgs: pv.imgs.filter((_, i) => i !== idx)}));
+      setImgsPreview(pv => pv?.filter((_, i) => i !== idx) || null);
    };
 
    // real-time input validation:
@@ -139,14 +146,12 @@ export default function Chatbot() {
    // must have either text or image, or both, present
    const validationError = useMemo(() => {
       if (input.text.length > 400) return "Message must be ≤400 characters";
-      if (!input.text.trim() && !input.img) return "Message or image required";
+      if (!input.text.trim() && input.imgs.length === 0) return "Message or image required";
       return null;
-   }, [input]);
+   }, [input.text, input.imgs.length]);
 
-   // Auto-scroll to bottom when messagesArr changes
-   useEffect(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-   }, [messagesArr]);
+   // Auto-scroll to bottom whenever messagesArr changes
+   useEffect(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), [messagesArr]);
 
    return (
       <div className="flex flex-col h-screen bg-gray-100">
@@ -156,6 +161,7 @@ export default function Chatbot() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4 text-lg">
+
                {messagesArr.map(msg => (
                   <div
                      key={msg.id}
@@ -172,6 +178,12 @@ export default function Chatbot() {
                            })}
                         >
                            {msg.text}
+
+                           {msg.imgs.length > 0 && 
+                              <div className="text-xs opacity-80">
+                                 {msg.imgs.length} image(s) attached
+                              </div>
+                           }
                         </div>
                         <span
                            className={clsx("text-xs mt-1 px-2 text-gray-500", {
@@ -184,37 +196,40 @@ export default function Chatbot() {
                      </div>
                   </div>
                ))}
+
                <div ref={messagesEndRef} />
+
             </div>
 
             <form
                onSubmit={handleSubmitQuery}
                className=" bg-gray-200 rounded-xl p-4 mt-2 w-2/3 mx-auto
                flex flex-col relative shadow-lg"
-            >
-               {imgPreview && (
-                  <div className="relative w-fit mb-3 text-center bg-gray-300 rounded-lg p-1">
-                     <img 
-                        src={imgPreview}
-                        alt="Image preview" 
-                        className="max-h-35 rounded-lg"
-                     />
-                     <div className="text-sm text-gray-700 truncate max-w-[100px]">
-                        {input.img?.name}
-                     </div>
-                     <button
-                        type="button"
-                        onClick={removeImage}
-                        className="absolute -top-2 -right-2
-                        bg-black text-white rounded-full p-1 
-                        hover:bg-gray-700 
-                        hover:cursor-pointer
-                        transition duration-300 ease-in-out"
-                     >
-                        <X size={18} />
-                     </button>
+            >  
+               {imgsPreview.length > 0 && 
+                  <div className="flex flex-row space-x-3 mb-3">
+                     {imgsPreview.map((prv, idx) => (
+                        <div key={idx} className="relative text-center bg-gray-300 rounded-lg p-1">
+                           <img 
+                              src={prv}
+                              alt={`Preview image ${idx + 1}`}
+                              className="max-h-20 rounded-lg"
+                           />
+                           <div className="text-sm text-gray-700 truncate max-w-[100px]">
+                              {input.imgs[idx]?.name}
+                           </div>
+                           <button
+                              type="button"
+                              onClick={() => removeImage(idx)}
+                              className="absolute -top-2 -right-2 bg-black text-white rounded-full p-1
+                              hover:bg-gray-700 hover:cursor-pointer transition duration-300 ease-in-out"
+                           >
+                              <X size={16} />
+                           </button>
+                        </div>
+                     ))}
                   </div>
-               )}
+               }
 
                <textarea
                   ref={textAreaRef}
@@ -230,22 +245,24 @@ export default function Chatbot() {
 
                <div className="absolute flex flex-row space-x-2 right-2 bottom-2">
 
-                  <input
-                     type="file"
-                     ref={fileInputRef}
-                     onChange={handleImageUpload}
-                     accept="image/*"
-                     className="hidden"
-                  />
+               <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImagesUpload}
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+               />
 
                   <div className="relative group">
                      <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
+                        disabled={input.imgs.length >= 3}
                         className=" 
                            text-black bg-white rounded-full p-2 w-10 h-10 flex justify-center items-center 
                            disabled:opacity-50 disabled:cursor-default
-                           hover:bg-gray-300 hover:cursor-pointer disabled:hover:bg-white disabled:hover:cursor-default
+                           hover:bg-gray-300 hover:cursor-pointer disabled:hover:bg-white disabled:hover:cursor-not-allowed
                            transition duration-300 ease-in-out"
                      >
                         <Image strokeWidth={2} size={25} />
@@ -259,7 +276,10 @@ export default function Chatbot() {
                         pointer-events-none whitespace-nowrap
                         z-10"
                      >
-                        Upload an image
+                        {input.imgs.length < 3
+                           ?  "Upload an image"
+                           :  "Max: 3 images"
+                        }
                      </div>
                   </div>
 
