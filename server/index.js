@@ -91,7 +91,20 @@ app.post("/api/reports", auth, createReport);
 
 // Agency endpoint (add agency auth later)
 // Change from :id to :reportId for clarity
-app.patch("/api/reports/:reportId", auth, updateReportStatus);
+app.patch("/api/reports/:id", auth, updateReportStatus);
 
 
 app.get("/api/reports/:id", auth, getReport);
+
+const geocodeAddress = require("./services/geocoder");
+const handleMediaUpload = require("./controllers/mediaController");
+
+// Location Services
+//app.post('/api/location/geocode', auth, geocodeAddress); // Convert address ↔ coordinates
+
+// Incident Reporting Flow
+// app.post('/api/conversations', auth, startConversation); // For AQR (Active Query Refinement)
+// app.post('/api/media', auth, upload.single('file'), handleMediaUpload); // Image/video handling
+
+// // Status Tracking
+// app.get('/api/reports/:id/updates', auth, getReportUpdates); // For notification system
