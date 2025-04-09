@@ -24,9 +24,11 @@ const queryRoutes = require('./routes/queryRoutes');
 const authRoutes = require('./routes/authRoutes');
 const reportController = require('./controllers/reportController');
 const auth = require('./middleware/auth');
+const mediaRoutes = require('./routes/mediaRoutes');
 
 app.use('/api', authRoutes);
 app.use('/api', queryRoutes);
+app.use('/api', mediaRoutes);
 
 // Direct report endpoints
 app.post('/api/reports', auth, reportController.createReport);
