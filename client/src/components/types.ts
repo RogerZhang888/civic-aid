@@ -6,7 +6,7 @@ export type Message = {
    timestamp: Date;
 }
 
-export type Input = {
+export type FormState = {
    text: string;
    imgs: File[];
 };

@@ -1,22 +1,20 @@
 import { ArrowUp, Image, X } from "lucide-react";
 import { useMemo, useRef } from "react"
-import { Input } from "./types"
+import { FormState } from "./types"
 
 export default function ChatbotForm({
-   handleSubmitQuery,
-   handleImagesUpload,
-   handleInputTextChange,
-   removeImage,
+   handleSubmitForm,
+   handleFormImgsChange,
+   handleFormTextChange,
    imgsPreview,
-   input,
+   formState,
    isWaitingForRes,
 }: {
-   handleSubmitQuery: () => Promise<void>
-   handleImagesUpload: (x: FileList | null) => void
-   handleInputTextChange: (x: string) => void
-   removeImage: (x: number) => void
+   handleSubmitForm: () => Promise<void>
+   handleFormImgsChange: (x: FileList | number) => void
+   handleFormTextChange: (x: string) => void
    imgsPreview: string[]
-   input: Input
+   formState: FormState
    isWaitingForRes: boolean
 }) {
 
@@ -27,20 +25,20 @@ export default function ChatbotForm({
    // text between 0 and 400 charcters, inclusive
    // must have either text or image, or both, present
    const validationError = useMemo(() => {
-      if (input.text.length > 400) return "Message must be ≤400 characters";
-      if (!input.text.trim() && input.imgs.length === 0) return "Message or image required";
+      if (formState.text.length > 400) return "Message must be ≤400 characters";
+      if (!formState.text.trim() && formState.imgs.length === 0) return "Message or image required";
       return null;
-   }, [input.text, input.imgs.length]);
+   }, [formState.text, formState.imgs.length]);
 
    return (
       <form
          onSubmit={e => {
             e.preventDefault();
             if (validationError) return;
-            handleSubmitQuery();
+            handleSubmitForm();
             if (textAreaRef.current) textAreaRef.current.style.height = 'auto';
          }}
-         className=" bg-gray-200 rounded-xl p-4 mt-2 w-2/3 mx-auto
+         className="bg-gray-200 rounded-xl p-4 mt-2 w-full md:w-2/3 mx-auto
          flex flex-col relative shadow-lg"
       >  
          {imgsPreview.length > 0 && 
@@ -53,11 +51,11 @@ export default function ChatbotForm({
                         className="max-h-20 rounded-lg"
                      />
                      <div className="text-sm text-gray-700 truncate max-w-[100px]">
-                        {input.imgs[idx]?.name}
+                        {formState.imgs[idx]?.name}
                      </div>
                      <button
                         type="button"
-                        onClick={() => removeImage(idx)}
+                        onClick={() => handleFormImgsChange(idx)}
                         className="absolute -top-2 -right-2 bg-black text-white rounded-full p-1
                         hover:bg-gray-700 hover:cursor-pointer transition duration-300 ease-in-out"
                      >
@@ -71,7 +69,7 @@ export default function ChatbotForm({
          <textarea
             placeholder="Ask anything"
             ref={textAreaRef}
-            value={input.text}
+            value={formState.text}
             rows={1}
             onChange={e => {
                const ta = e.target;
@@ -79,7 +77,17 @@ export default function ChatbotForm({
                   ta.style.height = 'auto';
                   ta.style.height = `${ta.scrollHeight}px`;
                }
-               handleInputTextChange(ta.value)
+               handleFormTextChange(ta.value)
+            }}
+            onKeyDown={e => {
+               if (e.key === 'Enter' && !e.shiftKey) {
+                  // Shift + Enter starts a new line
+                  // Enter on its own will submit the form
+                  e.preventDefault();
+                  if (validationError) return;
+                  handleSubmitForm();
+                  if (textAreaRef.current) textAreaRef.current.style.height = 'auto';
+               }
             }}
             className="w-full h-full resize-none overflow-hidden focus:outline-none mb-10"
          />
@@ -89,7 +97,13 @@ export default function ChatbotForm({
          <input
             type="file"
             ref={fileInputRef}
-            onChange={e => handleImagesUpload(e.target.files)}
+            onChange={e => {
+
+               const { files } = e.target;
+               if (!files || files.length === 0) return;
+
+               handleFormImgsChange(files)
+            }}
             accept="image/*"
             multiple
             className="hidden"
@@ -99,7 +113,7 @@ export default function ChatbotForm({
                <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={input.imgs.length >= 3}
+                  disabled={formState.imgs.length >= 3}
                   className=" 
                      text-black bg-white rounded-full p-2 w-10 h-10 flex justify-center items-center 
                      disabled:opacity-50 disabled:cursor-default
@@ -117,7 +131,7 @@ export default function ChatbotForm({
                   pointer-events-none whitespace-nowrap
                   z-10"
                >
-                  {input.imgs.length < 3
+                  {formState.imgs.length < 3
                      ?  "Upload an image"
                      :  "Max: 3 images"
                   }
