@@ -11,11 +11,19 @@ const mockLLMResponse = (prompt) => {
 
 exports.submitQuery = async (req, res) => {
   try {
-    const { prompt } = req.body;
-    const userId = req.user.id;
+    const { prompt, latitude, longitude, email } = req.body;
+    const userId = req.user?.id || null; // Optional: fallback if auth not ready
+    const uploadedFiles = req.files || [];
+
+    console.log("Received prompt:", prompt);
+    console.log("Location:", latitude, longitude);
+    console.log("Email:", email);
+    console.log("Uploaded files:", uploadedFiles);
 
     // Simulate LLM processing
     const llmResponse = mockLLMResponse(prompt);
+
+    // TODO: Optional — Save file paths to a related table if needed
 
     // Save to database
     const result = await pool.query(
@@ -28,7 +36,7 @@ exports.submitQuery = async (req, res) => {
         prompt,
         "System prompt placeholder",
         llmResponse.raw,
-        true, // Assume valid for placeholder
+        true,
         llmResponse.processed,
         llmResponse.confidence
       ]
@@ -41,6 +49,7 @@ exports.submitQuery = async (req, res) => {
     });
 
   } catch (error) {
+    console.error("Submit query error:", error);
     res.status(500).json({ error: error.message });
   }
 };
