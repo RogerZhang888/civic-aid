@@ -1,8 +1,22 @@
 export type Message = {
-   id: number;
+   id: string;
    text: string;
    imgs: File[];
-   sender: "user" | "ai";
+   sender: "user";
+   timestamp: Date;
+} | {
+   id: string;
+   text: string;
+   imgs: File[];
+   sender: "ai";
+   status: "pending";
+   timestamp?: Date;
+} | {
+   id: string;
+   text: string;
+   imgs: File[];
+   sender: "ai";
+   status: "finished";
    timestamp: Date;
 }
 

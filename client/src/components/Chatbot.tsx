@@ -5,13 +5,15 @@ import { FormState, Message } from "./types";
 import ChatbotForm from "./ChatbotForm";
 import { useGeolocated } from "react-geolocated";
 import axios, { AxiosError } from "axios";
+import { v4 as uuidv4 } from "uuid";
 
 const initAIMsg: Message = {
-   id: 1,
+   id: uuidv4(),
    text: "Hello! I'm Civic-AId. Type something and I'll repeat it back to you.",
    imgs: [],
    sender: "ai",
    timestamp: new Date(),
+   status: "finished"
 };
 
 const MAX_IMAGES = 3;
@@ -32,16 +34,30 @@ export default function Chatbot() {
 
       setIsWaitingForRes(true);
 
-      // Add user message to messages array
+      const userMsgUUID = uuidv4();
+      const aiMsgUUID = uuidv4();
+
+      // generate user message
       const { text, imgs } = formState;
-      const thisQuery: Message = {
-         id: messagesArr.length + 1,
+      const userMsg: Message = {
+         id: userMsgUUID,
          text,
          imgs,
          sender: "user",
          timestamp: new Date(),
       };
-      setMessagesArr((prev) => [...prev, thisQuery]);
+
+      // generate pending AI message
+      const pendingAiMsg: Message = {
+         id: aiMsgUUID,
+         text: "",
+         imgs: [],
+         sender: "ai",
+         status: "pending",
+      };
+
+      // add both to messages array
+      setMessagesArr(prev => [...prev, userMsg, pendingAiMsg])
 
       // reset formState and image previews
       setFormState({ text: "", imgs: [] });
@@ -89,40 +105,36 @@ export default function Chatbot() {
          // extract res data (this format might change later)
          const { reply, confidence } = res.data as { reply: string, confidence: number };
 
-         const AIres: Message = {
-            id: messagesArr.length + 2,
-            text: `The reply was "${reply}" with confidence ${confidence}`,
-            imgs: [],
-            sender: "ai",
-            timestamp: new Date(),
-         };
-         setMessagesArr((prev) => [...prev, AIres]);
+         setMessagesArr(prev => prev.map(msg => 
+            msg.id === pendingAiMsg.id
+               ?  {
+                  ...msg,
+                  text: `The reply was "${reply}" with confidence ${confidence}`,
+                  status: "finished",
+                  timestamp: new Date()
+               }
+               :  msg
+         ));
 
       } catch (error) {
 
          if (error instanceof AxiosError) {
 
-            const AIres: Message = {
-               id: messagesArr.length + 2,
-               text: error.message,
-               imgs: [],
-               sender: "ai",
-               timestamp: new Date(),
-            };
-            setMessagesArr((prev) => [...prev, AIres]);
+            setMessagesArr(prev => prev.map(msg => 
+               msg.id === pendingAiMsg.id 
+               ?  { ...msg, text: error.message, status: "finished", timestamp: new Date() }
+               :  msg
+            ));
    
             console.error("Request error during submission:", error.message);
 
          } else {
 
-            const AIres: Message = {
-               id: messagesArr.length + 2,
-               text: "An unknown error occured. Try again later.",
-               imgs: [],
-               sender: "ai",
-               timestamp: new Date(),
-            };
-            setMessagesArr((prev) => [...prev, AIres]);
+            setMessagesArr(prev => prev.map(msg => 
+               msg.id === pendingAiMsg.id 
+               ?  { ...msg, text: "An unknown error occured. Try again later.", status: "finished", timestamp: new Date() }
+               :  msg
+            ));
    
             console.error("Unknown error during submission:", error);
 
