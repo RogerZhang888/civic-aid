@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Message } from "./types";
+import { Message } from "../types";
 import { Image } from "lucide-react";
 import BeatLoader from "react-spinners/BeatLoader"
 

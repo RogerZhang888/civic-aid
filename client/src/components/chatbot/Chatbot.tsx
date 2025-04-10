@@ -1,7 +1,7 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import MessagesDisplay from "./MessagesDisplay";
-import { FormState, Message } from "./types";
+import { FormState, Message } from "../types";
 import ChatbotForm from "./ChatbotForm";
 import { useGeolocated } from "react-geolocated";
 import axios, { AxiosError } from "axios";
@@ -196,14 +196,13 @@ export default function Chatbot() {
    }
 
    return (
-      <div className="flex flex-col h-screen bg-gray-100">
-         <div className="w-full mx-auto flex flex-col h-full tracking-wide">
+      <div className="h-full flex flex-col">
 
-            <div className="bg-blue-600 text-white p-4 shadow-md text-xl font-bold">
-               Civic-AId
-            </div>
-
+         <div className="flex-1 overflow-y-auto">
             <MessagesDisplay messagesArr={messagesArr} />
+         </div>
+
+         <div className="sticky bottom-0">
 
             <ChatbotForm
                handleSubmitForm={handleSubmitForm}
@@ -219,6 +218,7 @@ export default function Chatbot() {
             </p>
 
          </div>
+
       </div>
    );
 }

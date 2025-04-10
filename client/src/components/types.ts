@@ -23,4 +23,22 @@ export type Message = {
 export type FormState = {
    text: string;
    imgs: File[];
-};
+}
+
+export type User = {
+   id: string;
+   email: string;
+   userName: string;
+}
+
+export type LoginFields = {
+   email: string;
+   password: string;
+}
+
+export type AuthContextType = {
+   currUser: User | null;
+   loading: boolean;
+   cvaLogin: (email: string, psd: string) => Promise<{ success: boolean; error?: string }>;
+   cvaLogout: () => Promise<void>;
+}
