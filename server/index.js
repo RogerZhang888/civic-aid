@@ -20,16 +20,13 @@ app.get('/health', async (req, res) => {
 });
 
 // Mount routers
-const auth = require('./routes/authRoutes');
 const queryRoutes = require('./routes/queryRoutes');
 const authRoutes = require('./routes/authRoutes');
-const reportController = require('./routes/reportRoutes');
-const mediaRoutes = require('./routes/mediaRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 app.use('/api', authRoutes);
 app.use('/api', queryRoutes);
-app.use('/api', mediaRoutes);
-app.use('/api', reportController);
+app.use('/api', reportRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
