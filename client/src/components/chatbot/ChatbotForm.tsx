@@ -1,6 +1,6 @@
 import { ArrowUp, Image, X } from "lucide-react";
 import { useMemo, useRef } from "react"
-import { FormState } from "./types"
+import { FormState } from "../types"
 
 export default function ChatbotForm({
    handleSubmitForm,
@@ -38,7 +38,7 @@ export default function ChatbotForm({
             handleSubmitForm();
             if (textAreaRef.current) textAreaRef.current.style.height = 'auto';
          }}
-         className="bg-gray-200 rounded-xl p-4 mt-2 w-full md:w-2/3 mx-auto
+         className="bg-gray-200 rounded-xl p-4 mt-2 w-4/5 md:w-2/3 mx-auto
          flex flex-col relative shadow-lg"
       >  
          {imgsPreview.length > 0 && 

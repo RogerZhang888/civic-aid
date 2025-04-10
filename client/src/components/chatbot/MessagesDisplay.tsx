@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef } from "react";
-import { Message } from "./types";
+import { Message } from "../types";
 import MessageBubble from "./MessageBubble";
 
 function MessagesDisplay({
@@ -22,7 +22,7 @@ function MessagesDisplay({
    useEffect(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), [messagesArr]);
 
    return (
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 text-lg">
+      <div className="overflow-y-auto p-4 space-y-4 text-lg">
 
          {messagesArr.map(msg => <MessageBubble message={msg} formatTime={formatTime} key={msg.id} />)}
 
