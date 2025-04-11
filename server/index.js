@@ -1,10 +1,10 @@
 const express = require('express');
+const app = express();
 const pool = require('./config/db');
-require('dotenv').config();
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+require('dotenv').config();
 
-const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
@@ -22,18 +22,11 @@ app.get('/health', async (req, res) => {
 // Mount routers
 const queryRoutes = require('./routes/queryRoutes');
 const authRoutes = require('./routes/authRoutes');
-const reportController = require('./controllers/reportController');
-const auth = require('./middleware/auth');
-const mediaRoutes = require('./routes/mediaRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 app.use('/api', authRoutes);
 app.use('/api', queryRoutes);
-app.use('/api', mediaRoutes);
-
-// Direct report endpoints
-app.post('/api/reports', auth, reportController.createReport);
-app.patch('/api/reports/:id', auth, reportController.updateReportStatus);
-app.get('/api/reports/:id', auth, reportController.getReport);
+app.use('/api', reportRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);

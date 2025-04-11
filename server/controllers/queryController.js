@@ -1,3 +1,5 @@
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 const pool = require("../config/db");
 
 // Placeholder LLM response
@@ -12,7 +14,7 @@ const mockLLMResponse = (prompt) => {
 exports.submitQuery = async (req, res) => {
   try {
     const { prompt, latitude, longitude, email } = req.body;
-    const userId = req.user?.id || null; // Optional: fallback if auth not ready
+    const userId = req.user?.id || null;
     const uploadedFiles = req.files || [];
 
     console.log("Received prompt:", prompt);
@@ -20,12 +22,27 @@ exports.submitQuery = async (req, res) => {
     console.log("Email:", email);
     console.log("Uploaded files:", uploadedFiles);
 
-    // Simulate LLM processing
+    if (!prompt) {
+      return res.status(400).json({ error: "Prompt is required" });
+    }
+
+    // Process and store uploaded files (mock URLs for now)
+    const savedMedia = uploadedFiles.map(file => {
+      const ext = path.extname(file.originalname);
+      const id = uuidv4();
+      const filename = `${id}${ext}`;
+      const mockUrl = `/uploads/${filename}`;
+      return {
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        url: mockUrl,
+      };
+    });
+
+    // Simulate LLM response
     const llmResponse = mockLLMResponse(prompt);
 
-    // TODO: Optional — Save file paths to a related table if needed
-
-    // Save to database
+    // Save query to DB
     const result = await pool.query(
       `INSERT INTO Queries 
        (user_id, user_prompt, system_prompt, response, valid, reply, confidence) 
@@ -42,10 +59,15 @@ exports.submitQuery = async (req, res) => {
       ]
     );
 
+    // TODO: optionally save file paths in a separate table tied to queryId
+
     res.json({
       queryId: result.rows[0].id,
       reply: llmResponse.processed,
-      confidence: llmResponse.confidence
+      confidence: llmResponse.confidence,
+      uploadedMedia: savedMedia,
+      location: latitude && longitude ? { latitude, longitude } : null,
+      email,
     });
 
   } catch (error) {
