@@ -36,6 +36,13 @@ export type LoginFields = {
    password: string;
 }
 
+export type RegisterFields = {
+   userName: string;
+   email: string;
+   password: string;
+   confirmPassword: string
+}
+
 export type AuthContextType = {
    currUser: User | null;
    loading: boolean;

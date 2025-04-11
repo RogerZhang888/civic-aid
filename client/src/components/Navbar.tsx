@@ -1,4 +1,4 @@
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "./auth/AuthContext";
 
 export default function Navbar() {
@@ -7,7 +7,7 @@ export default function Navbar() {
    const navigate = useNavigate();
 
    return (
-      <nav className="bg-blue-600 text-white shadow-lg">
+      <nav className="bg-blue-600 text-white shadow-lg" id="navbar">
          <div className="mx-auto px-4 flex h-15">
             <div className="flex items-center">
                <Link to="/" className="text-xl font-bold">
@@ -38,19 +38,13 @@ export default function Navbar() {
             <div className="flex ms-auto items-center">
                {currUser
                ?  <button
-                     className="px-2 py-1 text-sm border-white border-1 rounded-md
-                     hover:cursor-pointer
-                     hover:bg-blue-500 transition
-                     "
+                     className="btn btn-sm btn-outline"
                   >
                      Log Out
                   </button>
                :  <button
                      onClick={() => navigate("/auth")}
-                     className="px-2 py-1 text-sm border-white border-1 rounded-md
-                     hover:cursor-pointer
-                     hover:bg-blue-500 transition
-                     "
+                     className="btn btn-sm btn-outline"
                   >
                      Log In
                   </button>

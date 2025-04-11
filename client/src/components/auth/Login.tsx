@@ -28,41 +28,48 @@ export default function Login() {
          onSubmit={
             handleSubmit(async (fd) => await cvaLogin(fd.email, fd.password))
          }
-         className="lg:w-1/3 md:w-2/3 w-4/5 h-1/2 p-6 bg-white rounded-lg shadow-md space-y-6 text-xl"
+         className="min-w-1/2 py-5 px-10 bg-white rounded-lg space-y-1 shadow-[0_0_10px_4px_rgba(0,0,0,0.2)]"
       >
 
-         <label className="block">
-            <span className="text-gray-700">Email</span>
+         <fieldset className="fieldset">
+            <legend className="fieldset-legend text-sm">Email</legend>
             <input
                {...register("email", { required: true })}
                type="email"
                onBlur={() => trigger("email")}
                autoFocus={true}
-               className="mt-1 p-2 block w-full rounded-md border-1 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+               className="input text-lg w-full"
             />
-            <span className="mt-1 text-sm text-red-600">{errors.email?.message}</span>
-         </label>
+            <span className="fieldset-label text-sm text-red-600 h-3">{errors.email?.message}</span>
+         </fieldset>
 
-         <label className="block">
-            <span className="text-gray-700">Password</span>
+         <fieldset className="fieldset">
+            <legend className="fieldset-legend text-sm">Password</legend>
             <input
                {...register("password", { required: true })}
                type="password"
                onBlur={() => trigger("password")}
-               className="mt-1 p-2 block w-full rounded-md border-1 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+               className="input text-lg w-full"
             />
-            <span className="mt-1 text-sm text-red-600">{errors.password?.message}</span>
-         </label>
+            <span className="fieldset-label text-sm text-red-600 h-3">{errors.password?.message}</span>
+         </fieldset>
 
-         <button
-            type="submit"
-            disabled={!isDirty || !isValid || isSubmitting}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md text-white bg-indigo-600 hover:bg-indigo-700 hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-         >
-            {isSubmitting ? "Loading..." : "Log In"}
-         </button>
+         <div className="flex flex-col items-center space-y-4">
+            <button
+               type="submit"
+               disabled={!isDirty || !isValid || isSubmitting}
+               className="btn btn-wide btn-lg btn-success"
+            >
+               {isSubmitting 
+                  ?  <span className="loading loading-dots loading-md"/>
+                  :  "Log In"
+               }
+            </button>
+            <div>
+               No account? <Link to="/auth/reg" className="link">Register</Link>
+            </div>
+         </div>
 
-         <Link to="/auth/reg" className="text-blue-600">Register</Link>
 
       </form>
    );
