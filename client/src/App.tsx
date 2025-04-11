@@ -6,6 +6,8 @@ import Login from "./components/auth/Login";
 import MainLayout from "./components/MainLayout";
 import Register from "./components/auth/Register";
 import { AuthLayout } from "./components/auth/AuthLayout";
+import ProfilePage from "./components/profile/ProfilePage";
+import HomePage from "./components/HomePage";
 
 export default function App() {
    return (
@@ -13,13 +15,14 @@ export default function App() {
          <AuthProvider>
             <Toaster/>
             <Routes>
+
                <Route element={<MainLayout/>}>
 
-                  <Route path="/" element={<pre>filler 1</pre>} />
+                  <Route path="/" element={<HomePage/>} />
 
                   <Route path="/chatbot" element={<Chatbot />} />
 
-                  <Route path="/profile" element={<pre>filler 2</pre>} />
+                  <Route path="/profile" element={<ProfilePage/>} />
 
                   <Route path="/auth" element={<AuthLayout/>}>
                      <Route index element={<Login/>}/>
@@ -27,6 +30,7 @@ export default function App() {
                   </Route>
 
                </Route>
+               
             </Routes>
          </AuthProvider>
       </BrowserRouter>
