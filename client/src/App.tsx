@@ -1,38 +1,56 @@
 import { Toaster } from "react-hot-toast";
-import Chatbot from "./components/chatbot/Chatbot";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { AuthProvider } from "./components/auth/AuthProvider";
+import { ErrorBoundary } from "react-error-boundary";
+
+import AuthProvider from "./components/auth/AuthProvider";
+import AuthLayout from "./components/auth/AuthLayout";
 import Login from "./components/auth/Login";
-import MainLayout from "./components/MainLayout";
 import Register from "./components/auth/Register";
-import { AuthLayout } from "./components/auth/AuthLayout";
+import Chatbot from "./components/chatbot/Chatbot";
+import MainLayout from "./components/MainLayout";
 import ProfilePage from "./components/profile/ProfilePage";
 import HomePage from "./components/HomePage";
+import NotFound from "./components/NotFound";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 export default function App() {
    return (
       <BrowserRouter>
-         <AuthProvider>
-            <Toaster/>
-            <Routes>
+         <ErrorBoundary fallback={<div>Something went wrong</div>}>
+            <AuthProvider>
+               <Toaster/>
+               <Routes>
 
-               <Route element={<MainLayout/>}>
+                  <Route element={<MainLayout/>}>
 
-                  <Route path="/" element={<HomePage/>} />
+                     <Route path="/" element={<HomePage/>} />
 
-                  <Route path="/chatbot" element={<Chatbot />} />
+                     {/* 
+                        The /chatbot and /profile routes are protected
+                        only authenticated users can go there
+                        if not, redirected to /login
 
-                  <Route path="/profile" element={<ProfilePage/>} />
+                      */}
+                     <Route element={<ProtectedRoute/>}>
 
-                  <Route path="/auth" element={<AuthLayout/>}>
-                     <Route index element={<Login/>}/>
-                     <Route path="reg" element={<Register/>}/>
+                        <Route path="/chatbot" element={<Chatbot />} />
+
+                        <Route path="/profile" element={<ProfilePage/>} />
+
+                     </Route>
+
+                     <Route path="/auth" element={<AuthLayout/>}>
+                        <Route index element={<Login/>}/>
+                        <Route path="reg" element={<Register/>}/>
+                     </Route>
+
+                     <Route path="*" element={<NotFound />} />
+
                   </Route>
-
-               </Route>
-               
-            </Routes>
-         </AuthProvider>
+                  
+               </Routes>
+            </AuthProvider>
+         </ErrorBoundary>
       </BrowserRouter>
    );
 }

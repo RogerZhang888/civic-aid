@@ -6,6 +6,7 @@ import ChatbotForm from "./ChatbotForm";
 import { useGeolocated } from "react-geolocated";
 import axios, { AxiosError } from "axios";
 import { v4 as uuidv4 } from "uuid";
+import { useAuth } from "../auth/AuthContext";
 
 const initAIMsg: Message = {
    id: uuidv4(),
@@ -16,6 +17,8 @@ const initAIMsg: Message = {
    status: "finished"
 };
 
+const SERVER_URL = import.meta.env.SERVER_API_URL!;
+
 const MAX_IMAGES = 3;
 
 export default function Chatbot() {
@@ -24,10 +27,18 @@ export default function Chatbot() {
    const [formState, setFormState] = useState<FormState>({ text: "", imgs: [] });
    const [imgsPreview, setImgsPreview] = useState<string[]>([]);
 
+   // get user's coordinates
+   // browser will ask for permission
+   // if no permission granted, wont be sent in formdata
    const { coords } = useGeolocated({
       positionOptions: { enableHighAccuracy: false },
       userDecisionTimeout: 5000,
    });
+
+   // get the current user
+   // won't be null since this is under a protected route
+   const { currUser } = useAuth();
+   if (!currUser) return;
 
    // main form submit function
    async function handleSubmitForm() {
@@ -76,25 +87,14 @@ export default function Chatbot() {
       }
       // append user info
       // this is just dummy for now
-      fd.append('email', "john.doe@email.com");
+      fd.append('email', currUser!.email);
 
       try {
 
+         console.log(`User ${currUser} attempting to send a new query with text "${text}" and ${imgs.length} image(s)`);
+
          // send HTTP POST request
-         // server MUST have cors and configured to accept multipart/form-data
-         /* 
-         
-            eg.
-
-            const multer = require('multer');
-            const upload = multer({ dest: 'uploads/' });
-
-            app.post('/api/queries', upload.array('images'), (req, res) => {
-               console.log(req.files); // Array of file objects
-            });
-
-         */
-         const res = await axios.post("http://localhost:5000/api/queries", fd,
+         const res = await axios.post(`${SERVER_URL}/api/queries`, fd,
             {
                maxContentLength: 100 * 1024 * 1024,
                maxBodyLength: 100 * 1024 * 1024,
@@ -104,6 +104,8 @@ export default function Chatbot() {
 
          // extract res data (this format might change later)
          const { reply, confidence } = res.data as { reply: string, confidence: number };
+
+         console.log(`Server replied to ${currUser} querying "${text}" with "${reply}" that has confidence ${confidence}`);
 
          setMessagesArr(prev => prev.map(msg => 
             msg.id === pendingAiMsg.id
@@ -117,6 +119,8 @@ export default function Chatbot() {
          ));
 
       } catch (error) {
+
+         console.log(`Server replied to ${currUser} querying "${text}" with an error: \n${error}`);
 
          if (error instanceof AxiosError) {
 
