@@ -45,7 +45,6 @@ export type RegisterFields = {
 
 export type AuthContextType = {
    currUser: User | null;
-   loading: boolean;
-   cvaLogin: (email: string, psd: string) => Promise<{ success: boolean; error?: string }>;
-   cvaLogout: () => Promise<void>;
+   handleAddUserState: (u: User) => void;
+   handleRemoveUserState: () => void;
 }
