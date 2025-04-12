@@ -23,7 +23,6 @@ const zodSchema = z.object({
 }).refine(data => data.password === data.confirmPassword, { message: "Passwords must match", path: ["confirmPassword"] });
 
 export default function Register() {
-   const { cvaLogin } = useAuth();
    
    const {
       register,
@@ -37,9 +36,7 @@ export default function Register() {
 
    return (
       <form 
-         onSubmit={
-            handleSubmit(async (fd) => await cvaLogin(fd.email, fd.password))
-         }
+         onSubmit={handleSubmit(async (fd) => await cvaLogin(fd.email, fd.password))}
          className="min-w-1/2 py-5 px-10 bg-white rounded-lg space-y-1 shadow-[0_0_10px_4px_rgba(0,0,0,0.2)]"
       >
 

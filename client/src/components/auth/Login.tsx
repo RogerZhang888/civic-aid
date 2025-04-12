@@ -1,9 +1,13 @@
 import { useForm } from "react-hook-form";
-import { useAuth } from "./AuthContext";
-import { LoginFields } from "../types";
+import { LoginFields, User } from "../types";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios, { AxiosError } from "axios";
+import toast from "react-hot-toast";
+import { useAuth } from "./AuthContext";
+
+const SERVER_URL = import.meta.env.SERVER_API_URL!;
 
 const zodSchema = z.object({
    email: z.string().nonempty({ message: "Required" }).email({ message: "Invalid email" }),
@@ -11,23 +15,63 @@ const zodSchema = z.object({
 })
 
 export default function Login() {
-   const { cvaLogin } = useAuth();
-   
+
+   const { handleAddUserState } = useAuth();
+
+   const navigate = useNavigate();
+
+   // form handler
    const {
       register,
       handleSubmit,
       formState: { errors, isValid, isDirty, isSubmitting },
-      trigger
+      trigger,
+      reset
    } = useForm<LoginFields>({
       resolver: zodResolver(zodSchema),
       defaultValues: { email: "", password: "" },
    });
 
+   async function loginHandler(data: LoginFields) {
+
+      const { email, password } = data;
+
+      try {
+
+         console.log(`Attempting log in for ${email} ...`);
+
+         const res = await axios.post(`${SERVER_URL}/api/login`, 
+            { email, password },
+            { withCredentials: true }
+         );
+
+         const newLoggedInUser = res.data.user as User;
+
+         reset();
+
+         toast.success(`Welcome, ${newLoggedInUser.userName}`);
+
+         console.log(`Log in successful! Details: \n${JSON.stringify(newLoggedInUser)}`);
+
+         handleAddUserState(newLoggedInUser)
+
+         navigate("/dashboard");
+
+      } catch (error) {
+         
+         console.log(`Log in for ${email} unsuccessful due to: \n${error}`);
+
+         if (error instanceof AxiosError) {
+            toast.error(`Login failed: ${error.message}.`);
+         } else {
+            toast.error("An unknown error occured. Try again later.");
+         }
+      }
+   }
+
    return (
       <form 
-         onSubmit={
-            handleSubmit(async (fd) => await cvaLogin(fd.email, fd.password))
-         }
+         onSubmit={handleSubmit(loginHandler)}
          className="min-w-1/2 py-5 px-10 bg-white rounded-lg space-y-1 shadow-[0_0_10px_4px_rgba(0,0,0,0.2)]"
       >
 
