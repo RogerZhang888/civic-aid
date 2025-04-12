@@ -5,11 +5,11 @@ import { AuthContext } from "./AuthContext";
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
    const [currUser, setCurrUser] = useState<User | null>(null);
 
-   function handleAddUserState(u: User) {
+   function addUserState(u: User) {
       setCurrUser(u);
    }
 
-   function handleRemoveUserState() {
+   function removeUserState() {
       setCurrUser(null);
    }
 
@@ -33,7 +33,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
    // async function cvaLogout() {
    //    try {
-   //       await axios.post(`${SERVER_URL}/api/logout`, {}, { withCredentials: true });
+   //       await axios.post(`${SERVER_API_URL}/api/logout`, {}, { withCredentials: true });
    //       // set currUser state to null
    //       setCurrUser(null);
    //       // Redirect back to home page
@@ -49,8 +49,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       <AuthContext.Provider 
          value={{
             currUser,
-            handleRemoveUserState,
-            handleAddUserState
+            removeUserState,
+            addUserState
          }}
       >
          {children}

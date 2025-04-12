@@ -3,7 +3,7 @@ import { AuthContextType } from "../types";
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function useAuth() {
+export default function useAuth() {
    const ctx = useContext(AuthContext);
 
    if (ctx === undefined) {

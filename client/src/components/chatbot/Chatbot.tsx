@@ -7,7 +7,7 @@ import ChatbotForm from "./ChatbotForm";
 import { useGeolocated } from "react-geolocated";
 import axios, { AxiosError } from "axios";
 import { v4 as uuidv4 } from "uuid";
-import { useAuth } from "../auth/AuthContext";
+import useAuth from "../auth/AuthContext";
 
 const initAIMsg: Message = {
    id: uuidv4(),
@@ -18,7 +18,7 @@ const initAIMsg: Message = {
    status: "finished"
 };
 
-const SERVER_URL = import.meta.env.SERVER_API_URL!;
+const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 const MAX_IMAGES = 3;
 
@@ -99,7 +99,7 @@ export default function Chatbot() {
          console.log(`User ${currUser} attempting to send a new query with text "${text}" and ${imgs.length} image(s)`);
 
          // send HTTP POST request
-         const res = await axios.post(`${SERVER_URL}/api/queries`, fd,
+         const res = await axios.post(`${SERVER_API_URL}/api/queries`, fd,
             {
                maxContentLength: 100 * 1024 * 1024,
                maxBodyLength: 100 * 1024 * 1024,

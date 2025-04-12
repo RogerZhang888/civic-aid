@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "./auth/AuthContext";
+import useAuth from "./auth/AuthContext";
 
 export default function Navbar() {
    const { pathname } = useLocation();
