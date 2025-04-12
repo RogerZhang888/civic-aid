@@ -23,10 +23,12 @@ app.get('/health', async (req, res) => {
 const queryRoutes = require('./routes/queryRoutes');
 const authRoutes = require('./routes/authRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 app.use('/api', authRoutes);
 app.use('/api', queryRoutes);
 app.use('/api', reportRoutes);
+app.use('/api', chatRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);

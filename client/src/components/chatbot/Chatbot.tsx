@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import MessagesDisplay from "./MessagesDisplay";
 import { FormState, Message } from "../types";
@@ -18,16 +19,38 @@ const initAIMsg: Message = {
 
 const MAX_IMAGES = 3;
 
+
+
 export default function Chatbot() {
    const [messagesArr, setMessagesArr] = useState<Message[]>([initAIMsg]);
    const [isWaitingForRes, setIsWaitingForRes] = useState<boolean>(false);
    const [formState, setFormState] = useState<FormState>({ text: "", imgs: [] });
    const [imgsPreview, setImgsPreview] = useState<string[]>([]);
+   const [chatId, setChatId] = useState<string | null>(null);
+   
 
    const { coords } = useGeolocated({
       positionOptions: { enableHighAccuracy: false },
       userDecisionTimeout: 5000,
    });
+
+   useEffect(() => {
+      startNewChat();
+   }, []);
+
+   // function to start a new chat
+   async function startNewChat() {
+      try {
+        const res = await axios.post("http://localhost:5000/api/chats", {}, {
+          withCredentials: true // if using cookies
+        });
+        setChatId(res.data.chatId);
+      } catch (err) {
+        console.error("Failed to start chat:", err);
+        toast.error("Couldn't start a new chat session.");
+      }
+   }
+   
 
    // main form submit function
    async function handleSubmitForm() {

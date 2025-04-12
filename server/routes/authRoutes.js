@@ -29,7 +29,7 @@ router.post('/login', async (req, res) => {
     if (user.rows.length === 0 || !await bcrypt.compare(password, user.rows[0].password)) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
-    const token = jwt.sign({ id: user.rows[0].id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ id: user.rows[0].id }, process.env.JWT_SECRET, { expiresIn: "1000h" });
     res.cookie("token", token, { httpOnly: true });
     res.json({ message: "Logged in successfully" });
   } catch (error) {
