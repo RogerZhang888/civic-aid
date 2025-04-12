@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import MessagesDisplay from "./MessagesDisplay";
 import { FormState, Message } from "../types";
@@ -21,11 +22,15 @@ const SERVER_URL = import.meta.env.SERVER_API_URL!;
 
 const MAX_IMAGES = 3;
 
+
+
 export default function Chatbot() {
    const [messagesArr, setMessagesArr] = useState<Message[]>([initAIMsg]);
    const [isWaitingForRes, setIsWaitingForRes] = useState<boolean>(false);
    const [formState, setFormState] = useState<FormState>({ text: "", imgs: [] });
    const [imgsPreview, setImgsPreview] = useState<string[]>([]);
+   const [chatId, setChatId] = useState<string | null>(null);
+   
 
    // get user's coordinates
    // browser will ask for permission
