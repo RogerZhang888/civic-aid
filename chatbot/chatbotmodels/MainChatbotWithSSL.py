@@ -1,8 +1,9 @@
+#MAKE SURE GOT THE MODEL.SAFETENSORS FILE IN THE clip_lora_merged folder
 import os
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 import torch
-from transformers import CLIPProcessor, CLIPModel, AutoTokenizer
+from transformers import CLIPProcessor, CLIPModel
 from typing import List, Dict
 import json
 import numpy as np
@@ -10,11 +11,16 @@ import hnswlib
 from PIL import Image
 import requests
 import time
+from sklearn.feature_extraction.text import TfidfVectorizer
+from scipy.sparse import save_npz, load_npz
+import pickle
 
 INDEX_FILES = {
     'hnsw_index': 'government_chunks_hnsw.index',
     'database_metadata': 'database_metadata.json',
-    'embeddings': 'embeddings.npy'
+    'embeddings': 'embeddings.npy',
+    'tfidf_vectorizer': 'tfidf_vectorizer.pkl',
+    'tfidf_matrix': 'tfidf_matrix.npz'
 }
 
 torch.cuda.empty_cache()
@@ -25,7 +31,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
 # 1. Load CLIP model with GPU support
-
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(SCRIPT_DIR, ".", "clip_lora_merged")
 MODEL_PATH = os.path.normpath(MODEL_PATH)
@@ -34,7 +39,43 @@ clip_model = CLIPModel.from_pretrained(MODEL_PATH, local_files_only=True).to(dev
 
 # DeepSeek API configuration
 DEEPSEEK_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEEPSEEK_API_KEY = ""  # Replace with your actual API key
+DEEPSEEK_API_KEY = "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"
+
+class HybridRetriever:
+    def __init__(self, database):
+        self.database = database
+        self.vectorizer = TfidfVectorizer(stop_words='english')
+        self.tfidf_matrix = None
+        
+    def build_tfidf(self):
+        """Build TF-IDF matrix from database chunks"""
+        self.tfidf_matrix = self.vectorizer.fit_transform(self.database["chunks"])
+        
+    def search(self, query_embedding, query_text, index, top_k=5):
+        """Hybrid search combining vector and keyword results"""
+        # Vector similarity search
+        vector_indices, vector_distances = index.knn_query(query_embedding, k=top_k*2)
+        
+        # Keyword search
+        query_vec = self.vectorizer.transform([query_text])
+        keyword_scores = (self.tfidf_matrix @ query_vec.T).toarray().flatten()
+        keyword_top = np.argsort(keyword_scores)[-top_k*2:][::-1]
+        
+        # Combine and re-rank
+        all_indices = set(vector_indices[0]).union(set(keyword_top))
+        combined_scores = []
+        
+        for idx in all_indices:
+            vector_score = 1 - vector_distances[0][np.where(vector_indices[0] == idx)[0][0]] if idx in vector_indices[0] else 0
+            keyword_score = keyword_scores[idx]
+            combined_score = 0.5 * vector_score + 0.5 * keyword_score
+            combined_scores.append((idx, combined_score))
+        
+        combined_scores.sort(key=lambda x: x[1], reverse=True)
+        top_indices = [idx for idx, _ in combined_scores[:top_k]]
+        top_scores = [score for _, score in combined_scores[:top_k]]
+        
+        return top_indices, top_scores
 
 def check_existing_index():
     """Check if all index files exist and are valid"""
@@ -42,8 +83,7 @@ def check_existing_index():
         if not os.path.exists(file):
             return False
     try:
-        # Quick validation of the index
-        index = hnswlib.Index(space='cosine', dim=512)  # Changed to cosine
+        index = hnswlib.Index(space='cosine', dim=512)
         index.load_index(INDEX_FILES['hnsw_index'])
         with open(INDEX_FILES['database_metadata'], 'r') as f:
             json.load(f)
@@ -51,29 +91,43 @@ def check_existing_index():
     except:
         return False
 
-def save_index_files(index, database, embeddings):
+def save_index_files(index, database, embeddings, retriever=None):
     """Save all index components to files"""
     print("Saving index files...")
     index.save_index(INDEX_FILES['hnsw_index'])
     with open(INDEX_FILES['database_metadata'], 'w') as f:
         json.dump(database, f)
     
-    # Save normalized embeddings
     norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
     normalized_embeds = embeddings / norms
     np.save(INDEX_FILES['embeddings'], normalized_embeds)
+    
+    if retriever and hasattr(retriever, 'tfidf_matrix'):
+        with open(INDEX_FILES['tfidf_vectorizer'], 'wb') as f:
+            pickle.dump(retriever.vectorizer, f)
+        save_npz(INDEX_FILES['tfidf_matrix'], retriever.tfidf_matrix)
     
     print("Index files saved successfully.")
 
 def load_index_files():
     """Load all index components from files"""
     print("Loading existing index files...")
-    index = hnswlib.Index(space='cosine', dim=512)  # Changed to cosine
+    index = hnswlib.Index(space='cosine', dim=512)
     index.load_index(INDEX_FILES['hnsw_index'])
+    
     with open(INDEX_FILES['database_metadata'], 'r') as f:
         database = json.load(f)
+    
     embeddings = np.load(INDEX_FILES['embeddings'])
-    return index, database, embeddings
+    
+    retriever = None
+    if os.path.exists(INDEX_FILES['tfidf_vectorizer']):
+        retriever = HybridRetriever(database)
+        with open(INDEX_FILES['tfidf_vectorizer'], 'rb') as f:
+            retriever.vectorizer = pickle.load(f)
+        retriever.tfidf_matrix = load_npz(INDEX_FILES['tfidf_matrix'])
+    
+    return index, database, embeddings, retriever
 
 # 2. Chunking and Embedding Functions (unchanged)
 def chunk_text(text: str, chunk_size: int = 75, overlap: int = 25) -> List[str]:
@@ -103,7 +157,7 @@ def create_chunked_database(file_path: str) -> Dict:
 
 # 3. HNSWLib Indexing Setup - Updated for cosine similarity
 def build_hnsw_index(database: Dict):
-    # Create embeddings
+    """Build HNSW index and hybrid retriever"""
     embeddings = []
     for chunk in database["chunks"]:
         inputs = clip_processor(text=chunk, return_tensors="pt", padding=True, truncation=True, max_length=77).to(device)
@@ -112,29 +166,19 @@ def build_hnsw_index(database: Dict):
         embeddings.append(outputs.cpu().numpy().astype('float32'))
     
     embeddings = np.vstack(embeddings)
-    
-    # Normalize embeddings for cosine similarity
     norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
     normalized_embeddings = embeddings / norms
     
-    # Create HNSW index with cosine space
-    dim = embeddings.shape[1]
-    index = hnswlib.Index(space='cosine', dim=dim)  # Changed to cosine
-    
-    # Configure index
-    index.init_index(
-        max_elements=len(embeddings), 
-        ef_construction=200,
-        M=16
-    )
-    
-    # Add normalized data
+    index = hnswlib.Index(space='cosine', dim=embeddings.shape[1])
+    index.init_index(max_elements=len(embeddings), ef_construction=200, M=16)
     index.add_items(normalized_embeddings)
-    
-    # Set query-time parameters
     index.set_ef(50)
     
-    return index
+    # Initialize hybrid retriever
+    retriever = HybridRetriever(database)
+    retriever.build_tfidf()
+    
+    return index, retriever, embeddings
 
 def get_query_embedding(query: str = None, image=None):
     if image and query:
@@ -199,108 +243,58 @@ def call_deepseek_api(prompt: str, max_tokens: int = 400) -> str:
         print(f"API request failed: {e}")
         return "Sorry, I couldn't process your request at this time."
 
-def rag_search(query: str, database: Dict, index, top_k: int = 3, image=None, type_query = str) -> Dict:
-    """RAG search with cosine similarity confidence scoring"""
-    # Retrieve context
+def rag_search(query: str, database: Dict, index, retriever, top_k: int = 3, image=None, prompter: str = "") -> Dict:
+    """Hybrid RAG search with confidence scoring"""
     query_embedding = get_query_embedding(query, image)
-    indices, distances = index.knn_query(query_embedding, k=top_k)
+    indices, scores = retriever.search(query_embedding, query, index, top_k=top_k)
     
-    # Convert cosine distances to similarities (0-1)
-    cosine_similarities = 1 - np.array(distances[0])
-    cosine_similarities = np.clip(cosine_similarities, 0, 1)  # Ensure no negatives
-    
-    # Calculate confidence metrics
-    avg_similarity = float(np.mean(cosine_similarities))
-    max_similarity = float(np.max(cosine_similarities))
-    print("avg sim: ", avg_similarity)
-    print("max sim: ", max_similarity)
-    
-    # Prepare context with similarity scores
     context_blocks = []
     sources = []
-    source_threshold = 0.85  # Only include sources with similarity > 0.75
+    source_threshold = 0.85
     
-    for i, (idx, sim) in enumerate(zip(indices[0], cosine_similarities)):
+    for i, (idx, score) in enumerate(zip(indices, scores)):
         context_blocks.append(
-            f"[[CONTEXT BLOCK {i+1} (Similarity: {sim:.2f})]]\n"
+            f"[[CONTEXT BLOCK {i+1} (Score: {score:.2f})]]\n"
             f"{database['chunks'][idx]}\n"
             f"Source URL: {database['metadata'][idx]['url']}\n"
         )
-        # Only include sources above threshold
-        if sim > source_threshold:
+        if score > source_threshold:
             sources.append(database['metadata'][idx])
     
     context = "\n\n".join(context_blocks)
+    avg_score = float(np.mean(scores))
+    max_score = float(np.max(scores))
     
-    # Determine RAG vs direct query (using original thresholds)
-    use_rag = avg_similarity > 0.55 and max_similarity > 0.85
+    use_rag = avg_score > 0.55 and max_score > 0.85
     
     if use_rag:
-        # Generate answer using RAG context
-        if type_query == "query":
-            prompt = f"""### Context:
+        prompt = f"""### Context:
 {context}
 
 ### Question:
 {query}
 
 ### Instructions:
-This is a query related to Singapore government services. With the help of the context given, answer the question."""
-            answer = call_deepseek_api(prompt)
-            confidence = min(5, int(avg_similarity * 5))  # Scale to 1-5
-        else:
-            prompt = f"""### Context:
-{context}
-
-### Question:
-{query}
-
-### Instructions:
-This is a report regarding municipal issues in Singapore. You are advising the government to resolve the issue.
-Based on the provided context, identity the agency responsible of the issue, and recommend next steps for the agency."""
-            answer = call_deepseek_api(prompt)
-            confidence = min(5, int(avg_similarity * 5))  # Scale to 1-5
+{prompter}
+"""        
+        answer = call_deepseek_api(prompt)
+        #confidence = min(5, int(avg_score * 5)) THIS WAS REGARDING THE SIMILARITY OF THE RETRIEVED STUFF NOT THE CONFIDENCE OF THE OVERALL ANS
     else:
-        # Query directly without context
-        if type_query == "query":
-            prompt = f"""### Context:
-This question is regarding Singapore government services.
-
-### Question:
+        prompt = f"""### Question:
 {query}
 
 ### Instructions:
-As far as possible, provide sources for your answers."""
-            answer = call_deepseek_api(prompt)
-            confidence = 0  # No confidence score for direct answers
-        else:
-            prompt = f"""### Context:
-This is a report regarding municipal issues in Singapore. You are advising the government to resolve the issue.
-
-### Question:
-{query}
-
-### Instructions:
-Identify the government agency responsible for fixing the issue, and recommend next steps for the agency. DO NOT include instructions as to what the public should do. As far as possible, provide sources for your answers."""
-            answer = call_deepseek_api(prompt)
-            confidence = 0  # No confidence score for direct answers
+{prompter}"""
+        
+        answer = call_deepseek_api(prompt)
+        #confidence = 0
     
     return {
         "answer": answer,
-        "confidence": {
-            "score": confidence,
-            "similarity_metrics": {
-                "average": avg_similarity,
-                "max": max_similarity,
-                "threshold": 0.9 if use_rag else None,
-                "source_threshold": source_threshold
-            },
-            "used_rag": use_rag,
-            "rationale": "High similarity context found" if use_rag 
-                        else f"Low similarity (avg={avg_similarity:.2f}, max={max_similarity:.2f})"
-        },
-        "sources": sources if use_rag else None  # Only sources above threshold
-    }
+        "used_rag": use_rag,
+        "sources": sources if use_rag else None
+        }
+
 
 # 6. Helper Functions - Updated for cosine similarity
 def process_and_index_data(file_path: str):
@@ -312,57 +306,69 @@ def process_and_index_data(file_path: str):
     print("Creating new database...")
     database = create_chunked_database(file_path)
     
-    print("Building HNSW index...")
-    embeddings = []
-    for chunk in database["chunks"]:
-        inputs = clip_processor(text=chunk, return_tensors="pt", padding=True, truncation=True, max_length=77).to(device)
-        with torch.no_grad():
-            outputs = clip_model.get_text_features(**inputs)
-        embeddings.append(outputs.cpu().numpy().astype('float32'))
+    print("Building HNSW index and hybrid retriever...")
+    index, retriever, embeddings = build_hnsw_index(database)
     
-    embeddings = np.vstack(embeddings)
-    
-    # Normalize embeddings for cosine similarity
-    norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
-    normalized_embeddings = embeddings / norms
-    
-    index = hnswlib.Index(space='cosine', dim=embeddings.shape[1])
-    index.init_index(max_elements=len(embeddings), ef_construction=200, M=16)
-    index.add_items(normalized_embeddings)
-    index.set_ef(50)
-    
-    save_index_files(index, database, embeddings)
-    return index, database, embeddings
-
-# Main execution
+    save_index_files(index, database, embeddings, retriever)
+    return index, database, embeddings, retriever
+'''
 if __name__ == "__main__":
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(SCRIPT_DIR, "..", "govsg_crawler_2", "gov_text_output_cleaned.jl")
     data_path = os.path.normpath(data_path)
     
-    # Check if raw data file exists
     if not os.path.exists(data_path):
         raise FileNotFoundError(f"Data file not found at: {data_path}")
     
-    # Process data (or load existing)
-    index, database, _ = process_and_index_data(data_path)
+    index, database, _, retriever = process_and_index_data(data_path)
     
     query = "The glass panel in the community centre is broken."
-    #image_path = ""
-    image_path = None
+    image_path = None  # Replace with actual path if needed
+    
     if image_path is not None:
-        result = rag_search(query, database, index, image = image_path, type_query="report")
+        result = rag_search(query, database, index, retriever, image=image_path, prompter="")
     else:
-        result = rag_search(query, database, index, type_query="query")
-    print(f"\nProcessing query: {query}")
-   
+        result = rag_search(query, database, index, retriever, prompter="")
     
-    print("\nGenerated Answer:")
+    print(f"\nQuery: {query}")
+    print("\nAnswer:")
     print(result["answer"])
-    print("\nConfidence Score:", result["confidence"]["score"], "/5")
-    print("Confidence Rationale:", result["confidence"]["rationale"])
     
-    if result["sources"] is not None:
+    if result["sources"]:
         print("\nSources:")
         for src in result["sources"]:
             print(f"- {src['source_text']}\n  {src['url']}")
+    
+    #print("\nConfidence:", result["confidence"]["score"], "/5")
+    #print("Rationale:", result["confidence"]["rationale"])
+'''
+def call_model(text_query, prompt, image_path=None):
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(SCRIPT_DIR, "..", "govsg_crawler_2", "gov_text_output_cleaned.jl")
+    data_path = os.path.normpath(data_path)
+    
+    if not os.path.exists(data_path):
+        raise FileNotFoundError(f"Data file not found at: {data_path}")
+    
+    index, database, _, retriever = process_and_index_data(data_path)
+    
+    query = text_query
+    image_path = image_path
+    
+    if image_path is not None:
+        result = rag_search(query, database, index, retriever, image=image_path, prompter=prompt)
+    else:
+        result = rag_search(query, database, index, retriever, prompter=prompt)
+    
+    print(f"\nQuery: {query}")
+    print("\nAnswer:")
+    print(result["answer"])
+    print(result["used_rag"])
+    if result["sources"]:
+        print("\nSources:")
+        for src in result["sources"]:
+            print(f"- {src['source_text']}\n  {src['url']}")
+    
+    #return result
+
+call_model("How to apply for BTO flat","You are a Singapore government advisor, answer the question with the aid of context given, if any.")
