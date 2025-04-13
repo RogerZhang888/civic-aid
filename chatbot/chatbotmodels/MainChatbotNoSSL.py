@@ -34,7 +34,7 @@ clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device
 
 # DeepSeek API configuration
 DEEPSEEK_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEEPSEEK_API_KEY = ""  # Replace with your actual API key
+DEEPSEEK_API_KEY = "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"  # Replace with your actual API key
 
 def check_existing_index():
     """Check if all index files exist and are valid"""
@@ -233,7 +233,7 @@ def rag_search(query: str, database: Dict, index, top_k: int = 3, image=None, ty
     context = "\n\n".join(context_blocks)
     
     # Determine RAG vs direct query (using original thresholds)
-    use_rag = avg_similarity > 0.55 and max_similarity > 0.85
+    use_rag = avg_similarity > 0.55 and max_similarity > 0.8
     
     if use_rag:
         # Generate answer using RAG context
@@ -292,7 +292,7 @@ Identify the government agency responsible for fixing the issue, and recommend n
             "similarity_metrics": {
                 "average": avg_similarity,
                 "max": max_similarity,
-                "threshold": 0.9 if use_rag else None,
+                "threshold": 0.8 if use_rag else None,
                 "source_threshold": source_threshold
             },
             "used_rag": use_rag,
@@ -347,13 +347,44 @@ if __name__ == "__main__":
     # Process data (or load existing)
     index, database, _ = process_and_index_data(data_path)
     
-    query = "The glass panel in the community centre is broken."
+    query = "A fire hydrant burst"
     #image_path = ""
     image_path = None
     if image_path is not None:
         result = rag_search(query, database, index, image = image_path, type_query="report")
     else:
-        result = rag_search(query, database, index, type_query="query")
+        result = rag_search(query, database, index, type_query="report")
+    print(f"\nProcessing query: {query}")
+   
+    
+    print("\nGenerated Answer:")
+    print(result["answer"])
+    print("\nConfidence Score:", result["confidence"]["score"], "/5")
+    print("Confidence Rationale:", result["confidence"]["rationale"])
+    
+    if result["sources"] is not None:
+        print("\nSources:")
+        for src in result["sources"]:
+            print(f"- {src['source_text']}\n  {src['url']}")
+
+def use_model(query,  query_type, image_path=None):
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(SCRIPT_DIR, "..", "govsg_crawler_2", "gov_text_output_cleaned.jl")
+    data_path = os.path.normpath(data_path)
+    
+    # Check if raw data file exists
+    if not os.path.exists(data_path):
+        raise FileNotFoundError(f"Data file not found at: {data_path}")
+    
+    # Process data (or load existing)
+    index, database, _ = process_and_index_data(data_path)
+    
+    query = query
+    image_path = image_path
+    if image_path is not None:
+        result = rag_search(query, database, index, image = image_path, type_query=query_type)
+    else:
+        result = rag_search(query, database, index, type_query=query_type)
     print(f"\nProcessing query: {query}")
    
     
