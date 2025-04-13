@@ -4,15 +4,6 @@ const pool = require("../config/db");
 const { callModel } = require('../services/llmService');
 
 
-const llmResponse = await callLLM({
-  chatId,
-  prompt,
-  imageFiles: req.files,
-  previousQueries, // fetch from DB using chatId
-  location: { latitude, longitude }
-});
-
-
 exports.submitQuery = async (req, res) => {
   try {
     const { prompt, latitude, longitude, email } = req.body;
