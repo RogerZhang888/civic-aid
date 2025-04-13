@@ -1,0 +1,625 @@
+2025-04-11 08:56:30 [scrapy.utils.log] INFO: Scrapy 2.12.0 started (bot: govsg_crawler_2)
+2025-04-11 08:56:30 [scrapy.utils.log] INFO: Versions: lxml 5.3.2.0, libxml2 2.12.10, cssselect 1.3.0, parsel 1.10.0, w3lib 2.3.1, Twisted 24.11.0, Python 3.12.3 (main, Feb  4 2025, 14:48:35) [GCC 13.3.0], pyOpenSSL 25.0.0 (OpenSSL 3.4.1 11 Feb 2025), cryptography 44.0.2, Platform Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39
+2025-04-11 08:56:41 [twisted] CRITICAL: Unhandled error in Deferred:
+2025-04-11 08:56:41 [twisted] CRITICAL: 
+Traceback (most recent call last):
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/twisted/internet/defer.py", line 2017, in _inlineCallbacks
+    result = context.run(gen.send, result)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/scrapy/crawler.py", line 149, in crawl
+    self.spider = self._create_spider(*args, **kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/scrapy/crawler.py", line 163, in _create_spider
+    return self.spidercls.from_crawler(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/scrapy/spiders/__init__.py", line 66, in from_crawler
+    spider = cls(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "/root/NAISC25/govsg_crawler_2/govsg_crawler_2/spiders/test_scraper_2.py", line 39, in __init__
+    self.driver = webdriver.Chrome(options=chrome_options)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/selenium/webdriver/chrome/webdriver.py", line 45, in __init__
+    super().__init__(
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/selenium/webdriver/chromium/webdriver.py", line 66, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 250, in __init__
+    self.start_session(capabilities)
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 342, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 429, in execute
+    self.error_handler.check_response(response)
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.SessionNotCreatedException: Message: session not created: probably user data directory is already in use, please specify a unique value for --user-data-dir argument, or don't use --user-data-dir
+Stacktrace:
+#0 0x55c6d8f81d0a <unknown>
+#1 0x55c6d8a325f0 <unknown>
+#2 0x55c6d8a6c0db <unknown>
+#3 0x55c6d8a67e2f <unknown>
+#4 0x55c6d8ab7f9e <unknown>
+#5 0x55c6d8ab74c6 <unknown>
+#6 0x55c6d8aa9433 <unknown>
+#7 0x55c6d8a75ea3 <unknown>
+#8 0x55c6d8a76b01 <unknown>
+#9 0x55c6d8f46b5b <unknown>
+#10 0x55c6d8f4aa41 <unknown>
+#11 0x55c6d8f2dc52 <unknown>
+#12 0x55c6d8f4b5b4 <unknown>
+#13 0x55c6d8f11f0f <unknown>
+#14 0x55c6d8f6fdb8 <unknown>
+#15 0x55c6d8f6ff96 <unknown>
+#16 0x55c6d8f80b56 <unknown>
+#17 0x7f7954590aa4 <unknown>
+#18 0x7f795461dc3c <unknown>
+
+2025-04-11 09:11:35 [scrapy.utils.log] INFO: Scrapy 2.12.0 started (bot: govsg_crawler_2)
+2025-04-11 09:11:35 [scrapy.utils.log] INFO: Versions: lxml 5.3.2.0, libxml2 2.12.10, cssselect 1.3.0, parsel 1.10.0, w3lib 2.3.1, Twisted 24.11.0, Python 3.12.3 (main, Feb  4 2025, 14:48:35) [GCC 13.3.0], pyOpenSSL 25.0.0 (OpenSSL 3.4.1 11 Feb 2025), cryptography 44.0.2, Platform Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39
+2025-04-11 09:11:35 [scrapy.addons] INFO: Enabled addons:
+[]
+2025-04-11 09:11:35 [scrapy.extensions.telnet] INFO: Telnet Password: cf7ca2084462a65c
+2025-04-11 09:11:35 [py.warnings] WARNING: /root/NAISC25/NAISC_venv/lib/python3.12/site-packages/scrapy/extensions/feedexport.py:432: ScrapyDeprecationWarning: The `FEED_URI` and `FEED_FORMAT` settings have been deprecated in favor of the `FEEDS` setting. Please see the `FEEDS` setting docs for more details
+  exporter = cls(crawler)
+
+2025-04-11 09:11:35 [scrapy.middleware] INFO: Enabled extensions:
+['scrapy.extensions.corestats.CoreStats',
+ 'scrapy.extensions.telnet.TelnetConsole',
+ 'scrapy.extensions.memusage.MemoryUsage',
+ 'scrapy.extensions.feedexport.FeedExporter',
+ 'scrapy.extensions.logstats.LogStats',
+ 'scrapy.extensions.throttle.AutoThrottle']
+2025-04-11 09:11:35 [scrapy.crawler] INFO: Overridden settings:
+{'AUTOTHROTTLE_ENABLED': True,
+ 'BOT_NAME': 'govsg_crawler_2',
+ 'CONCURRENT_REQUESTS_PER_DOMAIN': 1,
+ 'DEPTH_LIMIT': 4,
+ 'DOWNLOAD_DELAY': 3.0,
+ 'FEED_EXPORT_ENCODING': 'utf-8',
+ 'LOG_FILE': 'govsg.log',
+ 'LOG_LEVEL': 'INFO',
+ 'NEWSPIDER_MODULE': 'govsg_crawler_2.spiders',
+ 'ROBOTSTXT_OBEY': True,
+ 'SPIDER_MODULES': ['govsg_crawler_2.spiders'],
+ 'TWISTED_REACTOR': 'twisted.internet.asyncioreactor.AsyncioSelectorReactor',
+ 'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+               '(KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'}
+2025-04-11 09:11:35 [scrapy.middleware] INFO: Enabled downloader middlewares:
+['scrapy.downloadermiddlewares.offsite.OffsiteMiddleware',
+ 'scrapy.downloadermiddlewares.robotstxt.RobotsTxtMiddleware',
+ 'scrapy.downloadermiddlewares.httpauth.HttpAuthMiddleware',
+ 'scrapy.downloadermiddlewares.downloadtimeout.DownloadTimeoutMiddleware',
+ 'scrapy.downloadermiddlewares.defaultheaders.DefaultHeadersMiddleware',
+ 'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware',
+ 'scrapy.downloadermiddlewares.retry.RetryMiddleware',
+ 'scrapy.downloadermiddlewares.redirect.MetaRefreshMiddleware',
+ 'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware',
+ 'scrapy.downloadermiddlewares.redirect.RedirectMiddleware',
+ 'scrapy.downloadermiddlewares.cookies.CookiesMiddleware',
+ 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware',
+ 'scrapy.downloadermiddlewares.stats.DownloaderStats']
+2025-04-11 09:11:35 [scrapy.middleware] INFO: Enabled spider middlewares:
+['scrapy.spidermiddlewares.httperror.HttpErrorMiddleware',
+ 'scrapy.spidermiddlewares.referer.RefererMiddleware',
+ 'scrapy.spidermiddlewares.urllength.UrlLengthMiddleware',
+ 'scrapy.spidermiddlewares.depth.DepthMiddleware']
+2025-04-11 09:11:35 [scrapy.middleware] INFO: Enabled item pipelines:
+[]
+2025-04-11 09:11:35 [scrapy.core.engine] INFO: Spider opened
+2025-04-11 09:11:35 [scrapy.extensions.logstats] INFO: Crawled 0 pages (at 0 pages/min), scraped 0 items (at 0 items/min)
+2025-04-11 09:11:35 [scrapy.extensions.telnet] INFO: Telnet console listening on 127.0.0.1:6023
+2025-04-11 09:11:44 [twisted] CRITICAL: Unhandled error in Deferred:
+2025-04-11 09:11:44 [twisted] CRITICAL: 
+twisted.conch.telnet.AlreadyNegotiating: twisted.conch.telnet.AlreadyNegotiating:b'\x01'
+2025-04-11 09:11:44 [twisted] CRITICAL: Unhandled error in Deferred:
+2025-04-11 09:11:44 [twisted] CRITICAL: 
+twisted.internet.error.ConnectionDone: Connection was closed cleanly.
+2025-04-11 09:11:45 [twisted] CRITICAL: Unhandled error in Deferred:
+2025-04-11 09:11:45 [twisted] CRITICAL: 
+twisted.conch.telnet.AlreadyNegotiating: twisted.conch.telnet.AlreadyNegotiating:b'\x01'
+2025-04-11 09:11:45 [twisted] CRITICAL: Unhandled error in Deferred:
+2025-04-11 09:11:45 [twisted] CRITICAL: 
+twisted.internet.error.ConnectionDone: Connection was closed cleanly.
+2025-04-11 09:13:03 [scrapy.extensions.logstats] INFO: Crawled 34 pages (at 34 pages/min), scraped 14 items (at 14 items/min)
+2025-04-11 09:13:38 [scrapy.extensions.logstats] INFO: Crawled 43 pages (at 9 pages/min), scraped 21 items (at 7 items/min)
+2025-04-11 09:14:35 [scrapy.extensions.logstats] INFO: Crawled 51 pages (at 8 pages/min), scraped 33 items (at 12 items/min)
+2025-04-11 09:15:44 [scrapy.extensions.logstats] INFO: Crawled 68 pages (at 17 pages/min), scraped 47 items (at 14 items/min)
+2025-04-11 09:16:37 [scrapy.extensions.logstats] INFO: Crawled 80 pages (at 12 pages/min), scraped 58 items (at 11 items/min)
+2025-04-11 09:17:51 [scrapy.extensions.logstats] INFO: Crawled 94 pages (at 14 pages/min), scraped 73 items (at 15 items/min)
+2025-04-11 09:18:39 [scrapy.extensions.logstats] INFO: Crawled 103 pages (at 9 pages/min), scraped 83 items (at 10 items/min)
+2025-04-11 09:19:37 [scrapy.extensions.logstats] INFO: Crawled 116 pages (at 13 pages/min), scraped 94 items (at 11 items/min)
+2025-04-11 09:20:41 [scrapy.extensions.logstats] INFO: Crawled 134 pages (at 18 pages/min), scraped 107 items (at 13 items/min)
+2025-04-11 09:21:35 [scrapy.extensions.logstats] INFO: Crawled 141 pages (at 7 pages/min), scraped 118 items (at 11 items/min)
+2025-04-11 09:22:35 [scrapy.extensions.logstats] INFO: Crawled 154 pages (at 13 pages/min), scraped 130 items (at 12 items/min)
+2025-04-11 09:23:37 [scrapy.extensions.logstats] INFO: Crawled 167 pages (at 13 pages/min), scraped 143 items (at 13 items/min)
+2025-04-11 09:24:37 [scrapy.extensions.logstats] INFO: Crawled 179 pages (at 12 pages/min), scraped 155 items (at 12 items/min)
+2025-04-11 09:25:35 [scrapy.extensions.logstats] INFO: Crawled 191 pages (at 12 pages/min), scraped 166 items (at 11 items/min)
+2025-04-11 09:26:35 [scrapy.extensions.logstats] INFO: Crawled 207 pages (at 16 pages/min), scraped 178 items (at 12 items/min)
+2025-04-11 09:27:50 [scrapy.extensions.logstats] INFO: Crawled 224 pages (at 17 pages/min), scraped 193 items (at 15 items/min)
+2025-04-11 09:28:39 [scrapy.extensions.logstats] INFO: Crawled 235 pages (at 11 pages/min), scraped 203 items (at 10 items/min)
+2025-04-11 09:29:38 [scrapy.extensions.logstats] INFO: Crawled 244 pages (at 9 pages/min), scraped 215 items (at 12 items/min)
+2025-04-11 09:30:37 [scrapy.extensions.logstats] INFO: Crawled 256 pages (at 12 pages/min), scraped 227 items (at 12 items/min)
+2025-04-11 09:31:36 [scrapy.extensions.logstats] INFO: Crawled 269 pages (at 13 pages/min), scraped 239 items (at 12 items/min)
+2025-04-11 09:32:45 [scrapy.extensions.logstats] INFO: Crawled 283 pages (at 14 pages/min), scraped 253 items (at 14 items/min)
+2025-04-11 09:33:39 [scrapy.extensions.logstats] INFO: Crawled 297 pages (at 14 pages/min), scraped 264 items (at 11 items/min)
+2025-04-11 09:34:37 [scrapy.extensions.logstats] INFO: Crawled 309 pages (at 12 pages/min), scraped 276 items (at 12 items/min)
+2025-04-11 09:35:41 [scrapy.extensions.logstats] INFO: Crawled 326 pages (at 17 pages/min), scraped 289 items (at 13 items/min)
+2025-04-11 09:36:11 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/MyPal/_acd-esvc-cp-login>: HTTP status code is not handled or not allowed
+2025-04-11 09:36:36 [scrapy.extensions.logstats] INFO: Crawled 338 pages (at 12 pages/min), scraped 300 items (at 11 items/min)
+2025-04-11 09:37:38 [scrapy.extensions.logstats] INFO: Crawled 353 pages (at 15 pages/min), scraped 313 items (at 13 items/min)
+2025-04-11 09:38:38 [scrapy.extensions.logstats] INFO: Crawled 364 pages (at 11 pages/min), scraped 324 items (at 11 items/min)
+2025-04-11 09:39:38 [scrapy.extensions.logstats] INFO: Crawled 380 pages (at 16 pages/min), scraped 336 items (at 12 items/min)
+2025-04-11 09:40:40 [scrapy.extensions.logstats] INFO: Crawled 393 pages (at 13 pages/min), scraped 349 items (at 13 items/min)
+2025-04-11 09:41:35 [scrapy.extensions.logstats] INFO: Crawled 400 pages (at 7 pages/min), scraped 358 items (at 9 items/min)
+2025-04-11 09:41:42 [govsg_crawler_2] INFO: Periodic driver refresh
+2025-04-11 09:41:43 [govsg_crawler_2] WARNING: Error while removing temp dir: [Errno 39] Directory not empty: '/tmp/chrome_profile__ycxu6bz'
+2025-04-11 09:42:36 [scrapy.extensions.logstats] INFO: Crawled 415 pages (at 15 pages/min), scraped 369 items (at 11 items/min)
+2025-04-11 09:43:39 [scrapy.extensions.logstats] INFO: Crawled 423 pages (at 8 pages/min), scraped 379 items (at 10 items/min)
+2025-04-11 09:44:42 [scrapy.extensions.logstats] INFO: Crawled 435 pages (at 12 pages/min), scraped 389 items (at 10 items/min)
+2025-04-11 09:45:43 [scrapy.extensions.logstats] INFO: Crawled 448 pages (at 13 pages/min), scraped 401 items (at 12 items/min)
+2025-04-11 09:47:02 [scrapy.extensions.logstats] INFO: Crawled 462 pages (at 14 pages/min), scraped 414 items (at 13 items/min)
+2025-04-11 09:47:35 [scrapy.extensions.logstats] INFO: Crawled 465 pages (at 3 pages/min), scraped 418 items (at 4 items/min)
+2025-04-11 09:48:36 [scrapy.extensions.logstats] INFO: Crawled 475 pages (at 10 pages/min), scraped 427 items (at 9 items/min)
+2025-04-11 09:48:40 [scrapy.downloadermiddlewares.retry] ERROR: Gave up retrying <GET http://www.ifaq.gov.sg/robots.txt> (failed 3 times): DNS lookup failed: no results for hostname lookup: www.ifaq.gov.sg.
+2025-04-11 09:48:40 [scrapy.downloadermiddlewares.robotstxt] ERROR: Error downloading <GET http://www.ifaq.gov.sg/robots.txt>: DNS lookup failed: no results for hostname lookup: www.ifaq.gov.sg.
+Traceback (most recent call last):
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/twisted/internet/defer.py", line 2013, in _inlineCallbacks
+    result = context.run(
+             ^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/twisted/python/failure.py", line 467, in throwExceptionIntoGenerator
+    return g.throw(self.value.with_traceback(self.tb))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/scrapy/core/downloader/middleware.py", line 68, in process_request
+    return (yield download_func(request, spider))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/twisted/internet/defer.py", line 1088, in _runCallbacks
+    current.result = callback(  # type: ignore[misc]
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/twisted/internet/endpoints.py", line 1061, in startConnectionAttempts
+    raise error.DNSLookupError(
+twisted.internet.error.DNSLookupError: DNS lookup failed: no results for hostname lookup: www.ifaq.gov.sg.
+2025-04-11 09:49:31 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://eservices.mlaw.gov.sg/io/ca/welcome.xhtml>: HTTP status code is not handled or not allowed
+2025-04-11 09:49:35 [scrapy.extensions.logstats] INFO: Crawled 487 pages (at 12 pages/min), scraped 438 items (at 11 items/min)
+2025-04-11 09:50:07 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <403 https://ask.gov.sg/corppass>: HTTP status code is not handled or not allowed
+2025-04-11 09:50:18 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.reach.gov.sg/YourSay/EconsultationPaper.aspx>: HTTP status code is not handled or not allowed
+2025-04-11 09:50:18 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/login/homepage>: HTTP status code is not handled or not allowed
+2025-04-11 09:50:22 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/common/digitalservicelist>: HTTP status code is not handled or not allowed
+2025-04-11 09:50:33 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/ro/pendingcpadminrequests/singpassauth>: HTTP status code is not handled or not allowed
+2025-04-11 09:50:35 [scrapy.extensions.logstats] INFO: Crawled 503 pages (at 16 pages/min), scraped 448 items (at 10 items/min)
+2025-04-11 09:50:35 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/login/kickoff?redirect_url=/portal/accounts/terminate>: HTTP status code is not handled or not allowed
+2025-04-11 09:50:40 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/enquirecp/enquire/singpassauth>: HTTP status code is not handled or not allowed
+2025-04-11 09:50:45 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/common/contactus>: HTTP status code is not handled or not allowed
+2025-04-11 09:50:49 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/common/userguides>: HTTP status code is not handled or not allowed
+2025-04-11 09:50:52 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/registration/nonuen/singpassauth>: HTTP status code is not handled or not allowed
+2025-04-11 09:50:56 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/common/sitemap>: HTTP status code is not handled or not allowed
+2025-04-11 09:50:59 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/registration/nonuen/nonsingpass>: HTTP status code is not handled or not allowed
+2025-04-11 09:51:04 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/common/aboutus>: HTTP status code is not handled or not allowed
+2025-04-11 09:51:07 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/common/terms>: HTTP status code is not handled or not allowed
+2025-04-11 09:51:10 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/portal/admin-application>: HTTP status code is not handled or not allowed
+2025-04-11 09:51:14 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/portal/application/check-status>: HTTP status code is not handled or not allowed
+2025-04-11 09:51:17 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/activation/enterinfo>: HTTP status code is not handled or not allowed
+2025-04-11 09:51:21 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/common/privacy>: HTTP status code is not handled or not allowed
+2025-04-11 09:51:25 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/corppass/login/splogout>: HTTP status code is not handled or not allowed
+2025-04-11 09:51:35 [scrapy.extensions.logstats] INFO: Crawled 521 pages (at 18 pages/min), scraped 452 items (at 4 items/min)
+2025-04-11 09:52:35 [scrapy.extensions.logstats] INFO: Crawled 524 pages (at 3 pages/min), scraped 455 items (at 3 items/min)
+2025-04-11 09:54:13 [scrapy.extensions.logstats] INFO: Crawled 526 pages (at 2 pages/min), scraped 457 items (at 2 items/min)
+2025-04-11 09:54:35 [scrapy.extensions.logstats] INFO: Crawled 526 pages (at 0 pages/min), scraped 457 items (at 0 items/min)
+2025-04-11 09:55:35 [scrapy.extensions.logstats] INFO: Crawled 528 pages (at 2 pages/min), scraped 459 items (at 2 items/min)
+2025-04-11 09:56:35 [scrapy.extensions.logstats] INFO: Crawled 528 pages (at 0 pages/min), scraped 459 items (at 0 items/min)
+2025-04-11 09:57:35 [scrapy.extensions.logstats] INFO: Crawled 529 pages (at 1 pages/min), scraped 459 items (at 0 items/min)
+2025-04-11 09:58:35 [scrapy.extensions.logstats] INFO: Crawled 531 pages (at 2 pages/min), scraped 461 items (at 2 items/min)
+2025-04-11 09:59:35 [scrapy.extensions.logstats] INFO: Crawled 534 pages (at 3 pages/min), scraped 464 items (at 3 items/min)
+2025-04-11 10:00:35 [scrapy.extensions.logstats] INFO: Crawled 534 pages (at 0 pages/min), scraped 464 items (at 0 items/min)
+2025-04-11 10:01:35 [scrapy.extensions.logstats] INFO: Crawled 535 pages (at 1 pages/min), scraped 465 items (at 1 items/min)
+2025-04-11 10:02:35 [scrapy.extensions.logstats] INFO: Crawled 537 pages (at 2 pages/min), scraped 467 items (at 2 items/min)
+2025-04-11 10:03:35 [scrapy.extensions.logstats] INFO: Crawled 540 pages (at 3 pages/min), scraped 470 items (at 3 items/min)
+2025-04-11 10:04:38 [scrapy.extensions.logstats] INFO: Crawled 543 pages (at 3 pages/min), scraped 473 items (at 3 items/min)
+2025-04-11 10:05:35 [scrapy.extensions.logstats] INFO: Crawled 548 pages (at 5 pages/min), scraped 477 items (at 4 items/min)
+2025-04-11 10:06:45 [scrapy.extensions.logstats] INFO: Crawled 562 pages (at 14 pages/min), scraped 488 items (at 11 items/min)
+2025-04-11 10:07:55 [scrapy.extensions.logstats] INFO: Crawled 566 pages (at 4 pages/min), scraped 494 items (at 6 items/min)
+2025-04-11 10:08:35 [scrapy.extensions.logstats] INFO: Crawled 568 pages (at 2 pages/min), scraped 497 items (at 3 items/min)
+2025-04-11 10:09:35 [scrapy.extensions.logstats] INFO: Crawled 571 pages (at 3 pages/min), scraped 500 items (at 3 items/min)
+2025-04-11 10:10:46 [scrapy.extensions.logstats] INFO: Crawled 582 pages (at 11 pages/min), scraped 509 items (at 9 items/min)
+2025-04-11 10:11:37 [scrapy.extensions.logstats] INFO: Crawled 588 pages (at 6 pages/min), scraped 514 items (at 5 items/min)
+2025-04-11 10:11:47 [govsg_crawler_2] INFO: Periodic driver refresh
+2025-04-11 10:11:48 [govsg_crawler_2] WARNING: Error while removing temp dir: [Errno 39] Directory not empty: '/tmp/chrome_profile_lhn70uxv'
+2025-04-11 10:12:01 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <403 https://ask.gov.sg/>: HTTP status code is not handled or not allowed
+2025-04-11 10:12:37 [scrapy.extensions.logstats] INFO: Crawled 602 pages (at 14 pages/min), scraped 526 items (at 12 items/min)
+2025-04-11 10:13:37 [scrapy.extensions.logstats] INFO: Crawled 616 pages (at 14 pages/min), scraped 537 items (at 11 items/min)
+2025-04-11 10:14:21 [scrapy.downloadermiddlewares.retry] ERROR: Gave up retrying <GET http://www.weather.gov.sg/robots.txt> (failed 3 times): [<twisted.python.failure.Failure twisted.internet.error.ConnectionDone: Connection was closed cleanly.>]
+2025-04-11 10:14:21 [scrapy.downloadermiddlewares.robotstxt] ERROR: Error downloading <GET http://www.weather.gov.sg/robots.txt>: [<twisted.python.failure.Failure twisted.internet.error.ConnectionDone: Connection was closed cleanly.>]
+Traceback (most recent call last):
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/twisted/internet/defer.py", line 2013, in _inlineCallbacks
+    result = context.run(
+             ^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/twisted/python/failure.py", line 467, in throwExceptionIntoGenerator
+    return g.throw(self.value.with_traceback(self.tb))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/scrapy/core/downloader/middleware.py", line 68, in process_request
+    return (yield download_func(request, spider))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+twisted.web._newclient.ResponseNeverReceived: [<twisted.python.failure.Failure twisted.internet.error.ConnectionDone: Connection was closed cleanly.>]
+2025-04-11 10:14:45 [scrapy.extensions.logstats] INFO: Crawled 633 pages (at 17 pages/min), scraped 551 items (at 14 items/min)
+2025-04-11 10:15:04 [scrapy.downloadermiddlewares.retry] ERROR: Gave up retrying <GET https://www.weather.gov.sg/home/> (failed 3 times): [<twisted.python.failure.Failure twisted.internet.error.ConnectionLost: Connection to the other side was lost in a non-clean fashion: Connection lost.>]
+2025-04-11 10:15:21 [scrapy.core.scraper] ERROR: Error downloading <GET https://www.weather.gov.sg/home/>
+Traceback (most recent call last):
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/twisted/internet/defer.py", line 2013, in _inlineCallbacks
+    result = context.run(
+             ^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/twisted/python/failure.py", line 467, in throwExceptionIntoGenerator
+    return g.throw(self.value.with_traceback(self.tb))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/scrapy/core/downloader/middleware.py", line 68, in process_request
+    return (yield download_func(request, spider))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+twisted.web._newclient.ResponseNeverReceived: [<twisted.python.failure.Failure twisted.internet.error.ConnectionLost: Connection to the other side was lost in a non-clean fashion: Connection lost.>]
+2025-04-11 10:15:44 [scrapy.extensions.logstats] INFO: Crawled 643 pages (at 10 pages/min), scraped 563 items (at 12 items/min)
+2025-04-11 10:16:39 [scrapy.extensions.logstats] INFO: Crawled 656 pages (at 13 pages/min), scraped 574 items (at 11 items/min)
+2025-04-11 10:17:37 [scrapy.extensions.logstats] INFO: Crawled 667 pages (at 11 pages/min), scraped 586 items (at 12 items/min)
+2025-04-11 10:18:36 [scrapy.extensions.logstats] INFO: Crawled 681 pages (at 14 pages/min), scraped 598 items (at 12 items/min)
+2025-04-11 10:19:38 [scrapy.extensions.logstats] INFO: Crawled 693 pages (at 12 pages/min), scraped 610 items (at 12 items/min)
+2025-04-11 10:20:37 [scrapy.extensions.logstats] INFO: Crawled 707 pages (at 14 pages/min), scraped 623 items (at 13 items/min)
+2025-04-11 10:21:37 [scrapy.extensions.logstats] INFO: Crawled 718 pages (at 11 pages/min), scraped 635 items (at 12 items/min)
+2025-04-11 10:22:38 [scrapy.extensions.logstats] INFO: Crawled 733 pages (at 15 pages/min), scraped 648 items (at 13 items/min)
+2025-04-11 10:23:44 [scrapy.extensions.logstats] INFO: Crawled 746 pages (at 13 pages/min), scraped 659 items (at 11 items/min)
+2025-04-11 10:24:37 [scrapy.extensions.logstats] INFO: Crawled 756 pages (at 10 pages/min), scraped 670 items (at 11 items/min)
+2025-04-11 10:25:36 [scrapy.extensions.logstats] INFO: Crawled 768 pages (at 12 pages/min), scraped 682 items (at 12 items/min)
+2025-04-11 10:26:37 [scrapy.extensions.logstats] INFO: Crawled 781 pages (at 13 pages/min), scraped 695 items (at 13 items/min)
+2025-04-11 10:27:05 [govsg_crawler_2] WARNING: Skipping disallowed domain: https://www.judiciary.gov.sg:443/page-not-found?initialRequestUrl=http%3a%2f%2fwww.judiciary.gov.sg%2frules%2fcourt-processes%2fappeals-to-high-court-under-pofma
+2025-04-11 10:27:35 [scrapy.extensions.logstats] INFO: Crawled 788 pages (at 7 pages/min), scraped 700 items (at 5 items/min)
+2025-04-11 10:28:35 [scrapy.extensions.logstats] INFO: Crawled 791 pages (at 3 pages/min), scraped 703 items (at 3 items/min)
+2025-04-11 10:29:43 [scrapy.extensions.logstats] INFO: Crawled 814 pages (at 23 pages/min), scraped 716 items (at 13 items/min)
+2025-04-11 10:30:42 [scrapy.extensions.logstats] INFO: Crawled 826 pages (at 12 pages/min), scraped 729 items (at 13 items/min)
+2025-04-11 10:31:41 [scrapy.extensions.logstats] INFO: Crawled 843 pages (at 17 pages/min), scraped 741 items (at 12 items/min)
+2025-04-11 10:32:39 [scrapy.extensions.logstats] INFO: Crawled 849 pages (at 6 pages/min), scraped 753 items (at 12 items/min)
+2025-04-11 10:33:37 [scrapy.extensions.logstats] INFO: Crawled 862 pages (at 13 pages/min), scraped 765 items (at 12 items/min)
+2025-04-11 10:34:41 [scrapy.extensions.logstats] INFO: Crawled 879 pages (at 17 pages/min), scraped 778 items (at 13 items/min)
+2025-04-11 10:35:45 [scrapy.extensions.logstats] INFO: Crawled 893 pages (at 14 pages/min), scraped 791 items (at 13 items/min)
+2025-04-11 10:35:59 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <403 https://ask.gov.sg/govsg>: HTTP status code is not handled or not allowed
+2025-04-11 10:36:40 [scrapy.extensions.logstats] INFO: Crawled 907 pages (at 14 pages/min), scraped 802 items (at 11 items/min)
+2025-04-11 10:37:35 [scrapy.extensions.logstats] INFO: Crawled 915 pages (at 8 pages/min), scraped 813 items (at 11 items/min)
+2025-04-11 10:38:38 [scrapy.extensions.logstats] INFO: Crawled 928 pages (at 13 pages/min), scraped 825 items (at 12 items/min)
+2025-04-11 10:39:40 [scrapy.extensions.logstats] INFO: Crawled 944 pages (at 16 pages/min), scraped 837 items (at 12 items/min)
+2025-04-11 10:40:51 [scrapy.extensions.logstats] INFO: Crawled 959 pages (at 15 pages/min), scraped 852 items (at 15 items/min)
+2025-04-11 10:41:37 [scrapy.extensions.logstats] INFO: Crawled 970 pages (at 11 pages/min), scraped 861 items (at 9 items/min)
+2025-04-11 10:41:51 [govsg_crawler_2] INFO: Periodic driver refresh
+2025-04-11 10:41:51 [govsg_crawler_2] WARNING: Error while removing temp dir: [Errno 39] Directory not empty: '/tmp/chrome_profile_f1_n6ao9'
+2025-04-11 10:42:39 [scrapy.extensions.logstats] INFO: Crawled 982 pages (at 12 pages/min), scraped 873 items (at 12 items/min)
+2025-04-11 10:43:38 [scrapy.extensions.logstats] INFO: Crawled 996 pages (at 14 pages/min), scraped 885 items (at 12 items/min)
+2025-04-11 10:44:42 [scrapy.extensions.logstats] INFO: Crawled 1008 pages (at 12 pages/min), scraped 898 items (at 13 items/min)
+2025-04-11 10:45:39 [scrapy.extensions.logstats] INFO: Crawled 1019 pages (at 11 pages/min), scraped 910 items (at 12 items/min)
+2025-04-11 10:46:41 [scrapy.extensions.logstats] INFO: Crawled 1030 pages (at 11 pages/min), scraped 921 items (at 11 items/min)
+2025-04-11 10:47:38 [scrapy.extensions.logstats] INFO: Crawled 1041 pages (at 11 pages/min), scraped 933 items (at 12 items/min)
+2025-04-11 10:48:36 [scrapy.extensions.logstats] INFO: Crawled 1054 pages (at 13 pages/min), scraped 945 items (at 12 items/min)
+2025-04-11 10:49:43 [scrapy.extensions.logstats] INFO: Crawled 1068 pages (at 14 pages/min), scraped 959 items (at 14 items/min)
+2025-04-11 10:50:35 [scrapy.extensions.logstats] INFO: Crawled 1077 pages (at 9 pages/min), scraped 969 items (at 10 items/min)
+2025-04-11 10:51:37 [scrapy.extensions.logstats] INFO: Crawled 1090 pages (at 13 pages/min), scraped 982 items (at 13 items/min)
+2025-04-11 10:52:38 [scrapy.extensions.logstats] INFO: Crawled 1103 pages (at 13 pages/min), scraped 994 items (at 12 items/min)
+2025-04-11 10:53:37 [scrapy.extensions.logstats] INFO: Crawled 1117 pages (at 14 pages/min), scraped 1006 items (at 12 items/min)
+2025-04-11 10:54:08 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <401 https://stats.mom.gov.sg/_layouts/15/Authenticate.aspx?Source=%2FPages%2FJob%2DVacancies%2D2024%2Easpx>: HTTP status code is not handled or not allowed
+2025-04-11 10:54:39 [scrapy.extensions.logstats] INFO: Crawled 1128 pages (at 11 pages/min), scraped 1018 items (at 12 items/min)
+2025-04-11 10:54:49 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <401 https://stats.mom.gov.sg/Statistics/_layouts/15/Authenticate.aspx?Source=%2FStatistics%2FPages%2FSocial%2DSecurity%2Easpx>: HTTP status code is not handled or not allowed
+2025-04-11 10:55:37 [scrapy.extensions.logstats] INFO: Crawled 1142 pages (at 14 pages/min), scraped 1030 items (at 12 items/min)
+2025-04-11 10:55:43 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <401 https://stats.mom.gov.sg/Statistics/_layouts/15/Authenticate.aspx?Source=%2FStatistics%2FPages%2Ftraining%2Dand%2Dhigher%2Deducation%2Easpx>: HTTP status code is not handled or not allowed
+2025-04-11 10:56:43 [scrapy.extensions.logstats] INFO: Crawled 1160 pages (at 18 pages/min), scraped 1043 items (at 13 items/min)
+2025-04-11 10:57:37 [scrapy.extensions.logstats] INFO: Crawled 1168 pages (at 8 pages/min), scraped 1054 items (at 11 items/min)
+2025-04-11 10:58:03 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <401 https://stats.mom.gov.sg/bt/_layouts/15/Authenticate.aspx?Source=%2Fbt%2FPages%2Fflexible%2Dwork%2Darrangement%2Dgeneral%2Easpx>: HTTP status code is not handled or not allowed
+2025-04-11 10:58:35 [scrapy.extensions.logstats] INFO: Crawled 1182 pages (at 14 pages/min), scraped 1066 items (at 12 items/min)
+2025-04-11 10:59:43 [scrapy.extensions.logstats] INFO: Crawled 1198 pages (at 16 pages/min), scraped 1080 items (at 14 items/min)
+2025-04-11 11:00:42 [scrapy.extensions.logstats] INFO: Crawled 1207 pages (at 9 pages/min), scraped 1092 items (at 12 items/min)
+2025-04-11 11:01:39 [scrapy.extensions.logstats] INFO: Crawled 1221 pages (at 14 pages/min), scraped 1104 items (at 12 items/min)
+2025-04-11 11:02:42 [scrapy.extensions.logstats] INFO: Crawled 1236 pages (at 15 pages/min), scraped 1117 items (at 13 items/min)
+2025-04-11 11:03:07 [scrapy.downloadermiddlewares.retry] ERROR: Gave up retrying <GET https://www.careers.hrp.gov.sg/robots.txt> (failed 3 times): 503 Service Unavailable
+2025-04-11 11:03:26 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.mha.gov.sg/isd/keeping-threats-at-bay/guarding-against-espionage>: HTTP status code is not handled or not allowed
+2025-04-11 11:03:41 [scrapy.extensions.logstats] INFO: Crawled 1253 pages (at 17 pages/min), scraped 1129 items (at 12 items/min)
+2025-04-11 11:04:38 [scrapy.extensions.logstats] INFO: Crawled 1262 pages (at 9 pages/min), scraped 1138 items (at 9 items/min)
+2025-04-11 11:05:36 [scrapy.extensions.logstats] INFO: Crawled 1275 pages (at 13 pages/min), scraped 1150 items (at 12 items/min)
+2025-04-11 11:06:40 [scrapy.extensions.logstats] INFO: Crawled 1291 pages (at 16 pages/min), scraped 1163 items (at 13 items/min)
+2025-04-11 11:07:19 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.cnb.gov.sg/useful-links>: HTTP status code is not handled or not allowed
+2025-04-11 11:07:36 [scrapy.extensions.logstats] INFO: Crawled 1300 pages (at 9 pages/min), scraped 1174 items (at 11 items/min)
+2025-04-11 11:08:39 [scrapy.extensions.logstats] INFO: Crawled 1315 pages (at 15 pages/min), scraped 1187 items (at 13 items/min)
+2025-04-11 11:09:36 [scrapy.extensions.logstats] INFO: Crawled 1329 pages (at 14 pages/min), scraped 1199 items (at 12 items/min)
+2025-04-11 11:10:48 [scrapy.extensions.logstats] INFO: Crawled 1347 pages (at 18 pages/min), scraped 1214 items (at 15 items/min)
+2025-04-11 11:11:37 [scrapy.extensions.logstats] INFO: Crawled 1357 pages (at 10 pages/min), scraped 1224 items (at 10 items/min)
+2025-04-11 11:11:53 [govsg_crawler_2] INFO: Periodic driver refresh
+2025-04-11 11:11:53 [govsg_crawler_2] WARNING: Error while removing temp dir: [Errno 39] Directory not empty: '/tmp/chrome_profile_wtkix5vr'
+2025-04-11 11:12:36 [scrapy.extensions.logstats] INFO: Crawled 1367 pages (at 10 pages/min), scraped 1236 items (at 12 items/min)
+2025-04-11 11:13:39 [scrapy.extensions.logstats] INFO: Crawled 1381 pages (at 14 pages/min), scraped 1249 items (at 13 items/min)
+2025-04-11 11:14:37 [scrapy.extensions.logstats] INFO: Crawled 1392 pages (at 11 pages/min), scraped 1261 items (at 12 items/min)
+2025-04-11 11:15:40 [scrapy.extensions.logstats] INFO: Crawled 1411 pages (at 19 pages/min), scraped 1274 items (at 13 items/min)
+2025-04-11 11:16:47 [scrapy.extensions.logstats] INFO: Crawled 1423 pages (at 12 pages/min), scraped 1288 items (at 14 items/min)
+2025-04-11 11:17:36 [scrapy.extensions.logstats] INFO: Crawled 1437 pages (at 14 pages/min), scraped 1298 items (at 10 items/min)
+2025-04-11 11:18:48 [scrapy.extensions.logstats] INFO: Crawled 1445 pages (at 8 pages/min), scraped 1308 items (at 10 items/min)
+2025-04-11 11:19:40 [scrapy.extensions.logstats] INFO: Crawled 1459 pages (at 14 pages/min), scraped 1319 items (at 11 items/min)
+2025-04-11 11:20:40 [scrapy.extensions.logstats] INFO: Crawled 1469 pages (at 10 pages/min), scraped 1331 items (at 12 items/min)
+2025-04-11 11:21:37 [scrapy.extensions.logstats] INFO: Crawled 1480 pages (at 11 pages/min), scraped 1343 items (at 12 items/min)
+2025-04-11 11:22:40 [scrapy.extensions.logstats] INFO: Crawled 1495 pages (at 15 pages/min), scraped 1356 items (at 13 items/min)
+2025-04-11 11:23:37 [scrapy.extensions.logstats] INFO: Crawled 1510 pages (at 15 pages/min), scraped 1368 items (at 12 items/min)
+2025-04-11 11:24:35 [scrapy.extensions.logstats] INFO: Crawled 1518 pages (at 8 pages/min), scraped 1379 items (at 11 items/min)
+2025-04-11 11:25:35 [scrapy.extensions.logstats] INFO: Crawled 1524 pages (at 6 pages/min), scraped 1385 items (at 6 items/min)
+2025-04-11 11:26:35 [scrapy.extensions.logstats] INFO: Crawled 1528 pages (at 4 pages/min), scraped 1389 items (at 4 items/min)
+2025-04-11 11:27:35 [scrapy.extensions.logstats] INFO: Crawled 1538 pages (at 10 pages/min), scraped 1399 items (at 10 items/min)
+2025-04-11 11:28:35 [scrapy.extensions.logstats] INFO: Crawled 1545 pages (at 7 pages/min), scraped 1405 items (at 6 items/min)
+2025-04-11 11:29:37 [scrapy.extensions.logstats] INFO: Crawled 1550 pages (at 5 pages/min), scraped 1410 items (at 5 items/min)
+2025-04-11 11:30:35 [scrapy.extensions.logstats] INFO: Crawled 1561 pages (at 11 pages/min), scraped 1420 items (at 10 items/min)
+2025-04-11 11:31:35 [scrapy.extensions.logstats] INFO: Crawled 1565 pages (at 4 pages/min), scraped 1424 items (at 4 items/min)
+2025-04-11 11:32:35 [scrapy.extensions.logstats] INFO: Crawled 1568 pages (at 3 pages/min), scraped 1427 items (at 3 items/min)
+2025-04-11 11:33:35 [scrapy.extensions.logstats] INFO: Crawled 1571 pages (at 3 pages/min), scraped 1430 items (at 3 items/min)
+2025-04-11 11:34:35 [scrapy.extensions.logstats] INFO: Crawled 1574 pages (at 3 pages/min), scraped 1433 items (at 3 items/min)
+2025-04-11 11:35:35 [scrapy.extensions.logstats] INFO: Crawled 1581 pages (at 7 pages/min), scraped 1439 items (at 6 items/min)
+2025-04-11 11:36:35 [scrapy.extensions.logstats] INFO: Crawled 1589 pages (at 8 pages/min), scraped 1446 items (at 7 items/min)
+2025-04-11 11:37:36 [scrapy.extensions.logstats] INFO: Crawled 1595 pages (at 6 pages/min), scraped 1451 items (at 5 items/min)
+2025-04-11 11:38:35 [scrapy.extensions.logstats] INFO: Crawled 1601 pages (at 6 pages/min), scraped 1457 items (at 6 items/min)
+2025-04-11 11:39:35 [scrapy.extensions.logstats] INFO: Crawled 1603 pages (at 2 pages/min), scraped 1459 items (at 2 items/min)
+2025-04-11 11:40:38 [scrapy.extensions.logstats] INFO: Crawled 1616 pages (at 13 pages/min), scraped 1471 items (at 12 items/min)
+2025-04-11 11:41:45 [scrapy.extensions.logstats] INFO: Crawled 1629 pages (at 13 pages/min), scraped 1482 items (at 11 items/min)
+2025-04-11 11:41:57 [govsg_crawler_2] INFO: Periodic driver refresh
+2025-04-11 11:41:57 [govsg_crawler_2] WARNING: Error while removing temp dir: [Errno 39] Directory not empty: '/tmp/chrome_profile_smsl6l5h'
+2025-04-11 11:42:08 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <403 https://support.corenet.gov.sg/hc/en-us>: HTTP status code is not handled or not allowed
+2025-04-11 11:42:39 [scrapy.extensions.logstats] INFO: Crawled 1642 pages (at 13 pages/min), scraped 1494 items (at 12 items/min)
+2025-04-11 11:43:39 [scrapy.extensions.logstats] INFO: Crawled 1652 pages (at 10 pages/min), scraped 1505 items (at 11 items/min)
+2025-04-11 11:44:40 [scrapy.extensions.logstats] INFO: Crawled 1668 pages (at 16 pages/min), scraped 1518 items (at 13 items/min)
+2025-04-11 11:45:45 [scrapy.extensions.logstats] INFO: Crawled 1679 pages (at 11 pages/min), scraped 1528 items (at 10 items/min)
+2025-04-11 11:46:37 [scrapy.extensions.logstats] INFO: Crawled 1686 pages (at 7 pages/min), scraped 1537 items (at 9 items/min)
+2025-04-11 11:47:38 [scrapy.extensions.logstats] INFO: Crawled 1699 pages (at 13 pages/min), scraped 1550 items (at 13 items/min)
+2025-04-11 11:48:52 [scrapy.extensions.logstats] INFO: Crawled 1712 pages (at 13 pages/min), scraped 1563 items (at 13 items/min)
+2025-04-11 11:49:43 [scrapy.extensions.logstats] INFO: Crawled 1725 pages (at 13 pages/min), scraped 1573 items (at 10 items/min)
+2025-04-11 11:50:41 [scrapy.extensions.logstats] INFO: Crawled 1733 pages (at 8 pages/min), scraped 1582 items (at 9 items/min)
+2025-04-11 11:51:44 [scrapy.extensions.logstats] INFO: Crawled 1747 pages (at 14 pages/min), scraped 1595 items (at 13 items/min)
+2025-04-11 11:52:37 [scrapy.extensions.logstats] INFO: Crawled 1756 pages (at 9 pages/min), scraped 1604 items (at 9 items/min)
+2025-04-11 11:53:40 [scrapy.extensions.logstats] INFO: Crawled 1771 pages (at 15 pages/min), scraped 1617 items (at 13 items/min)
+2025-04-11 11:54:55 [scrapy.extensions.logstats] INFO: Crawled 1782 pages (at 11 pages/min), scraped 1630 items (at 13 items/min)
+2025-04-11 11:55:35 [scrapy.extensions.logstats] INFO: Crawled 1788 pages (at 6 pages/min), scraped 1636 items (at 6 items/min)
+2025-04-11 11:56:38 [scrapy.extensions.logstats] INFO: Crawled 1800 pages (at 12 pages/min), scraped 1647 items (at 11 items/min)
+2025-04-11 11:57:36 [scrapy.extensions.logstats] INFO: Crawled 1813 pages (at 13 pages/min), scraped 1659 items (at 12 items/min)
+2025-04-11 11:58:35 [scrapy.extensions.logstats] INFO: Crawled 1821 pages (at 8 pages/min), scraped 1668 items (at 9 items/min)
+2025-04-11 11:59:38 [scrapy.extensions.logstats] INFO: Crawled 1827 pages (at 6 pages/min), scraped 1674 items (at 6 items/min)
+2025-04-11 11:59:57 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <403 https://ask.gov.sg/ica?topic=Passport>: HTTP status code is not handled or not allowed
+2025-04-11 12:00:36 [scrapy.extensions.logstats] INFO: Crawled 1840 pages (at 13 pages/min), scraped 1685 items (at 11 items/min)
+2025-04-11 12:01:38 [scrapy.extensions.logstats] INFO: Crawled 1854 pages (at 14 pages/min), scraped 1698 items (at 13 items/min)
+2025-04-11 12:02:40 [scrapy.extensions.logstats] INFO: Crawled 1866 pages (at 12 pages/min), scraped 1711 items (at 13 items/min)
+2025-04-11 12:03:55 [scrapy.extensions.logstats] INFO: Crawled 1883 pages (at 17 pages/min), scraped 1723 items (at 12 items/min)
+2025-04-11 12:04:37 [scrapy.extensions.logstats] INFO: Crawled 1890 pages (at 7 pages/min), scraped 1732 items (at 9 items/min)
+2025-04-11 12:04:45 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.nparks.gov.sg/e-newsletter>: HTTP status code is not handled or not allowed
+2025-04-11 12:05:38 [scrapy.extensions.logstats] INFO: Crawled 1904 pages (at 14 pages/min), scraped 1745 items (at 13 items/min)
+2025-04-11 12:06:55 [scrapy.extensions.logstats] INFO: Crawled 1916 pages (at 12 pages/min), scraped 1759 items (at 14 items/min)
+2025-04-11 12:07:39 [scrapy.extensions.logstats] INFO: Crawled 1926 pages (at 10 pages/min), scraped 1768 items (at 9 items/min)
+2025-04-11 12:08:38 [scrapy.extensions.logstats] INFO: Crawled 1939 pages (at 13 pages/min), scraped 1780 items (at 12 items/min)
+2025-04-11 12:09:40 [scrapy.extensions.logstats] INFO: Crawled 1951 pages (at 12 pages/min), scraped 1793 items (at 13 items/min)
+2025-04-11 12:10:38 [scrapy.extensions.logstats] INFO: Crawled 1964 pages (at 13 pages/min), scraped 1805 items (at 12 items/min)
+2025-04-11 12:11:36 [scrapy.extensions.logstats] INFO: Crawled 1974 pages (at 10 pages/min), scraped 1816 items (at 11 items/min)
+2025-04-11 12:11:55 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.nparks.gov.sg/gardens-parks-and-nature/dos-and-donts/animal-advisories>: HTTP status code is not handled or not allowed
+2025-04-11 12:11:59 [govsg_crawler_2] INFO: Periodic driver refresh
+2025-04-11 12:11:59 [govsg_crawler_2] WARNING: Error while removing temp dir: [Errno 39] Directory not empty: '/tmp/chrome_profile_gmnb9bqw'
+2025-04-11 12:12:36 [scrapy.extensions.logstats] INFO: Crawled 1985 pages (at 11 pages/min), scraped 1826 items (at 10 items/min)
+2025-04-11 12:13:37 [scrapy.extensions.logstats] INFO: Crawled 1997 pages (at 12 pages/min), scraped 1838 items (at 12 items/min)
+2025-04-11 12:14:35 [scrapy.extensions.logstats] INFO: Crawled 2009 pages (at 12 pages/min), scraped 1850 items (at 12 items/min)
+2025-04-11 12:15:37 [scrapy.extensions.logstats] INFO: Crawled 2021 pages (at 12 pages/min), scraped 1862 items (at 12 items/min)
+2025-04-11 12:15:57 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.nparks.gov.sg/nparksnewslettersubscription>: HTTP status code is not handled or not allowed
+2025-04-11 12:16:37 [scrapy.extensions.logstats] INFO: Crawled 2034 pages (at 13 pages/min), scraped 1874 items (at 12 items/min)
+2025-04-11 12:17:32 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.nparks.gov.sg/~/media/nparks-real-content/gardens-parks-and-nature/parks-and-nature-reserve/pulau-ubin/documents/checklist-mammals.pdf?la=en>: HTTP status code is not handled or not allowed
+2025-04-11 12:17:35 [scrapy.extensions.logstats] INFO: Crawled 2044 pages (at 10 pages/min), scraped 1883 items (at 9 items/min)
+2025-04-11 12:18:38 [scrapy.extensions.logstats] INFO: Crawled 2057 pages (at 13 pages/min), scraped 1896 items (at 13 items/min)
+2025-04-11 12:19:02 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.nparks.gov.sg/~/media/nparks-real-content/gardens-parks-and-nature/parks-and-nature-reserve/pulau-ubin/documents/checklist-butterflies-2.pdf?la=en>: HTTP status code is not handled or not allowed
+2025-04-11 12:19:36 [scrapy.extensions.logstats] INFO: Crawled 2071 pages (at 14 pages/min), scraped 1907 items (at 11 items/min)
+2025-04-11 12:20:31 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.nparks.gov.sg/~/media/nparks-real-content/gardens-parks-and-nature/parks-and-nature-reserve/pulau-ubin/documents/checklist-dragonfliesdamselflies.pdf?la=en>: HTTP status code is not handled or not allowed
+2025-04-11 12:20:36 [scrapy.extensions.logstats] INFO: Crawled 2081 pages (at 10 pages/min), scraped 1917 items (at 10 items/min)
+2025-04-11 12:21:40 [scrapy.extensions.logstats] INFO: Crawled 2099 pages (at 18 pages/min), scraped 1930 items (at 13 items/min)
+2025-04-11 12:22:48 [scrapy.extensions.logstats] INFO: Crawled 2111 pages (at 12 pages/min), scraped 1942 items (at 12 items/min)
+2025-04-11 12:23:39 [scrapy.extensions.logstats] INFO: Crawled 2119 pages (at 8 pages/min), scraped 1952 items (at 10 items/min)
+2025-04-11 12:24:44 [scrapy.extensions.logstats] INFO: Crawled 2132 pages (at 13 pages/min), scraped 1964 items (at 12 items/min)
+2025-04-11 12:25:38 [scrapy.extensions.logstats] INFO: Crawled 2141 pages (at 9 pages/min), scraped 1973 items (at 9 items/min)
+2025-04-11 12:25:48 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/industry-development/digitalisation/smes-go-digital-programme-for-the-real-estate-agency-industry>: HTTP status code is not handled or not allowed
+2025-04-11 12:26:36 [scrapy.extensions.logstats] INFO: Crawled 2156 pages (at 15 pages/min), scraped 1984 items (at 11 items/min)
+2025-04-11 12:26:45 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/industry-development/reitm/what-is-reitm>: HTTP status code is not handled or not allowed
+2025-04-11 12:27:39 [scrapy.extensions.logstats] INFO: Crawled 2172 pages (at 16 pages/min), scraped 1997 items (at 13 items/min)
+2025-04-11 12:28:02 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.mnd.gov.sg/Help/SSO-Guide/Article/20>: HTTP status code is not handled or not allowed
+2025-04-11 12:28:37 [scrapy.extensions.logstats] INFO: Crawled 2183 pages (at 11 pages/min), scraped 2009 items (at 12 items/min)
+2025-04-11 12:29:39 [scrapy.extensions.logstats] INFO: Crawled 2195 pages (at 12 pages/min), scraped 2022 items (at 13 items/min)
+2025-04-11 12:30:41 [scrapy.extensions.logstats] INFO: Crawled 2207 pages (at 12 pages/min), scraped 2035 items (at 13 items/min)
+2025-04-11 12:31:38 [scrapy.extensions.logstats] INFO: Crawled 2220 pages (at 13 pages/min), scraped 2047 items (at 12 items/min)
+2025-04-11 12:32:21 [scrapy.downloadermiddlewares.retry] ERROR: Gave up retrying <GET https://app.mlaw.gov.sg/robots.txt> (failed 3 times): DNS lookup failed: no results for hostname lookup: app.mlaw.gov.sg.
+2025-04-11 12:32:21 [scrapy.downloadermiddlewares.robotstxt] ERROR: Error downloading <GET https://app.mlaw.gov.sg/robots.txt>: DNS lookup failed: no results for hostname lookup: app.mlaw.gov.sg.
+Traceback (most recent call last):
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/twisted/internet/defer.py", line 2013, in _inlineCallbacks
+    result = context.run(
+             ^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/twisted/python/failure.py", line 467, in throwExceptionIntoGenerator
+    return g.throw(self.value.with_traceback(self.tb))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/scrapy/core/downloader/middleware.py", line 68, in process_request
+    return (yield download_func(request, spider))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/twisted/internet/defer.py", line 1088, in _runCallbacks
+    current.result = callback(  # type: ignore[misc]
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/NAISC25/NAISC_venv/lib/python3.12/site-packages/twisted/internet/endpoints.py", line 1061, in startConnectionAttempts
+    raise error.DNSLookupError(
+twisted.internet.error.DNSLookupError: DNS lookup failed: no results for hostname lookup: app.mlaw.gov.sg.
+2025-04-11 12:32:40 [scrapy.extensions.logstats] INFO: Crawled 2233 pages (at 13 pages/min), scraped 2060 items (at 13 items/min)
+2025-04-11 12:33:39 [scrapy.extensions.logstats] INFO: Crawled 2244 pages (at 11 pages/min), scraped 2072 items (at 12 items/min)
+2025-04-11 12:34:38 [scrapy.extensions.logstats] INFO: Crawled 2251 pages (at 7 pages/min), scraped 2079 items (at 7 items/min)
+2025-04-11 12:37:07 [govsg_crawler_2] ERROR: Error processing https://www.psd.gov.sg/leadership/public-service-leadership-careers/: HTTPConnectionPool(host='localhost', port=51183): Read timed out. (read timeout=120)
+2025-04-11 12:39:02 [urllib3.connectionpool] WARNING: Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPConnectionPool(host='localhost', port=51183): Read timed out. (read timeout=120)")': /session/963d0fa934bad37d0fb227276f597284
+2025-04-11 12:40:56 [urllib3.connectionpool] WARNING: Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPConnectionPool(host='localhost', port=51183): Read timed out. (read timeout=120)")': /session/963d0fa934bad37d0fb227276f597284
+2025-04-11 12:42:50 [urllib3.connectionpool] WARNING: Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'ReadTimeoutError("HTTPConnectionPool(host='localhost', port=51183): Read timed out. (read timeout=120)")': /session/963d0fa934bad37d0fb227276f597284
+2025-04-11 12:44:44 [govsg_crawler_2] WARNING: Error while removing temp dir: [Errno 39] Directory not empty: '/tmp/chrome_profile_j_htbi89'
+2025-04-11 12:44:45 [scrapy.extensions.logstats] INFO: Crawled 2259 pages (at 8 pages/min), scraped 2085 items (at 6 items/min)
+2025-04-11 12:44:45 [govsg_crawler_2] INFO: Periodic driver refresh
+2025-04-11 12:44:45 [govsg_crawler_2] WARNING: Error while removing temp dir: [Errno 39] Directory not empty: '/tmp/chrome_profile_ab45_zo7'
+2025-04-11 12:45:36 [scrapy.extensions.logstats] INFO: Crawled 2270 pages (at 11 pages/min), scraped 2095 items (at 10 items/min)
+2025-04-11 12:46:38 [scrapy.extensions.logstats] INFO: Crawled 2283 pages (at 13 pages/min), scraped 2108 items (at 13 items/min)
+2025-04-11 12:47:40 [scrapy.extensions.logstats] INFO: Crawled 2296 pages (at 13 pages/min), scraped 2121 items (at 13 items/min)
+2025-04-11 12:48:18 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/industry-development/industry-initiatives/exclusive-agency-agreements-commitment-to-service>: HTTP status code is not handled or not allowed
+2025-04-11 12:48:18 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/industry-development/cpd/information-on-cpd-framework>: HTTP status code is not handled or not allowed
+2025-04-11 12:48:23 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/industry-development/cpd/cpd-guidelines-for-cpd-course-providers>: HTTP status code is not handled or not allowed
+2025-04-11 12:48:37 [scrapy.extensions.logstats] INFO: Crawled 2311 pages (at 15 pages/min), scraped 2133 items (at 12 items/min)
+2025-04-11 12:48:37 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/industry-development/cea-estate-agency-industry-conference>: HTTP status code is not handled or not allowed
+2025-04-11 12:48:42 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/legislation-guidelines/legislation/subsidiary-legislation>: HTTP status code is not handled or not allowed
+2025-04-11 12:48:47 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/consumers/educational-materials/guides-brochures>: HTTP status code is not handled or not allowed
+2025-04-11 12:49:00 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/professionals/dispute-resolution-schemes>: HTTP status code is not handled or not allowed
+2025-04-11 12:49:10 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/industry-development/digitalisation/enterprise-development-grant>: HTTP status code is not handled or not allowed
+2025-04-11 12:49:16 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/industry-development/cpd/e-learning-cpd-courses>: HTTP status code is not handled or not allowed
+2025-04-11 12:49:25 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/industry-development/digitalisation/open-innovation-platform>: HTTP status code is not handled or not allowed
+2025-04-11 12:49:32 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/professionals/complaint-disciplinary-management/disciplinary-procedure>: HTTP status code is not handled or not allowed
+2025-04-11 12:49:35 [scrapy.extensions.logstats] INFO: Crawled 2328 pages (at 17 pages/min), scraped 2143 items (at 10 items/min)
+2025-04-11 12:49:39 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/professionals/complaint-disciplinary-management/key-enforcement-statistics>: HTTP status code is not handled or not allowed
+2025-04-11 12:49:43 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/professionals/complaint-disciplinary-management/letter-of-censure-disciplinary-regime>: HTTP status code is not handled or not allowed
+2025-04-11 12:49:51 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/news-publications/tips-of-the-month>: HTTP status code is not handled or not allowed
+2025-04-11 12:49:57 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/industry-development/reitm/strengthening-professionalism-upskilling-the-workforce>: HTTP status code is not handled or not allowed
+2025-04-11 12:50:15 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/admission-to-the-bar/alternatives-for-working-in-the-legal-field/>: HTTP status code is not handled or not allowed
+2025-04-11 12:50:31 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/law-practice-entities-and-lawyers/registration-of-individuals/update-the-particulars-of-an-individual/>: HTTP status code is not handled or not allowed
+2025-04-11 12:50:41 [scrapy.extensions.logstats] INFO: Crawled 2350 pages (at 22 pages/min), scraped 2155 items (at 12 items/min)
+2025-04-11 12:50:50 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/law-practice-entities-and-lawyers/licensing-or-registration-of-law-practice-entities/renew-the-licence-of-a-law-practice-entity/>: HTTP status code is not handled or not allowed
+2025-04-11 12:50:56 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/about-us/our-legal-system/>: HTTP status code is not handled or not allowed
+2025-04-11 12:51:07 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/law-practice-entities-and-lawyers/registration-of-individuals/types-of-individual-registration/>: HTTP status code is not handled or not allowed
+2025-04-11 12:51:24 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/about-us/organisation-structure/>: HTTP status code is not handled or not allowed
+2025-04-11 12:51:40 [scrapy.extensions.logstats] INFO: Crawled 2363 pages (at 13 pages/min), scraped 2166 items (at 11 items/min)
+2025-04-11 12:51:51 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/news/visits/>: HTTP status code is not handled or not allowed
+2025-04-11 12:52:07 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/admission-to-the-bar/details-on-applying-for-an-exemption/>: HTTP status code is not handled or not allowed
+2025-04-11 12:53:39 [scrapy.extensions.logstats] INFO: Crawled 2377 pages (at 14 pages/min), scraped 2175 items (at 9 items/min)
+2025-04-11 12:54:04 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/law-practice-entities-and-lawyers/licensing-or-registration-of-law-practice-entities/update-the-particulars-of-a-law-practice-entity/>: HTTP status code is not handled or not allowed
+2025-04-11 12:54:06 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/news/speeches/>: HTTP status code is not handled or not allowed
+2025-04-11 12:54:35 [scrapy.extensions.logstats] INFO: Crawled 2385 pages (at 8 pages/min), scraped 2183 items (at 8 items/min)
+2025-04-11 12:55:02 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/about-us/contact-us/>: HTTP status code is not handled or not allowed
+2025-04-11 12:55:41 [scrapy.extensions.logstats] INFO: Crawled 2390 pages (at 5 pages/min), scraped 2187 items (at 4 items/min)
+2025-04-11 12:55:45 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.boa.gov.sg/law-practice-entities-and-lawyers/resources-for-law-practice-entities/useful-template/>: HTTP status code is not handled or not allowed
+2025-04-11 12:56:35 [scrapy.extensions.logstats] INFO: Crawled 2394 pages (at 4 pages/min), scraped 2190 items (at 3 items/min)
+2025-04-11 12:57:39 [scrapy.extensions.logstats] INFO: Crawled 2396 pages (at 2 pages/min), scraped 2192 items (at 2 items/min)
+2025-04-11 12:58:35 [scrapy.extensions.logstats] INFO: Crawled 2398 pages (at 2 pages/min), scraped 2194 items (at 2 items/min)
+2025-04-11 12:59:35 [scrapy.extensions.logstats] INFO: Crawled 2400 pages (at 2 pages/min), scraped 2196 items (at 2 items/min)
+2025-04-11 13:01:36 [scrapy.extensions.logstats] INFO: Crawled 2403 pages (at 3 pages/min), scraped 2199 items (at 3 items/min)
+2025-04-11 13:02:35 [scrapy.extensions.logstats] INFO: Crawled 2405 pages (at 2 pages/min), scraped 2201 items (at 2 items/min)
+2025-04-11 13:04:15 [scrapy.extensions.logstats] INFO: Crawled 2407 pages (at 2 pages/min), scraped 2203 items (at 2 items/min)
+2025-04-11 13:04:52 [scrapy.extensions.logstats] INFO: Crawled 2408 pages (at 1 pages/min), scraped 2204 items (at 1 items/min)
+2025-04-11 13:05:35 [scrapy.extensions.logstats] INFO: Crawled 2410 pages (at 2 pages/min), scraped 2206 items (at 2 items/min)
+2025-04-11 13:06:35 [scrapy.extensions.logstats] INFO: Crawled 2414 pages (at 4 pages/min), scraped 2210 items (at 4 items/min)
+2025-04-11 13:07:35 [scrapy.extensions.logstats] INFO: Crawled 2419 pages (at 5 pages/min), scraped 2215 items (at 5 items/min)
+2025-04-11 13:08:35 [scrapy.extensions.logstats] INFO: Crawled 2427 pages (at 8 pages/min), scraped 2223 items (at 8 items/min)
+2025-04-11 13:09:35 [scrapy.extensions.logstats] INFO: Crawled 2427 pages (at 0 pages/min), scraped 2223 items (at 0 items/min)
+2025-04-11 13:10:35 [scrapy.extensions.logstats] INFO: Crawled 2429 pages (at 2 pages/min), scraped 2225 items (at 2 items/min)
+2025-04-11 13:11:35 [scrapy.extensions.logstats] INFO: Crawled 2431 pages (at 2 pages/min), scraped 2227 items (at 2 items/min)
+2025-04-11 13:12:39 [scrapy.extensions.logstats] INFO: Crawled 2434 pages (at 3 pages/min), scraped 2230 items (at 3 items/min)
+2025-04-11 13:13:57 [scrapy.extensions.logstats] INFO: Crawled 2436 pages (at 2 pages/min), scraped 2232 items (at 2 items/min)
+2025-04-11 13:16:10 [govsg_crawler_2] ERROR: Error processing https://www.msf.gov.sg/what-we-do/ycpartners/stories: HTTPConnectionPool(host='localhost', port=44813): Read timed out. (read timeout=120)
+2025-04-11 13:16:17 [govsg_crawler_2] WARNING: Error while removing temp dir: [Errno 39] Directory not empty: '/tmp/chrome_profile_tkim_d03'
+2025-04-11 13:16:21 [scrapy.extensions.logstats] INFO: Crawled 2442 pages (at 6 pages/min), scraped 2236 items (at 4 items/min)
+2025-04-11 13:16:22 [govsg_crawler_2] INFO: Periodic driver refresh
+2025-04-11 13:16:22 [govsg_crawler_2] WARNING: Error while removing temp dir: [Errno 39] Directory not empty: '/tmp/chrome_profile_6_sltiv0'
+2025-04-11 13:16:35 [scrapy.extensions.logstats] INFO: Crawled 2444 pages (at 2 pages/min), scraped 2237 items (at 1 items/min)
+2025-04-11 13:17:35 [scrapy.extensions.logstats] INFO: Crawled 2444 pages (at 0 pages/min), scraped 2238 items (at 1 items/min)
+2025-04-11 13:18:35 [scrapy.extensions.logstats] INFO: Crawled 2446 pages (at 2 pages/min), scraped 2240 items (at 2 items/min)
+2025-04-11 13:19:35 [scrapy.extensions.logstats] INFO: Crawled 2447 pages (at 1 pages/min), scraped 2241 items (at 1 items/min)
+2025-04-11 13:20:35 [scrapy.extensions.logstats] INFO: Crawled 2453 pages (at 6 pages/min), scraped 2246 items (at 5 items/min)
+2025-04-11 13:21:37 [scrapy.extensions.logstats] INFO: Crawled 2462 pages (at 9 pages/min), scraped 2255 items (at 9 items/min)
+2025-04-11 13:22:40 [scrapy.extensions.logstats] INFO: Crawled 2475 pages (at 13 pages/min), scraped 2268 items (at 13 items/min)
+2025-04-11 13:23:38 [scrapy.extensions.logstats] INFO: Crawled 2488 pages (at 13 pages/min), scraped 2280 items (at 12 items/min)
+2025-04-11 13:24:35 [scrapy.extensions.logstats] INFO: Crawled 2492 pages (at 4 pages/min), scraped 2285 items (at 5 items/min)
+2025-04-11 13:25:12 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <469 https://sso.agc.gov.sg/civil/civil-claims-(from-1-april-2022)>: HTTP status code is not handled or not allowed
+2025-04-11 13:25:30 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <469 https://sso.agc.gov.sg/news-and-resources/registrar's-circulars>: HTTP status code is not handled or not allowed
+2025-04-11 13:25:35 [scrapy.extensions.logstats] INFO: Crawled 2503 pages (at 11 pages/min), scraped 2294 items (at 9 items/min)
+2025-04-11 13:26:35 [scrapy.extensions.logstats] INFO: Crawled 2504 pages (at 1 pages/min), scraped 2295 items (at 1 items/min)
+2025-04-11 13:27:35 [scrapy.extensions.logstats] INFO: Crawled 2507 pages (at 3 pages/min), scraped 2298 items (at 3 items/min)
+2025-04-11 13:28:35 [scrapy.extensions.logstats] INFO: Crawled 2515 pages (at 8 pages/min), scraped 2306 items (at 8 items/min)
+2025-04-11 13:29:35 [scrapy.extensions.logstats] INFO: Crawled 2524 pages (at 9 pages/min), scraped 2315 items (at 9 items/min)
+2025-04-11 13:30:35 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 http://data.gov.sg/>: HTTP status code is not handled or not allowed
+2025-04-11 13:30:37 [scrapy.extensions.logstats] INFO: Crawled 2536 pages (at 12 pages/min), scraped 2325 items (at 10 items/min)
+2025-04-11 13:30:47 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/research-data/research-grants>: HTTP status code is not handled or not allowed
+2025-04-11 13:30:48 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/what-we-do/strengthen-the-social-service-sector>: HTTP status code is not handled or not allowed
+2025-04-11 13:31:28 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <403 https://ask.gov.sg/moh?topic=MediShield%20Life>: HTTP status code is not handled or not allowed
+2025-04-11 13:31:36 [scrapy.extensions.logstats] INFO: Crawled 2551 pages (at 15 pages/min), scraped 2337 items (at 12 items/min)
+2025-04-11 13:32:40 [scrapy.extensions.logstats] INFO: Crawled 2567 pages (at 16 pages/min), scraped 2347 items (at 10 items/min)
+2025-04-11 13:33:35 [scrapy.extensions.logstats] INFO: Crawled 2577 pages (at 10 pages/min), scraped 2357 items (at 10 items/min)
+2025-04-11 13:34:35 [scrapy.extensions.logstats] INFO: Crawled 2590 pages (at 13 pages/min), scraped 2368 items (at 11 items/min)
+2025-04-11 13:34:53 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://prepare.cda.gov.sg/faqs>: HTTP status code is not handled or not allowed
+2025-04-11 13:35:35 [scrapy.extensions.logstats] INFO: Crawled 2602 pages (at 12 pages/min), scraped 2378 items (at 10 items/min)
+2025-04-11 13:36:39 [scrapy.extensions.logstats] INFO: Crawled 2616 pages (at 14 pages/min), scraped 2390 items (at 12 items/min)
+2025-04-11 13:37:35 [scrapy.extensions.logstats] INFO: Crawled 2628 pages (at 12 pages/min), scraped 2401 items (at 11 items/min)
+2025-04-11 13:38:36 [scrapy.extensions.logstats] INFO: Crawled 2641 pages (at 13 pages/min), scraped 2414 items (at 13 items/min)
+2025-04-11 13:39:40 [scrapy.extensions.logstats] INFO: Crawled 2654 pages (at 13 pages/min), scraped 2426 items (at 12 items/min)
+2025-04-11 13:40:45 [scrapy.extensions.logstats] INFO: Crawled 2669 pages (at 15 pages/min), scraped 2439 items (at 13 items/min)
+2025-04-11 13:41:36 [scrapy.extensions.logstats] INFO: Crawled 2678 pages (at 9 pages/min), scraped 2449 items (at 10 items/min)
+2025-04-11 13:42:38 [scrapy.extensions.logstats] INFO: Crawled 2693 pages (at 15 pages/min), scraped 2462 items (at 13 items/min)
+2025-04-11 13:43:36 [scrapy.extensions.logstats] INFO: Crawled 2703 pages (at 10 pages/min), scraped 2472 items (at 10 items/min)
+2025-04-11 13:44:35 [scrapy.extensions.logstats] INFO: Crawled 2712 pages (at 9 pages/min), scraped 2481 items (at 9 items/min)
+2025-04-11 13:44:55 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <403 https://ask.gov.sg/smc>: HTTP status code is not handled or not allowed
+2025-04-11 13:45:35 [scrapy.extensions.logstats] INFO: Crawled 2721 pages (at 9 pages/min), scraped 2489 items (at 8 items/min)
+2025-04-11 13:46:25 [govsg_crawler_2] INFO: Periodic driver refresh
+2025-04-11 13:46:25 [govsg_crawler_2] WARNING: Error while removing temp dir: [Errno 39] Directory not empty: '/tmp/chrome_profile_7wl5yv9d'
+2025-04-11 13:46:40 [scrapy.extensions.logstats] INFO: Crawled 2735 pages (at 14 pages/min), scraped 2501 items (at 12 items/min)
+2025-04-11 13:47:39 [scrapy.extensions.logstats] INFO: Crawled 2746 pages (at 11 pages/min), scraped 2513 items (at 12 items/min)
+2025-04-11 13:48:37 [scrapy.extensions.logstats] INFO: Crawled 2758 pages (at 12 pages/min), scraped 2525 items (at 12 items/min)
+2025-04-11 13:49:05 [govsg_crawler_2] WARNING: Skipping disallowed domain: https://www.ecda.gov.sg:443/
+2025-04-11 13:49:36 [scrapy.extensions.logstats] INFO: Crawled 2770 pages (at 12 pages/min), scraped 2534 items (at 9 items/min)
+2025-04-11 13:50:37 [scrapy.extensions.logstats] INFO: Crawled 2779 pages (at 9 pages/min), scraped 2544 items (at 10 items/min)
+2025-04-11 13:51:38 [scrapy.extensions.logstats] INFO: Crawled 2789 pages (at 10 pages/min), scraped 2554 items (at 10 items/min)
+2025-04-11 13:52:36 [scrapy.extensions.logstats] INFO: Crawled 2793 pages (at 4 pages/min), scraped 2557 items (at 3 items/min)
+2025-04-11 13:53:25 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/who-we-are/organisation-chart>: HTTP status code is not handled or not allowed
+2025-04-11 13:53:39 [scrapy.extensions.logstats] INFO: Crawled 2808 pages (at 15 pages/min), scraped 2570 items (at 13 items/min)
+2025-04-11 13:53:54 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/e-services/find-map-data-through-onemap>: HTTP status code is not handled or not allowed
+2025-04-11 13:54:16 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/properties/purchase-of-remnant-land>: HTTP status code is not handled or not allowed
+2025-04-11 13:54:37 [scrapy.extensions.logstats] INFO: Crawled 2822 pages (at 14 pages/min), scraped 2582 items (at 12 items/min)
+2025-04-11 13:55:25 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/regulatory/foreign-ownership-of-property>: HTTP status code is not handled or not allowed
+2025-04-11 13:55:39 [scrapy.extensions.logstats] INFO: Crawled 2837 pages (at 15 pages/min), scraped 2595 items (at 13 items/min)
+2025-04-11 13:56:33 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/geospatial-development-and-services/map-our-world>: HTTP status code is not handled or not allowed
+2025-04-11 13:56:33 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.healthprofessionals.gov.sg/smc/fc78b2ce-3463-4ce9-b63e-f31811dbce2b>: HTTP status code is not handled or not allowed
+2025-04-11 13:56:33 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/geospatial-development-and-services>: HTTP status code is not handled or not allowed
+2025-04-11 13:56:35 [scrapy.extensions.logstats] INFO: Crawled 2848 pages (at 11 pages/min), scraped 2606 items (at 11 items/min)
+2025-04-11 13:56:48 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/newsroom>: HTTP status code is not handled or not allowed
+2025-04-11 13:57:01 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/geospatial-development-and-services/property-ownership-survey-plans-and-road-lines-information>: HTTP status code is not handled or not allowed
+2025-04-11 13:57:14 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/regulatory/lodge-your-property-title>: HTTP status code is not handled or not allowed
+2025-04-11 13:57:28 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/geospatial-development-and-services/digitised-land-information>: HTTP status code is not handled or not allowed
+2025-04-11 13:57:35 [scrapy.extensions.logstats] INFO: Crawled 2861 pages (at 13 pages/min), scraped 2615 items (at 9 items/min)
+2025-04-11 13:57:40 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/regulatory>: HTTP status code is not handled or not allowed
+2025-04-11 13:57:50 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/newsroom/press-release>: HTTP status code is not handled or not allowed
+2025-04-11 13:58:02 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/properties/management-of-state-land>: HTTP status code is not handled or not allowed
+2025-04-11 13:58:15 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/properties/acquisition-of-land>: HTTP status code is not handled or not allowed
+2025-04-11 13:58:33 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/who-we-are/mission-values>: HTTP status code is not handled or not allowed
+2025-04-11 13:58:39 [scrapy.extensions.logstats] INFO: Crawled 2875 pages (at 14 pages/min), scraped 2624 items (at 9 items/min)
+2025-04-11 13:58:48 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/what-we-do/support-families-and-parents>: HTTP status code is not handled or not allowed
+2025-04-11 13:58:56 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/what-we-do/Research-Conferences-Forums-Networks>: HTTP status code is not handled or not allowed
+2025-04-11 13:59:10 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/what-we-do/help-those-in-need>: HTTP status code is not handled or not allowed
+2025-04-11 13:59:21 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/media-room>: HTTP status code is not handled or not allowed
+2025-04-11 13:59:33 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/what-we-do/building-families-together>: HTTP status code is not handled or not allowed
+2025-04-11 13:59:37 [scrapy.extensions.logstats] INFO: Crawled 2888 pages (at 13 pages/min), scraped 2632 items (at 8 items/min)
+2025-04-11 13:59:48 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/join-us/volunteer-with-msfcare-network>: HTTP status code is not handled or not allowed
+2025-04-11 14:00:08 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/join-us/jobs-careers>: HTTP status code is not handled or not allowed
+2025-04-11 14:00:14 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/join-us/scholarships-internships>: HTTP status code is not handled or not allowed
+2025-04-11 14:00:17 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.moh.gov.sg/careshieldlife/about-careshield-life/careshield-life-premium-calculator>: HTTP status code is not handled or not allowed
+2025-04-11 14:00:38 [scrapy.extensions.logstats] INFO: Crawled 2906 pages (at 18 pages/min), scraped 2643 items (at 11 items/min)
+2025-04-11 14:00:55 [govsg_crawler_2] WARNING: Skipping disallowed domain: https://www.healthhub.sg/programmes/parent-hub
+2025-04-11 14:01:11 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.moh.gov.sg/staying-healthy/%5Bresource:3:22011%5D>: HTTP status code is not handled or not allowed
+2025-04-11 14:01:36 [scrapy.extensions.logstats] INFO: Crawled 2918 pages (at 12 pages/min), scraped 2652 items (at 9 items/min)
+2025-04-11 14:02:38 [scrapy.extensions.logstats] INFO: Crawled 2928 pages (at 10 pages/min), scraped 2662 items (at 10 items/min)
+2025-04-11 14:03:41 [scrapy.extensions.logstats] INFO: Crawled 2942 pages (at 14 pages/min), scraped 2675 items (at 13 items/min)
+2025-04-11 14:04:45 [scrapy.extensions.logstats] INFO: Crawled 2957 pages (at 15 pages/min), scraped 2687 items (at 12 items/min)
+2025-04-11 14:05:23 [govsg_crawler_2] WARNING: Skipping disallowed domain: https://www.healthhub.sg/programmes/parent-hub/student-health-centre-dental-centre
+2025-04-11 14:05:35 [scrapy.extensions.logstats] INFO: Crawled 2962 pages (at 5 pages/min), scraped 2693 items (at 6 items/min)
+2025-04-11 14:06:35 [scrapy.extensions.logstats] INFO: Crawled 2963 pages (at 1 pages/min), scraped 2694 items (at 1 items/min)
+2025-04-11 14:07:37 [scrapy.extensions.logstats] INFO: Crawled 2974 pages (at 11 pages/min), scraped 2705 items (at 11 items/min)
+2025-04-11 14:08:38 [scrapy.extensions.logstats] INFO: Crawled 2985 pages (at 11 pages/min), scraped 2715 items (at 10 items/min)
+2025-04-11 14:09:35 [scrapy.extensions.logstats] INFO: Crawled 3000 pages (at 15 pages/min), scraped 2727 items (at 12 items/min)
+2025-04-11 14:10:37 [scrapy.extensions.logstats] INFO: Crawled 3012 pages (at 12 pages/min), scraped 2740 items (at 13 items/min)
+2025-04-11 14:11:36 [scrapy.extensions.logstats] INFO: Crawled 3024 pages (at 12 pages/min), scraped 2752 items (at 12 items/min)
+2025-04-11 14:12:14 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://www.moh.gov.sg/e-consultation>: HTTP status code is not handled or not allowed
+2025-04-11 14:12:37 [scrapy.extensions.logstats] INFO: Crawled 3042 pages (at 18 pages/min), scraped 2765 items (at 13 items/min)
+2025-04-11 14:13:40 [scrapy.extensions.logstats] INFO: Crawled 3050 pages (at 8 pages/min), scraped 2776 items (at 11 items/min)
+2025-04-11 14:14:35 [scrapy.extensions.logstats] INFO: Crawled 3059 pages (at 9 pages/min), scraped 2785 items (at 9 items/min)
+2025-04-11 14:15:36 [scrapy.extensions.logstats] INFO: Crawled 3072 pages (at 13 pages/min), scraped 2797 items (at 12 items/min)
+2025-04-11 14:15:35 [govsg_crawler_2] WARNING: Skipping disallowed domain: https://www.healthhub.sg/programmes/mindsg/vascular-dementia
+2025-04-11 14:16:35 [scrapy.extensions.logstats] INFO: Crawled 3077 pages (at 5 pages/min), scraped 2801 items (at 4 items/min)
+2025-04-11 14:17:35 [scrapy.extensions.logstats] INFO: Crawled 3077 pages (at 0 pages/min), scraped 2801 items (at 0 items/min)
+2025-04-11 14:18:35 [scrapy.extensions.logstats] INFO: Crawled 3077 pages (at 0 pages/min), scraped 2801 items (at 0 items/min)
+2025-04-11 14:19:21 [govsg_crawler_2] INFO: Periodic driver refresh
+2025-04-11 14:19:21 [govsg_crawler_2] WARNING: Error while removing temp dir: [Errno 39] Directory not empty: '/tmp/chrome_profile_a2plu5wh'
+2025-04-11 14:19:35 [scrapy.extensions.logstats] INFO: Crawled 3080 pages (at 3 pages/min), scraped 2803 items (at 2 items/min)
+2025-04-11 14:20:43 [scrapy.extensions.logstats] INFO: Crawled 3095 pages (at 15 pages/min), scraped 2815 items (at 12 items/min)
+2025-04-11 14:21:39 [scrapy.extensions.logstats] INFO: Crawled 3110 pages (at 15 pages/min), scraped 2827 items (at 12 items/min)
+2025-04-11 14:22:38 [scrapy.extensions.logstats] INFO: Crawled 3122 pages (at 12 pages/min), scraped 2839 items (at 12 items/min)
+2025-04-11 14:23:45 [scrapy.extensions.logstats] INFO: Crawled 3137 pages (at 15 pages/min), scraped 2853 items (at 14 items/min)
+2025-04-11 14:24:47 [scrapy.extensions.logstats] INFO: Crawled 3146 pages (at 9 pages/min), scraped 2863 items (at 10 items/min)
+2025-04-11 14:24:48 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/programmes/parent-hub/parentingforwellness>: HTTP status code is not handled or not allowed
+2025-04-11 14:24:55 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/programmes/parent-hub/teens>: HTTP status code is not handled or not allowed
+2025-04-11 14:25:08 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/programmes/parent-hub/baby-toddler>: HTTP status code is not handled or not allowed
+2025-04-11 14:25:20 [scrapy.spidermiddlewares.httperror] INFO: Ignoring response <404 https://go.gov.sg/programmes/parent-hub/primary>: HTTP status code is not handled or not allowed
+2025-04-11 14:59:18 [scrapy.crawler] INFO: Received SIGINT, shutting down gracefully. Send again to force 
+2025-04-11 15:22:38 [scrapy.crawler] INFO: Received SIGINT twice, forcing unclean shutdown

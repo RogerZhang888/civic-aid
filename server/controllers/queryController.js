@@ -1,15 +1,8 @@
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const pool = require("../config/db");
+const { callModel } = require('../services/llmService');
 
-// Placeholder LLM response
-const mockLLMResponse = (prompt) => {
-  return {
-    raw: `${prompt} (simulated response)`,
-    processed: "This is a placeholder response. LLM integration pending.",
-    confidence: 0.85
-  };
-};
 
 exports.submitQuery = async (req, res) => {
   try {
@@ -39,32 +32,48 @@ exports.submitQuery = async (req, res) => {
       };
     });
 
-    // Simulate LLM response
-    const llmResponse = mockLLMResponse(prompt);
+    const queryType = 'query'; // or 'report' — set based on context or user input
+    const imagePath = uploadedFiles.length > 0 ? uploadedFiles[0].path : null;
+
+
+    let llmResponse;
+    try {
+      llmResponse = await callModel({
+        query: prompt,
+        queryType,
+        imagePath
+      });
+    } catch (err) {
+      console.error("LLM model call failed:", err);
+      return res.status(500).json({ error: "Model failed to generate a response." });
+    }
+
 
     // Save query to DB
     const result = await pool.query(
       `INSERT INTO Queries 
-       (user_id, user_prompt, system_prompt, response, valid, reply, confidence) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+       (user_id, chat_id, user_prompt, system_prompt, response, valid, reply, confidence) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
        RETURNING id, created_at`,
       [
         userId,
+        chatId,
         prompt,
         "System prompt placeholder",
-        llmResponse.raw,
+        llmResponse.answer,
         true,
-        llmResponse.processed,
-        llmResponse.confidence
+        llmResponse.answer,
+        llmResponse.confidence?.score || 0
       ]
     );
+    
 
     // TODO: optionally save file paths in a separate table tied to queryId
 
     res.json({
       queryId: result.rows[0].id,
-      reply: llmResponse.processed,
-      confidence: llmResponse.confidence,
+      reply: llmResponse.answer,
+      confidence: llmResponse.confidence,  
       uploadedMedia: savedMedia,
       location: latitude && longitude ? { latitude, longitude } : null,
       email,
