@@ -1,14 +1,12 @@
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import useUserContext from "../user-context/UserContext";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 export default function useLogout() {
 
    const navigate = useNavigate();
-   const { removeUserState } = useUserContext();
 
    return async function logoutHandler() {
 
@@ -18,8 +16,6 @@ export default function useLogout() {
          console.log("Log out successful");
 
          toast.success("You successfully logged out");
-
-         removeUserState();
 
          navigate("/");
 

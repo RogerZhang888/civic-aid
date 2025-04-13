@@ -1,12 +1,13 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import useUserContext from "./user-context/UserContext";
 import useLogout from "./auth/useLogout";
+import useUser from "./auth/user";
 
 export default function Navbar() {
    const { pathname } = useLocation();
-   const { currUser } = useUserContext();
    const navigate = useNavigate();
    const logoutHandler = useLogout();
+
+   const { data: user, isLoading, error } = useUser();
 
    return (
       <nav className="bg-blue-600 text-white shadow-lg" id="navbar">
@@ -17,31 +18,29 @@ export default function Navbar() {
                </Link>
             </div>
 
-            {currUser &&
-               <div className="flex items-center justify-between px-10 space-x-10 text-gray-300">
+            <div className="flex items-center justify-between px-10 space-x-10 text-gray-300">
 
-                  <Link
-                     to="/chatbot"
-                     className={`hover:text-white transition ${pathname === "/chatbot" ? "text-white" : ""}`}
-                  >
-                     Chatbot
-                  </Link>
+               <Link
+                  to="/chatbot"
+                  className={`hover:text-white transition ${pathname === "/chatbot" ? "text-white" : ""}`}
+               >
+                  Chatbot
+               </Link>
 
-                  <Link
-                     to="/profile"
-                     className={`hover:text-white transition ${pathname === "/profile" ? "text-white" : ""}`}
-                  >
-                     Profile
-                  </Link>
+               <Link
+                  to="/profile"
+                  className={`hover:text-white transition ${pathname === "/profile" ? "text-white" : ""}`}
+               >
+                  Profile
+               </Link>
 
-               </div>
-            }
+            </div>
 
-            <div className="flex ms-auto items-center">
-               {currUser
+            <div className="flex ms-auto items-center space-x-3">
+               {user
                ?  <>
                      <div>
-                        Welcome, {currUser.userName}
+                        Welcome, <strong>{user.userName}</strong>
                      </div>
                      <button
                         onClick={logoutHandler}

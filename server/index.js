@@ -1,18 +1,21 @@
 const express = require('express');
 const app = express();
-const pool = require('./config/db');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 require('dotenv').config();
 
-app.use(cors());
+app.use(cors({
+   origin: 'http://localhost:5173', // Explicitly allow your frontend origin
+   credentials: true, // Allow credentials
+   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+   allowedHeaders: ['Content-Type', 'Authorization'] // Allowed headers
+}));
 app.use(express.json());
 app.use(cookieParser());
 
 // Health check
 app.get('/health', async (req, res) => {
   try {
-    await pool.query('SELECT NOW()');
     res.status(200).json({ status: 'ok' });
   } catch (error) {
     res.status(500).json({ error: 'Database connection failed' });
