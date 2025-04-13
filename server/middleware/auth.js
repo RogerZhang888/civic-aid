@@ -22,6 +22,7 @@ const auth = (req, res, next) => {
         res.status(401).json({ error: "Token not decoded" });
     }
     req.user = decoded;
+
     next();
 };
 module.exports = auth;
