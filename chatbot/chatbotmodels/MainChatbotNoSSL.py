@@ -397,3 +397,15 @@ def use_model(query,  query_type, image_path=None):
         print("\nSources:")
         for src in result["sources"]:
             print(f"- {src['source_text']}\n  {src['url']}")
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--query", required=True)
+    parser.add_argument("--type", choices=["query", "report"], required=True)
+    parser.add_argument("--image", default=None)
+
+    args = parser.parse_args()
+    result = rag_search(args.query, database, index, image=args.image, type_query=args.type)
+
+    print(json.dumps(result))  # 👈 very important for backend parsing
