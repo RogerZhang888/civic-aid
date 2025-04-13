@@ -86,7 +86,6 @@ export default function Chatbot() {
       }
       // append user info
       // this is just dummy for now
-      fd.append('email', user!.email);
 
       try {
 
