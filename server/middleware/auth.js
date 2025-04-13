@@ -17,7 +17,8 @@ const auth = (req, res, next) => {
    } catch (error) {
       res.status(401).json({ error: "Invalid token" });
    }
-   console.log(`Authenticated JWT ${decoded}`);
+   console.log("auth middleware has authenticated JWT");
+   console.log(decoded);
    if (!decoded) {
       res.status(401).json({ error: "Token not decoded" });
    }
