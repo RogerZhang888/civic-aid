@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -29,6 +30,8 @@ export default function Login() {
       defaultValues: { email: "", password: "" },
    });
 
+   const queryClient = useQueryClient();
+
    async function loginHandler(data: LoginFields) {
 
       const { email, password } = data;
@@ -48,9 +51,9 @@ export default function Login() {
             }
          );
 
-         console.log(res.data);
-
          const newLoggedInUser = res.data as User;
+
+         queryClient.setQueryData(['current-user'], newLoggedInUser);
 
          reset();
 
@@ -65,7 +68,11 @@ export default function Login() {
          console.log(`Log in for ${email} unsuccessful due to: \n${error}`);
 
          if (axios.isAxiosError(error)) {
-            toast.error(`Login failed: ${error.message}.`);
+            if (error.response) {
+               toast.error(`Login failed: ${error.response.data.error}.`);
+            } else {
+               toast.error(`Login failed: ${error.request}.`);
+            }
          } else {
             toast.error("An unknown error occured. Try again later.");
          }
@@ -116,7 +123,6 @@ export default function Login() {
                No account? <Link to="/auth/reg" className="link">Register</Link>
             </div>
          </div>
-
 
       </form>
    );

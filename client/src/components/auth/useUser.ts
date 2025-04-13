@@ -6,19 +6,29 @@ const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 async function queryFn(): Promise<User> {
 
-   console.log("inkoving useUser...")
+   console.log("invoking useUser...");
 
-   const res = await axios.get<User>(
-      `${SERVER_API_URL}/api/protected`, 
-      {
-         withCredentials: true,
-      }
-   );
+   try {
+      
+      const res = await axios.get<User>(
+         `${SERVER_API_URL}/api/protected`, 
+         {
+            withCredentials: true,
+         }
+      );
+   
+      console.log("user validated");
+   
+      return res.data; 
 
-   console.log("response from server for useUser:");
-   console.log(res.data);
+   } catch (error) {
 
-   return res.data; 
+      console.log("user not validated");
+
+      throw error;
+
+   }
+
 }
 
 export default function useUser() {

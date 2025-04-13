@@ -10,7 +10,7 @@ import MainLayout from "./components/MainLayout";
 import ProfilePage from "./components/profile/ProfilePage";
 import HomePage from "./components/HomePage";
 import NotFound from "./components/NotFound";
-import ProtectedRouteWrapper from "./components/auth/ProtectedRouteWrapper";
+import ProtectedRoutesWrapper from "./components/auth/ProtectedRoutesWrapper";
 
 export default function App() {
    return (
@@ -28,7 +28,7 @@ export default function App() {
                      only authenticated users can go there
                      if not, redirected to /login
                      */}
-                  <Route element={<ProtectedRouteWrapper/>}>
+                  <Route element={<ProtectedRoutesWrapper/>}>
 
                      <Route path="/chatbot" element={<Chatbot />} />
 

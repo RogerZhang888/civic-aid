@@ -3,7 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
-const { neon } = require("@neondatabase/serverless");
+const { neon, NeonDbError } = require("@neondatabase/serverless");
 
 const saltRounds = 10;
 
@@ -11,36 +11,48 @@ const sql = neon(process.env.DATABASE_URL);
 
 // Register
 router.post("/register", async (req, res) => {
-   console.log("REGISTRATION HANDLER");
+   
+   console.log("RUNNING REGISTRATION HANDLER");
 
    try {
+
       const { name, email, password } = req.body;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
-      const result = await sql.query(
+      await sql.query(
          "INSERT INTO Users (name, email, password) VALUES ($1, $2, $3) RETURNING *",
          [name, email, hashedPassword]
       );
 
-      console.log(result);
+      // don't return any user data
+      res.status(201).json({ success: true });
 
-      res.status(201).json(result.rows[0]);
    } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: error.message });
+
+      if (error instanceof NeonDbError) {
+         // likely due to duplicate key
+         // meaning user already registered, email already in 'users' table
+         console.log(error);
+         res.status(500).json({ error: error.detail });
+      } else {
+         console.log(error);
+         res.status(500).json({ error: error.message });
+      }
+
    }
 });
 
 // Login
 router.post("/login", async (req, res) => {
 
-   console.log("LOGIN HANDLER");
+   console.log("RUNNING LOGIN HANDLER");
 
    try {
-      const { email: reqEmail, password } = req.body;
-      const sqlRes = await sql.query("SELECT * FROM Users WHERE email = $1", [reqEmail]);
 
-      // array of rows that match query
-      // res = [
+      const { email: reqEmail, password } = req.body;
+      const sqlLoginRes = await sql.query("SELECT * FROM Users WHERE email = $1", [reqEmail]);
+
+      // this is an array of rows that match query
+      // sqlLoginRes = [
       //    {
       //      id: 17,
       //      name: 'qwertyuiop',
@@ -49,16 +61,17 @@ router.post("/login", async (req, res) => {
       //      singpass_verified: false
       //    }
       // ]
-      // if user exists, res will have length 1
-      // res[0] will have id, name, password, email, singpass_verified fields
-      console.log(sqlRes);
+      // if user exists, will have length 1
+      // will have id, name, password, email, singpass_verified fields
 
-      if (sqlRes.length === 0 || !(await bcrypt.compare(password, sqlRes[0].password))) {
+      console.log(sqlLoginRes);
+
+      if (sqlLoginRes.length === 0 || !(await bcrypt.compare(password, sqlLoginRes[0].password))) {
          console.log("invalid credentials");
-         return sqlRes.status(401).json({ error: "INVALID CREDS" });
+         return res.status(401).json({ error: "invalid credentials" });
       }
 
-      const { id, name: userName, email: resEmail } = sqlRes[0];
+      const { id, name: userName, email: resEmail } = sqlLoginRes[0];
 
       const token = jwt.sign(
          { 
@@ -86,6 +99,9 @@ router.post("/login", async (req, res) => {
 });
 
 router.post('/logout', auth, (req, res) => {
+
+   console.log("RUNNING LOGOUT HANDLER");
+
    res.clearCookie("token", {
      httpOnly: true,
      secure: process.env.NODE_ENV === 'production',

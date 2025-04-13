@@ -1,8 +1,8 @@
-import useUser from "../auth/user";
+import useUser from "../auth/useUser";
 
 export default function ProfilePage() {
 
-   const { data: user, isLoading, error } = useUser();
+   const { data: user, isLoading } = useUser();
 
    if (isLoading) return <div>Loading...</div>
 
@@ -11,6 +11,8 @@ export default function ProfilePage() {
          <div className="text-xl font-bold">Your Profile</div>
 
          <div>Hello, {user!.userName}!</div>
+
+         <pre>{JSON.stringify(user)}</pre>
 
          <div>
             <div className="collapse collapse-plus border border-1">
