@@ -6,7 +6,7 @@ import ChatbotForm from "./ChatbotForm";
 import { useGeolocated } from "react-geolocated";
 import axios, { AxiosError } from "axios";
 import { v4 as uuidv4 } from "uuid";
-import useUser from "../auth/user";
+import useUser from "../auth/useUser";
 
 const initAIMsg: Message = {
    id: uuidv4(),
@@ -35,7 +35,7 @@ export default function Chatbot() {
       userDecisionTimeout: 5000,
    });
 
-   const { data: user, isLoading, isError } = useUser();
+   const { data: user, isLoading } = useUser();
 
    const { id: userId, email: userEmail } = user!;
 

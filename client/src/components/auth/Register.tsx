@@ -46,15 +46,13 @@ export default function Register() {
 
          console.log(`Attempting to register new user ${userName} (${email}) ...`);
 
-         const res = await axios.post(`${SERVER_API_URL}/api/register`, 
+         await axios.post(`${SERVER_API_URL}/api/register`, 
             { 
                name: userName, 
                email, 
                password 
             }
          );
-
-         console.log(res)
 
          reset();
 
@@ -67,7 +65,11 @@ export default function Register() {
          console.log(`Unsuccessful registration for ${email} due to: \n${error}`);
 
          if (axios.isAxiosError(error)) {
-            toast.error(`Registration failed: ${error.message}.`);
+            if (error.response) {
+               toast.error(`Registration failed: ${error.response.data.error}.`);
+            } else {
+               toast.error(`Registration failed: ${error.request}.`);
+            }
          } else {
             toast.error("An unknown error occured. Try again later.");
          }
