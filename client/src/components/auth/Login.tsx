@@ -3,11 +3,11 @@ import { LoginFields, User } from "../types";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import toast from "react-hot-toast";
-import { useAuth } from "./AuthContext";
+import useUserContext from "../user-context/UserContext";
 
-const SERVER_URL = import.meta.env.SERVER_API_URL!;
+const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 const zodSchema = z.object({
    email: z.string().nonempty({ message: "Required" }).email({ message: "Invalid email" }),
@@ -16,7 +16,7 @@ const zodSchema = z.object({
 
 export default function Login() {
 
-   const { handleAddUserState } = useAuth();
+   const { addUserState } = useUserContext();
 
    const navigate = useNavigate();
 
@@ -40,10 +40,7 @@ export default function Login() {
 
          console.log(`Attempting log in for ${email} ...`);
 
-         const res = await axios.post(`${SERVER_URL}/api/login`, 
-            { email, password },
-            { withCredentials: true }
-         );
+         const res = await axios.post(`${SERVER_API_URL}/api/login`, { email, password });
 
          const newLoggedInUser = res.data.user as User;
 
@@ -53,7 +50,7 @@ export default function Login() {
 
          console.log(`Log in successful! Details: \n${JSON.stringify(newLoggedInUser)}`);
 
-         handleAddUserState(newLoggedInUser)
+         addUserState(newLoggedInUser);
 
          navigate("/dashboard");
 
@@ -61,7 +58,7 @@ export default function Login() {
          
          console.log(`Log in for ${email} unsuccessful due to: \n${error}`);
 
-         if (error instanceof AxiosError) {
+         if (axios.isAxiosError(error)) {
             toast.error(`Login failed: ${error.message}.`);
          } else {
             toast.error("An unknown error occured. Try again later.");

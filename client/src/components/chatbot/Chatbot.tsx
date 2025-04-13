@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useEffect } from "react";
 import toast from "react-hot-toast";
 import MessagesDisplay from "./MessagesDisplay";
 import { FormState, Message } from "../types";
@@ -7,7 +6,7 @@ import ChatbotForm from "./ChatbotForm";
 import { useGeolocated } from "react-geolocated";
 import axios, { AxiosError } from "axios";
 import { v4 as uuidv4 } from "uuid";
-import { useAuth } from "../auth/AuthContext";
+import useUserContext from "../user-context/UserContext";
 
 const initAIMsg: Message = {
    id: uuidv4(),
@@ -18,19 +17,15 @@ const initAIMsg: Message = {
    status: "finished"
 };
 
-const SERVER_URL = import.meta.env.SERVER_API_URL!;
+const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 const MAX_IMAGES = 3;
-
-
 
 export default function Chatbot() {
    const [messagesArr, setMessagesArr] = useState<Message[]>([initAIMsg]);
    const [isWaitingForRes, setIsWaitingForRes] = useState<boolean>(false);
    const [formState, setFormState] = useState<FormState>({ text: "", imgs: [] });
-   const [imgsPreview, setImgsPreview] = useState<string[]>([]);
-   const [chatId, setChatId] = useState<string | null>(null);
-   
+   const [imgsPreview, setImgsPreview] = useState<string[]>([]);   
 
    // get user's coordinates
    // browser will ask for permission
@@ -42,7 +37,7 @@ export default function Chatbot() {
 
    // get the current user
    // won't be null since this is under a protected route
-   const { currUser } = useAuth();
+   const { currUser } = useUserContext();
    if (!currUser) return;
 
    // main form submit function
@@ -99,7 +94,7 @@ export default function Chatbot() {
          console.log(`User ${currUser} attempting to send a new query with text "${text}" and ${imgs.length} image(s)`);
 
          // send HTTP POST request
-         const res = await axios.post(`${SERVER_URL}/api/queries`, fd,
+         const res = await axios.post(`${SERVER_API_URL}/api/queries`, fd,
             {
                maxContentLength: 100 * 1024 * 1024,
                maxBodyLength: 100 * 1024 * 1024,
