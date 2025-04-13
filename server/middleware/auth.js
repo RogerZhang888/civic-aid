@@ -24,4 +24,4 @@ const auth = (req, res, next) => {
     req.user = decoded;
     next();
 };
-module.exports = auth;
+module.exports = auth;
