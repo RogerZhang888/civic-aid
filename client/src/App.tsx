@@ -2,7 +2,7 @@ import { Toaster } from "react-hot-toast";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 
-import AuthProvider from "./components/auth/AuthProvider";
+import UserProvider from "./components/user-context/UserProvider";
 import AuthRoutesWrapper from "./components/auth/AuthRoutesWrapper";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
@@ -17,7 +17,7 @@ export default function App() {
    return (
       <BrowserRouter>
          <ErrorBoundary fallback={<div>Something went wrong</div>}>
-            <AuthProvider>
+            <UserProvider>
                <Toaster/>
                <Routes>
 
@@ -55,7 +55,7 @@ export default function App() {
                   </Route>
                   
                </Routes>
-            </AuthProvider>
+            </UserProvider>
          </ErrorBoundary>
       </BrowserRouter>
    );

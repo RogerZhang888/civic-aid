@@ -1,10 +1,10 @@
 import { Navigate, Outlet } from "react-router-dom";
-import useAuth from "./AuthContext";
+import useUserContext from "../user-context/UserContext";
 import useAuthCheck from "./useAuthCheck";
 
 export default function ProtectedRouteWrapper() {
    const { data, isLoading, isError } = useAuthCheck();
-   const { addUserState, removeUserState } = useAuth();
+   const { addUserState, removeUserState } = useUserContext();
 
    if (isLoading) return <div>AUTH LOADING...</div>;
 

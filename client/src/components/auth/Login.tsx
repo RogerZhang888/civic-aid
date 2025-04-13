@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
-import useAuth from "./AuthContext";
+import useUserContext from "../user-context/UserContext";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -16,7 +16,7 @@ const zodSchema = z.object({
 
 export default function Login() {
 
-   const { addUserState } = useAuth();
+   const { addUserState } = useUserContext();
 
    const navigate = useNavigate();
 

@@ -43,7 +43,7 @@ export type RegisterFields = {
    confirmPassword: string
 }
 
-export type AuthContextType = {
+export type UserContextType = {
    currUser: User | null;
    addUserState: (u: User) => void;
    removeUserState: () => void;
