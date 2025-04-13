@@ -11,12 +11,14 @@ const auth = (req, res, next) => {
 
   if (!token) return res.status(401).json({ error: "Unauthorized" });
 
+  let decoded = undefined
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
   } catch (error) {
     res.status(401).json({ error: "Invalid token" });
   }
+  console.log(`Decoded JWT ${decoded}`)
+  req.user = decoded;
+    next();
 };
 module.exports = auth;
