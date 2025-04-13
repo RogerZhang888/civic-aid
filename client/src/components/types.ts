@@ -26,7 +26,7 @@ export type FormState = {
 }
 
 export type User = {
-   id: string;
+   id: number;
    email: string;
    userName: string;
 }
@@ -43,8 +43,8 @@ export type RegisterFields = {
    confirmPassword: string
 }
 
-export type AuthContextType = {
+export type UserContextType = {
    currUser: User | null;
-   handleAddUserState: (u: User) => void;
-   handleRemoveUserState: () => void;
+   addUserState: (u: User) => void;
+   removeUserState: () => void;
 }

@@ -1,9 +1,12 @@
 import { useForm } from "react-hook-form";
-import { useAuth } from "./AuthContext";
 import { RegisterFields } from "../types";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import toast from "react-hot-toast";
+
+const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 const zodSchema = z.object({
    userName: z.string()
@@ -28,15 +31,50 @@ export default function Register() {
       register,
       handleSubmit,
       formState: { errors, isValid, isDirty, isSubmitting },
-      trigger
+      trigger,
+      reset
    } = useForm<RegisterFields>({
       resolver: zodResolver(zodSchema),
       defaultValues: { userName: "", email: "", password: "", confirmPassword: "" },
    });
 
+   async function registerHandler(data: RegisterFields) {
+
+      const { userName, email, password } = data;
+
+      try {
+
+         console.log(`Attempting to register new user ${userName} (${email}) ...`);
+
+         await axios.post(`${SERVER_API_URL}/api/register`, 
+            { 
+               name: userName, 
+               email, 
+               password 
+            }
+         );
+
+         reset();
+
+         toast.success("Your account has been created! You may log in now.");
+
+         console.log(`New user ${email} was registered successfully`);
+
+      } catch (error) {
+         
+         console.log(`Unsuccessful registration for ${email} due to: \n${error}`);
+
+         if (axios.isAxiosError(error)) {
+            toast.error(`Registration failed: ${error.message}.`);
+         } else {
+            toast.error("An unknown error occured. Try again later.");
+         }
+      }
+   }
+
    return (
       <form 
-         onSubmit={handleSubmit(async (fd) => await cvaLogin(fd.email, fd.password))}
+         onSubmit={handleSubmit(registerHandler)}
          className="min-w-1/2 py-5 px-10 bg-white rounded-lg space-y-1 shadow-[0_0_10px_4px_rgba(0,0,0,0.2)]"
       >
 
@@ -58,7 +96,6 @@ export default function Register() {
                {...register("email", { required: true })}
                type="email"
                onBlur={() => trigger("email")}
-               autoFocus={true}
                className="input text-lg w-full"
             />
             <span className="fieldset-label text-sm text-red-600 h-3">{errors.email?.message}</span>

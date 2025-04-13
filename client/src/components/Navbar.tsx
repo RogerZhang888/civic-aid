@@ -1,10 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "./auth/AuthContext";
+import useUserContext from "./user-context/UserContext";
+import useLogout from "./auth/useLogout";
 
 export default function Navbar() {
    const { pathname } = useLocation();
-   const { currUser } = useAuth();
+   const { currUser } = useUserContext();
    const navigate = useNavigate();
+   const logoutHandler = useLogout();
 
    return (
       <nav className="bg-blue-600 text-white shadow-lg" id="navbar">
@@ -37,11 +39,17 @@ export default function Navbar() {
 
             <div className="flex ms-auto items-center">
                {currUser
-               ?  <button
-                     className="btn btn-sm btn-outline"
-                  >
-                     Log Out
+               ?  <>
+                     <div>
+                        Welcome, {currUser.userName}
+                     </div>
+                     <button
+                        onClick={logoutHandler}
+                        className="btn btn-sm btn-outline"
+                     >
+                        Log Out
                   </button>
+                  </>
                :  <button
                      onClick={() => navigate("/auth")}
                      className="btn btn-sm btn-outline"
@@ -55,16 +63,3 @@ export default function Navbar() {
       </nav>
    );
 }
-
-/**
- *                   <Link
-                     to="/auth"
-                     className={`px-3 py-2 rounded-md text-sm font-medium ${
-                        pathname === "/auth"
-                           ? "bg-gray-900 text-white"
-                           : "hover:bg-gray-700 hover:text-white"
-                     }`}
-                  >
-                     Login
-                  </Link>
- */
