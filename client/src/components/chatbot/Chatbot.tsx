@@ -10,7 +10,7 @@ import useUser from "../auth/user";
 
 const initAIMsg: Message = {
    id: uuidv4(),
-   text: "Hello! I'm Civic-AId. Type something and I'll repeat it back to you.",
+   text: "Hello! I'm Civic-AId. If you want to ask a question, type 'question'. If you want to report an issue, type 'report'.",
    imgs: [],
    sender: "ai",
    timestamp: new Date(),
@@ -36,6 +36,8 @@ export default function Chatbot() {
    });
 
    const { data: user, isLoading, isError } = useUser();
+
+   const { id: userId, email: userEmail } = user!;
 
    if (isLoading) return <div>Loading chatbot...</div>
 
@@ -85,11 +87,12 @@ export default function Chatbot() {
          fd.append('longitude', coords.longitude.toString());
       }
       // append user info
-      // this is just dummy for now
+      fd.append('user_id', userId.toString());
 
       try {
 
-         console.log(`User ${email123} attempting to send a new query with text "${text}" and ${imgs.length} image(s)`);
+         console.log(`User ${userEmail} attempting to send a new query with text "${text}" and ${imgs.length} image(s)`);
+         if (coords) console.log(`User is at latitude ${coords.latitude.toString()} and longitude ${coords.longitude.toString()}`)
 
          // send HTTP POST request
          const res = await axios.post(`${SERVER_API_URL}/api/queries`, fd,
@@ -103,7 +106,7 @@ export default function Chatbot() {
          // extract res data (this format might change later)
          const { reply, confidence } = res.data as { reply: string, confidence: number };
 
-         console.log(`Server replied to ${email123} querying "${text}" with "${reply}" that has confidence ${confidence}`);
+         console.log(`Server replied to ${userEmail} querying "${text}" with "${reply}" that has confidence ${confidence}`);
 
          setMessagesArr(prev => prev.map(msg => 
             msg.id === pendingAiMsg.id
@@ -118,7 +121,7 @@ export default function Chatbot() {
 
       } catch (error) {
 
-         console.log(`Server replied to ${email123} querying "${text}" with an error: \n${error}`);
+         console.log(`Server replied to ${userEmail} querying "${text}" with an error: \n${error}`);
 
          if (error instanceof AxiosError) {
 

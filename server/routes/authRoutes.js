@@ -85,6 +85,16 @@ router.post("/login", async (req, res) => {
    }
 });
 
+router.post('/logout', auth, (req, res) => {
+   res.clearCookie("token", {
+     httpOnly: true,
+     secure: process.env.NODE_ENV === 'production',
+     sameSite: 'strict',
+   });
+ 
+   res.json({ message: 'Logged out successfully!' });
+});
+
 // Protected route example
 router.get("/protected", auth, (req, res) => {
    res.json(req.user);
