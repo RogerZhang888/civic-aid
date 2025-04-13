@@ -46,13 +46,15 @@ export default function Register() {
 
          console.log(`Attempting to register new user ${userName} (${email}) ...`);
 
-         await axios.post(`${SERVER_API_URL}/api/register`, 
+         const res = await axios.post(`${SERVER_API_URL}/api/register`, 
             { 
                name: userName, 
                email, 
                password 
             }
          );
+
+         console.log(res)
 
          reset();
 

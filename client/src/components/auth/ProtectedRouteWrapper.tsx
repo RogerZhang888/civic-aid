@@ -1,22 +1,15 @@
 import { Navigate, Outlet } from "react-router-dom";
-import useUserContext from "../user-context/UserContext";
-import useAuthCheck from "./useAuthCheck";
+import useUser from "./user";
 
 export default function ProtectedRouteWrapper() {
-   const { data, isLoading, isError } = useAuthCheck();
-   const { addUserState, removeUserState } = useUserContext();
+   
+   const { isLoading, isError } = useUser();
 
-   if (isLoading) return <div>AUTH LOADING...</div>;
+   console.log("Trying to access a protected route...")
 
-   // isError = true if unauthorised / invalid token
-   // in that case, remove user object if any
-   // redirect to login page (/auth)
-   if (isError) {
-      removeUserState();
-      return <Navigate to="/auth" />;
-   }
+   if (isLoading) return <div>LOADING....</div>;
 
-   // else, means authorised & valid token
-   // continue to children (protected routes)
-   return <Outlet />;
+   if (isError) return <Navigate to="/auth" />; // Redirect if unauthorized
+
+   return <Outlet />; // Render protected routes
 }

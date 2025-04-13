@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
-import useUserContext from "../user-context/UserContext";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -15,8 +14,6 @@ const zodSchema = z.object({
 })
 
 export default function Login() {
-
-   const { addUserState } = useUserContext();
 
    const navigate = useNavigate();
 
@@ -40,9 +37,20 @@ export default function Login() {
 
          console.log(`Attempting log in for ${email} ...`);
 
-         const res = await axios.post(`${SERVER_API_URL}/api/login`, { email, password });
+         const res = await axios.post(
+            `${SERVER_API_URL}/api/login`,
+            { email, password },
+            { 
+               withCredentials: true,
+               headers: {
+                  'Content-Type': 'application/json'
+               }
+            }
+         );
 
-         const newLoggedInUser = res.data.user as User;
+         console.log(res.data);
+
+         const newLoggedInUser = res.data as User;
 
          reset();
 
@@ -50,9 +58,7 @@ export default function Login() {
 
          console.log(`Log in successful! Details: \n${JSON.stringify(newLoggedInUser)}`);
 
-         addUserState(newLoggedInUser);
-
-         navigate("/dashboard");
+         navigate("/profile");
 
       } catch (error) {
          

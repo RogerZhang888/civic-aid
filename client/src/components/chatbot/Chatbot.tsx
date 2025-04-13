@@ -6,7 +6,7 @@ import ChatbotForm from "./ChatbotForm";
 import { useGeolocated } from "react-geolocated";
 import axios, { AxiosError } from "axios";
 import { v4 as uuidv4 } from "uuid";
-import useUserContext from "../user-context/UserContext";
+import useUser from "../auth/user";
 
 const initAIMsg: Message = {
    id: uuidv4(),
@@ -35,10 +35,9 @@ export default function Chatbot() {
       userDecisionTimeout: 5000,
    });
 
-   // get the current user
-   // won't be null since this is under a protected route
-   const { currUser } = useUserContext();
-   if (!currUser) return;
+   const { data: user, isLoading, isError } = useUser();
+
+   if (isLoading) return <div>Loading chatbot...</div>
 
    // main form submit function
    async function handleSubmitForm() {
@@ -87,13 +86,10 @@ export default function Chatbot() {
       }
       // append user info
       // this is just dummy for now
-      fd.append('email', currUser!.email);
-      fd.append("chatId", chatId as string);
-
 
       try {
 
-         console.log(`User ${currUser} attempting to send a new query with text "${text}" and ${imgs.length} image(s)`);
+         console.log(`User ${email123} attempting to send a new query with text "${text}" and ${imgs.length} image(s)`);
 
          // send HTTP POST request
          const res = await axios.post(`${SERVER_API_URL}/api/queries`, fd,
@@ -107,7 +103,7 @@ export default function Chatbot() {
          // extract res data (this format might change later)
          const { reply, confidence } = res.data as { reply: string, confidence: number };
 
-         console.log(`Server replied to ${currUser} querying "${text}" with "${reply}" that has confidence ${confidence}`);
+         console.log(`Server replied to ${email123} querying "${text}" with "${reply}" that has confidence ${confidence}`);
 
          setMessagesArr(prev => prev.map(msg => 
             msg.id === pendingAiMsg.id
@@ -122,7 +118,7 @@ export default function Chatbot() {
 
       } catch (error) {
 
-         console.log(`Server replied to ${currUser} querying "${text}" with an error: \n${error}`);
+         console.log(`Server replied to ${email123} querying "${text}" with an error: \n${error}`);
 
          if (error instanceof AxiosError) {
 
