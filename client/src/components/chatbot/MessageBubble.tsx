@@ -32,7 +32,7 @@ function MessageBubble({
    // AI message case
    return (
       <div key={message.id} className="chat chat-start tracking-wide">
-         <div className="chat-bubble chat-bubble-info">
+         <div className="chat-bubble chat-bubble-primary">
             {message.status === "pending" 
                ?  <span className="loading loading-dots loading-md"/>
                :  <div>{message.text}</div>

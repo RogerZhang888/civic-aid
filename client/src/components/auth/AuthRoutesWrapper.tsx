@@ -11,7 +11,11 @@ export default function AuthRoutesWrapper() {
 
    if (isError) {
       console.log("User is not logged in, can access /auth");
-      return <Outlet/>
+      return (
+         <div className="w-full h-full flex items-center justify-center">
+            <Outlet/>
+         </div>
+      )
    };
 
    console.log("User is logged in, cannot access /auth");

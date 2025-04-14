@@ -1,7 +1,14 @@
 const jwt = require("jsonwebtoken");
 
+// auth middleware to verify JWT token
+// requires token in cookies or Authorization header
+// if token is not present, or is invalid, will return 401 status code and error message
+// if token is present, will verify token and decode it
+// if token is valid, will return user data and call next middleware
 const auth = (req, res, next) => {
-   // Check cookies first
+
+   console.log("RUNNING AUTH MIDDLEWARE");
+
    let token = req.cookies.token;
 
    // Fallback to Authorization header
@@ -9,19 +16,26 @@ const auth = (req, res, next) => {
       token = req.headers.authorization.split(" ")[1]; // Bearer <token>
    }
 
-   if (!token) return res.status(401).json({ error: "Unauthorized" });
+   if (!token) {
+      console.log("No token found");
+      return res.status(401).json({ error: "No valid JWT token" });
+   }
 
    let decoded = null;
+
    try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
    } catch (error) {
-      res.status(401).json({ error: "Invalid token" });
+      if (error.name === "TokenExpiredError") {
+         console.log("Token expired");
+         return res.status(401).json({ error: "Session expired. Please log in again." });
+      }
+      console.log("Token invalid");
+      return res.status(401).json({ error: "Invalid token" });
    }
+
    console.log("auth middleware has authenticated JWT");
-   console.log(decoded);
-   if (!decoded) {
-      res.status(401).json({ error: "Token not decoded" });
-   }
+
    req.user = decoded;
 
    next();
