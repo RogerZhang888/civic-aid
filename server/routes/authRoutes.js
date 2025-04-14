@@ -9,7 +9,13 @@ const saltRounds = 10;
 
 const sql = neon(process.env.DATABASE_URL);
 
-// Register
+/**
+ * @route   POST /register
+ * @desc    Registers a new user with name, email, and hashed password.
+ * @access  Public
+ * @body    { name: string, email: string, password: string }
+ * @returns 201 on success, 500 with error message on failure
+ */
 router.post("/register", async (req, res) => {
    
    console.log("RUNNING REGISTRATION HANDLER");
@@ -41,7 +47,13 @@ router.post("/register", async (req, res) => {
    }
 });
 
-// Login
+/**
+ * @route   POST /login
+ * @desc    Authenticates a user and issues a JWT token stored in an HTTP-only cookie.
+ * @access  Public
+ * @body    { email: string, password: string }
+ * @returns 200 with user data on success, 401 or 500 with error on failure
+ */
 router.post("/login", async (req, res) => {
 
    console.log("RUNNING LOGIN HANDLER");
@@ -98,6 +110,12 @@ router.post("/login", async (req, res) => {
    }
 });
 
+/**
+ * @route   POST /logout
+ * @desc    Logs out the user by clearing the JWT cookie.
+ * @access  Private (requires valid token)
+ * @returns 200 with success message
+ */
 router.post('/logout', auth, (req, res) => {
 
    console.log("RUNNING LOGOUT HANDLER");
@@ -108,10 +126,15 @@ router.post('/logout', auth, (req, res) => {
      sameSite: 'strict',
    });
  
-   res.json({ message: 'Logged out successfully!' });
+   res.json({ success: true });
 });
 
-// Protected route example
+/**
+ * @route   GET /protected
+ * @desc    Example of a protected route. Returns authenticated user's data.
+ * @access  Private
+ * @returns 200 with user data if authenticated
+ */
 router.get("/protected", auth, (req, res) => {
    res.json(req.user);
 });

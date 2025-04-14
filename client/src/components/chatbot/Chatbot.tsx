@@ -7,6 +7,7 @@ import { useGeolocated } from "react-geolocated";
 import axios, { AxiosError } from "axios";
 import { v4 as uuidv4 } from "uuid";
 import useUser from "../auth/useUser";
+import { Info } from "lucide-react";
 
 const initAIMsg: Message = {
    id: uuidv4(),
@@ -218,9 +219,14 @@ export default function Chatbot() {
                isWaitingForRes={isWaitingForRes}
             />
 
-            <p className="text-xs m-2 text-center text-gray-500">
-               AI-generated, for reference only.
-            </p>
+            <div className="text-xs m-2 text-center text-gray-500">
+               {!coords && 
+                  <div className="font-bold flex flex-row items-center justify-center gap-1">
+                     <Info size={15} strokeWidth="3"/>This chatbot requires your location data for personalised recommendations.
+                  </div>
+               }
+               <div>AI-generated, for reference only.</div>
+            </div>
 
          </div>
 

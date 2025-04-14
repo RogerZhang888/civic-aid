@@ -18,8 +18,8 @@ const zodSchema = z.object({
       .nonempty({ message: "Required" })
       .email({ message: "Invalid email" }),
 
-      password: z.string(),
-//      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, { message: "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number" }),
+   password: z.string(),
+   //   .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, { message: "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number" }),
 
    confirmPassword: z.string()
 
@@ -31,9 +31,9 @@ export default function Register() {
       register,
       handleSubmit,
       formState: { errors, isValid, isDirty, isSubmitting },
-      trigger,
       reset
    } = useForm<RegisterFields>({
+      mode: "onChange",
       resolver: zodResolver(zodSchema),
       defaultValues: { userName: "", email: "", password: "", confirmPassword: "" },
    });
@@ -87,7 +87,6 @@ export default function Register() {
             <input
                {...register("userName", { required: true })}
                type="text"
-               onBlur={() => trigger("userName")}
                autoFocus={true}
                className="input text-lg w-full"
             />
@@ -99,7 +98,6 @@ export default function Register() {
             <input
                {...register("email", { required: true })}
                type="email"
-               onBlur={() => trigger("email")}
                className="input text-lg w-full"
             />
             <span className="fieldset-label text-sm text-red-600 h-3">{errors.email?.message}</span>
@@ -110,7 +108,6 @@ export default function Register() {
             <input
                {...register("password", { required: true })}
                type="password"
-               onBlur={() => trigger("password")}
                className="input text-lg w-full"
             />
             <span className="fieldset-label text-sm text-red-600 h-3">{errors.password?.message}</span>
@@ -121,7 +118,6 @@ export default function Register() {
             <input
                {...register("confirmPassword", { required: true })}
                type="password"
-               onBlur={() => trigger("confirmPassword")}
                className="input text-lg w-full"
             />
             <span className="fieldset-label text-sm text-red-600 h-3">{errors.confirmPassword?.message}</span>
