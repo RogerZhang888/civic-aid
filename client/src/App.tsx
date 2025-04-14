@@ -26,7 +26,7 @@ export default function App() {
                   {/* 
                      The /chatbot and /profile routes are protected
                      only authenticated users can go there
-                     if not, redirected to /login
+                     if not, redirected to /auth
                      */}
                   <Route element={<ProtectedRoutesWrapper/>}>
 

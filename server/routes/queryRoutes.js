@@ -6,7 +6,6 @@ const upload = multer({ dest: 'uploads/' });
 const queryController = require('../controllers/queryController');
 const auth = require('../middleware/auth');
 
-// Upload multiple images as 'images'
-router.post('/queries', auth, upload.array('images'), queryController.submitQuery);
+router.post('/query', auth, upload.array('image'), queryController.submitQuery);
 
 module.exports = router;

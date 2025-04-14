@@ -15,10 +15,10 @@ function MessageBubble({
          <div key={message.id} className="chat chat-end tracking-wide">
             <div className="chat-bubble space-y-1">
                {message.text && <div>{message.text}</div>}
-               {message.imgs.length > 0 &&
+               {message.img&&
                   <div className="text-xs flex items-center space-x-1">
                      <Image size={16} />
-                     <span>{message.imgs.length} image(s) attached</span>
+                     <span>Image attached</span>
                   </div>
                }
             </div>

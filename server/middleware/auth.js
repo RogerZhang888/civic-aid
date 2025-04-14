@@ -34,9 +34,21 @@ const auth = (req, res, next) => {
       return res.status(401).json({ error: "Invalid token" });
    }
 
-   console.log("auth middleware has authenticated JWT");
+   console.log("auth middleware has authenticated JWT, decoded JWT is:");
+   console.log(decoded);
 
    req.user = decoded;
+
+   /**
+    * req.user will be 
+    * {
+    *   id: (some number),
+    *   email: (some email),
+    *   userName: (some name),
+    *   iat: (issued at time),
+    *   exp: (expiration time),
+    * }
+    */
 
    next();
 };
