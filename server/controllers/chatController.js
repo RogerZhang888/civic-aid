@@ -1,3 +1,5 @@
+// allows frontend to request a chat_id before sending any queries
+
 const { v4: uuidv4 } = require('uuid');
 const pool = require('../config/db');
 
