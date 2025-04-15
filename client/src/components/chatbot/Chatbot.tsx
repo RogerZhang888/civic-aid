@@ -12,7 +12,6 @@ import { Info } from "lucide-react";
 const initAIMsg: Message = {
    id: uuidv4(),
    text: "Hello! I'm Civic-AId. If you want to ask a question, type 'question'. If you want to report an issue, type 'report'.",
-   imgs: [],
    sender: "ai",
    timestamp: new Date(),
    status: "finished"
@@ -20,13 +19,11 @@ const initAIMsg: Message = {
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
-const MAX_IMAGES = 3;
-
 export default function Chatbot() {
    const [messagesArr, setMessagesArr] = useState<Message[]>([initAIMsg]);
    const [isWaitingForRes, setIsWaitingForRes] = useState<boolean>(false);
-   const [formState, setFormState] = useState<FormState>({ text: "", imgs: [] });
-   const [imgsPreview, setImgsPreview] = useState<string[]>([]);   
+   const [formState, setFormState] = useState<FormState>({ text: "", img: null });
+   const [imgPreview, setImgPreview] = useState<string | null>(null);   
 
    // get user's coordinates
    // browser will ask for permission
@@ -51,11 +48,11 @@ export default function Chatbot() {
       const aiMsgUUID = uuidv4();
 
       // generate user message
-      const { text, imgs } = formState;
+      const { text, img } = formState;
       const userMsg: Message = {
          id: userMsgUUID,
          text,
-         imgs,
+         img,
          sender: "user",
          timestamp: new Date(),
       };
@@ -64,7 +61,6 @@ export default function Chatbot() {
       const pendingAiMsg: Message = {
          id: aiMsgUUID,
          text: "",
-         imgs: [],
          sender: "ai",
          status: "pending",
       };
@@ -73,15 +69,15 @@ export default function Chatbot() {
       setMessagesArr(prev => [...prev, userMsg, pendingAiMsg])
 
       // reset formState and image previews
-      setFormState({ text: "", imgs: [] });
-      setImgsPreview([]);
+      setFormState({ text: "", img: null });
+      setImgPreview(null);
 
       // make the request body in the POST request
       const fd = new FormData();
       // append the text
-      fd.append('prompt', formState.text);
-      // append each image file
-      formState.imgs.forEach(img => fd.append('images', img));
+      fd.append('prompt', formState.text || "NO_TEXT_PROVIDED");
+      // append the image file if available
+      if (img) fd.append('image', img);
       // append user location data, if available
       if (coords) {
          fd.append('latitude', coords.latitude.toString());
@@ -90,17 +86,27 @@ export default function Chatbot() {
       // append user info
       fd.append('user_id', userId.toString());
 
+      /**
+       *  fd will contain the following:
+       * - prompt: the TEXT input from the user, if it was empty, it will be "NO_TEXT_PROVIDED"
+       * - image: the image file uploaded by the user (if available)
+       * - latitude: the user's latitude (if available)
+       * - longitude: the user's longitude (if available)
+       * - user_id: the user's ID from the database
+       */
+
       try {
 
-         console.log(`User ${userEmail} attempting to send a new query with text "${text}" and ${imgs.length} image(s)`);
+         console.log(`User ${userEmail} attempting to send a new query with text "${text}" and ${img ? img.name : "no image"}`);
          if (coords) console.log(`User is at latitude ${coords.latitude.toString()} and longitude ${coords.longitude.toString()}`)
 
          // send HTTP POST request
-         const res = await axios.post(`${SERVER_API_URL}/api/queries`, fd,
+         const res = await axios.post(`${SERVER_API_URL}/api/query`, fd,
             {
                maxContentLength: 100 * 1024 * 1024,
                maxBodyLength: 100 * 1024 * 1024,
-               headers: { 'Content-Type': 'multipart/form-data' }
+               headers: { 'Content-Type': 'multipart/form-data' },
+               withCredentials: true,
             }
          )
 
@@ -151,46 +157,38 @@ export default function Chatbot() {
       }
    }
 
-   // handle imgs upload
-   function handleFormImgsChange(param: FileList | number) {
+   // handle single img upload or removal
+   function handleFormImgChange(param: File | null) {
 
-      if (param instanceof FileList) {
-         // case: add files
+      if (param instanceof File) {
+         // case: add file
+      
+         const isImgFile = param.type.startsWith("image/");
    
-         if (!param || param.length === 0) return;
-   
-         const newImgFiles = Array.from(param).filter((file) =>
-            file.type.startsWith("image/")
-         );
-   
-         if (newImgFiles.length !== param.length) {
+         if (!isImgFile) {
             toast.error("Please upload only image files");
             return;
          }
    
-         if (formState.imgs.length + newImgFiles.length > MAX_IMAGES) {
-            toast.error(`Maximum ${MAX_IMAGES} images allowed`);
+         if (formState.img) {
+            toast.error("Please upload only one image file at a time");
             return;
          }
    
-         setFormState((pv) => ({ ...pv, imgs: [...pv.imgs, ...newImgFiles] }));
+         setFormState((pv) => ({ ...pv, img: param }));
    
          // Create preview URLs
-         newImgFiles.forEach((file) => {
-            const reader = new FileReader();
-            reader.onload = (event) =>
-               setImgsPreview((pv) => [
-                  ...(pv || []),
-                  event.target?.result as string,
-               ]);
-            reader.readAsDataURL(file);
-         });
+         const reader = new FileReader();
+         reader.onloadend = () => {
+            setImgPreview(reader.result as string);
+         };
+         reader.readAsDataURL(param);
 
       } else {
-         // case: remove files
+         // case: remove file
 
-         setFormState((pv) => ({ ...pv, imgs: pv.imgs.filter((_, i) => i !== param) }));
-         setImgsPreview((pv) => pv?.filter((_, i) => i !== param) || null);
+         setFormState((pv) => ({ ...pv, img: null }));
+         setImgPreview(null);
 
       }
 
@@ -212,9 +210,9 @@ export default function Chatbot() {
 
             <ChatbotForm
                handleSubmitForm={handleSubmitForm}
-               handleFormImgsChange={handleFormImgsChange}
+               handleFormImgChange={handleFormImgChange}
                handleFormTextChange={handleFormTextChange}
-               imgsPreview={imgsPreview}
+               imgPreview={imgPreview}
                formState={formState}
                isWaitingForRes={isWaitingForRes}
             />
