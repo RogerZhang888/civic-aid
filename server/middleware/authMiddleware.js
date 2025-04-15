@@ -1,11 +1,11 @@
 const jwt = require("jsonwebtoken");
 
-// auth middleware to verify JWT token
+// middleware to verify JWT token
 // requires token in cookies or Authorization header
 // if token is not present, or is invalid, will return 401 status code and error message
 // if token is present, will verify token and decode it
 // if token is valid, will return user data and call next middleware
-const auth = (req, res, next) => {
+const authMiddleware = (req, res, next) => {
 
    console.log("RUNNING AUTH MIDDLEWARE");
 
@@ -52,4 +52,4 @@ const auth = (req, res, next) => {
 
    next();
 };
-module.exports = auth;
+module.exports = authMiddleware;

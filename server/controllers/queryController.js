@@ -1,6 +1,5 @@
-const path = require('path');
 const { v4: uuidv4 } = require('uuid');
-const pool = require("../config/db");
+const pgsql = require("../config/db");
 const { callModel } = require('../services/llmService');
 
 
@@ -55,7 +54,7 @@ exports.submitQuery = async (req, res) => {
 
       // Save query to DB
       // TODO: CHANGE TO NEON DB!!
-      // const result = await pool.query(
+      // const result = await pgsql.query(
       //    `INSERT INTO Queries
       //  (user_id, chat_id, user_prompt, system_prompt, response, valid, reply, confidence)
       //  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)

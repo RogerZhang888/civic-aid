@@ -1,13 +1,12 @@
 const express = require("express");
-const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const auth = require("../middleware/auth");
-const { neon, NeonDbError } = require("@neondatabase/serverless");
+const authMiddleware = require("../middleware/authMiddleware");
+const { NeonDbError } = require("@neondatabase/serverless");
+const pgsql = require("../config/db");
 
+const router = express.Router();
 const saltRounds = 10;
-
-const sql = neon(process.env.DATABASE_URL);
 
 /**
  * @route   POST /register
@@ -24,8 +23,8 @@ router.post("/register", async (req, res) => {
 
       const { name, email, password } = req.body;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
-      await sql.query(
-         "INSERT INTO Users (name, email, password) VALUES ($1, $2, $3) RETURNING *",
+      await pgsql.query(
+         "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *",
          [name, email, hashedPassword]
       );
 
@@ -63,10 +62,10 @@ router.post("/login", async (req, res) => {
    try {
 
       const { email: reqEmail, password } = req.body;
-      const sqlLoginRes = await sql.query("SELECT * FROM Users WHERE email = $1", [reqEmail]);
+      const pgsqlLoginRes = await pgsql.query("SELECT * FROM users WHERE email = $1", [reqEmail]);
 
       // this is an array of rows that match query
-      // sqlLoginRes = [
+      // pgsqlLoginRes = [
       //    {
       //      id: 17,
       //      name: 'qwertyuiop',
@@ -78,12 +77,12 @@ router.post("/login", async (req, res) => {
       // if user exists, will have length 1
       // will have id, name, password, email, singpass_verified fields
 
-      if (sqlLoginRes.length === 0 || !(await bcrypt.compare(password, sqlLoginRes[0].password))) {
+      if (pgsqlLoginRes.length === 0 || !(await bcrypt.compare(password, pgsqlLoginRes[0].password))) {
          console.log("invalid credentials");
          return res.status(401).json({ error: "invalid credentials" });
       }
 
-      const { id, name: userName, email: resEmail } = sqlLoginRes[0];
+      const { id, name: userName, email: resEmail } = pgsqlLoginRes[0];
 
       const token = jwt.sign(
          { 
@@ -116,7 +115,7 @@ router.post("/login", async (req, res) => {
  * @access  Private (requires valid token)
  * @returns 200 with success message
  */
-router.post('/logout', auth, (req, res) => {
+router.post('/logout', authMiddleware, (req, res) => {
 
    const { email } = req.user;
 
@@ -139,7 +138,7 @@ router.post('/logout', auth, (req, res) => {
  * @access  Private
  * @returns 200 with user data if authenticated
  */
-router.get("/protected", auth, (req, res) => {
+router.get("/protected", authMiddleware, (req, res) => {
    const { email } = req.user;
    console.log(`User ${email} accessed protected route`);
    res.json(req.user);
