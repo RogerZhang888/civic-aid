@@ -7,10 +7,10 @@ const path = require('path');
  */
 exports.callModel = async ({ query, queryType, imagePath = null }) => {
   return new Promise((resolve, reject) => {
-    const scriptPath = path.join(__dirname, '.../chatbot/chatbotmodels/MainChatbotNoSSL.py'); // adjust this
+    const scriptPath = path.join(__dirname, '../../chatbot/chatbotmodels/MainChatbotWithSSL.py'); // adjust this
     const command = imagePath
-      ? `python3 "${scriptPath}" --query "${query}" --type "${queryType}" --image "${imagePath}"`
-      : `python3 "${scriptPath}" --query "${query}" --type "${queryType}"`;
+      ? `py "${scriptPath}" --query "${query}" --type "${queryType}" --image "${imagePath}"`
+      : `py "${scriptPath}" --query "${query}" --type "${queryType}"`;
 
     exec(command, (error, stdout, stderr) => {
       if (error) {

@@ -29,6 +29,8 @@ router.post("/register", async (req, res) => {
          [name, email, hashedPassword]
       );
 
+      console.log(`User ${name} (${email}) was registered successfully`);
+
       // don't return any user data
       res.status(201).json({ success: true });
 
@@ -76,8 +78,6 @@ router.post("/login", async (req, res) => {
       // if user exists, will have length 1
       // will have id, name, password, email, singpass_verified fields
 
-      console.log(sqlLoginRes);
-
       if (sqlLoginRes.length === 0 || !(await bcrypt.compare(password, sqlLoginRes[0].password))) {
          console.log("invalid credentials");
          return res.status(401).json({ error: "invalid credentials" });
@@ -92,10 +92,10 @@ router.post("/login", async (req, res) => {
             email: resEmail
          },
          process.env.JWT_SECRET,
-         { expiresIn: "1000h" }
+         { expiresIn: 60 * 60 }
       );
 
-      console.log(`HELLO USER ${resEmail}!!!`);
+      console.log(`User ${resEmail} logged in successfully`);
 
       res.cookie("token", token, { 
          httpOnly: true,
@@ -118,6 +118,8 @@ router.post("/login", async (req, res) => {
  */
 router.post('/logout', auth, (req, res) => {
 
+   const { email } = req.user;
+
    console.log("RUNNING LOGOUT HANDLER");
 
    res.clearCookie("token", {
@@ -125,6 +127,8 @@ router.post('/logout', auth, (req, res) => {
      secure: process.env.NODE_ENV === 'production',
      sameSite: 'strict',
    });
+
+   console.log(`User ${email} logged out successfully`);
  
    res.json({ success: true });
 });
@@ -136,6 +140,8 @@ router.post('/logout', auth, (req, res) => {
  * @returns 200 with user data if authenticated
  */
 router.get("/protected", auth, (req, res) => {
+   const { email } = req.user;
+   console.log(`User ${email} accessed protected route`);
    res.json(req.user);
 });
 

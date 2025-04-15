@@ -23,7 +23,7 @@ export default function Navbar() {
    }
 
    return (
-      <div className="navbar shadow-sm bg-primary text-primary-content">
+      <div className="navbar shadow-sm bg-primary text-primary-content px-4">
          <div className="navbar-start">
             
             {user &&
@@ -77,7 +77,7 @@ export default function Navbar() {
 
             {user && (
                <div className="hidden lg:flex">
-                  <ul className="menu menu-horizontal px-1">
+                  <ul className="menu menu-horizontal px-4 space-x-2">
                      <li>
                         <Link
                            to="/profile"
@@ -105,7 +105,7 @@ export default function Navbar() {
 
          <div className="navbar-end">
             {user ? (
-               <div className="flex flex-row items-center space-x-3">
+               <div className="flex flex-row items-center space-x-4">
                   <div>
                      Welcome, <strong>{user.userName}</strong>
                   </div>
