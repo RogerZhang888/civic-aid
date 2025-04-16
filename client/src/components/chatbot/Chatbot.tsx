@@ -1,29 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import MessagesDisplay from "./MessagesDisplay";
-import { FormState, Message } from "../types";
-import ChatbotForm from "./ChatbotForm";
 import { useGeolocated } from "react-geolocated";
 import axios, { AxiosError } from "axios";
 import { v4 as uuidv4 } from "uuid";
-import useUser from "../auth/useUser";
 import { Info } from "lucide-react";
+import { useParams } from "react-router";
 
-const initAIMsg: Message = {
-   id: uuidv4(),
-   text: "Hello! I'm Civic-AId. If you want to ask a question, type 'question'. If you want to report an issue, type 'report'.",
-   sender: "ai",
-   timestamp: new Date(),
-   status: "finished"
-};
+import useUser from "../auth/useUser";
+import ChatbotForm from "./ChatbotForm";
+import { FormState, Message } from "../types";
+import MessagesDisplay from "./MessagesDisplay";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 export default function Chatbot() {
-   const [messagesArr, setMessagesArr] = useState<Message[]>([initAIMsg]);
+
+   const { chatId } = useParams<{ chatId: string }>();
+
+   const [messagesArr, setMessagesArr] = useState<Message[]>([]);
    const [isWaitingForRes, setIsWaitingForRes] = useState<boolean>(false);
    const [formState, setFormState] = useState<FormState>({ text: "", img: null });
-   const [imgPreview, setImgPreview] = useState<string | null>(null);   
+   const [imgPreview, setImgPreview] = useState<string | null>(null);
 
    // get user's coordinates
    // browser will ask for permission
@@ -34,6 +31,18 @@ export default function Chatbot() {
    });
 
    const { data: user, isLoading } = useUser();
+
+   useEffect(() => {
+      setMessagesArr([
+         {
+            id: uuidv4(),
+            text: `Hello! I'm Civic-AId. This is chat ${chatId}.`,
+            sender: "ai",
+            timestamp: new Date(),
+            status: "finished"
+         }
+      ]);
+   }, [chatId]);
 
    const { id: userId, email: userEmail } = user!;
 
@@ -97,7 +106,7 @@ export default function Chatbot() {
 
       try {
 
-         console.log(`User ${userEmail} attempting to send a new query with text "${text}" and ${img ? img.name : "no image"}`);
+         console.log(`User ${userEmail} attempting to send a new query in chat id ${chatId} with text "${text}" and ${img ? img.name : "no image"}`);
          if (coords) console.log(`User is at latitude ${coords.latitude.toString()} and longitude ${coords.longitude.toString()}`)
 
          // send HTTP POST request
@@ -200,7 +209,7 @@ export default function Chatbot() {
    }
 
    return (
-      <div className="h-full flex flex-col">
+      <div className="h-full flex flex-1 flex-col">
 
          <div className="flex-1 overflow-y-auto">
             <MessagesDisplay messagesArr={messagesArr} />

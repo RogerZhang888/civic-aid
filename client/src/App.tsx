@@ -11,6 +11,7 @@ import ProfilePage from "./components/profile/ProfilePage";
 import HomePage from "./components/HomePage";
 import NotFound from "./components/NotFound";
 import ProtectedRoutesWrapper from "./components/auth/ProtectedRoutesWrapper";
+import ChatbotWrapper from "./components/chatbot/ChatbotWrapper";
 
 export default function App() {
    return (
@@ -21,7 +22,7 @@ export default function App() {
 
                <Route element={<MainLayout/>}>
 
-                  <Route path="/" element={<HomePage/>} />
+                  <Route index element={<HomePage/>} />
 
                   {/* 
                      The /chatbot and /profile routes are protected
@@ -30,7 +31,11 @@ export default function App() {
                      */}
                   <Route element={<ProtectedRoutesWrapper/>}>
 
-                     <Route path="/chatbot" element={<Chatbot />} />
+                     <Route path="/chatbot/:chatId?" element={<ChatbotWrapper/>}>
+
+                        <Route index element={<Chatbot />} />
+
+                     </Route>
 
                      <Route path="/profile" element={<ProfilePage/>} />
 

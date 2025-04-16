@@ -15,7 +15,7 @@ export default function Navbar() {
    if (isLoading) {
       return (
          <div className="navbar shadow-sm bg-primary text-primary-content">
-            <Link to="/" className="btn btn-ghost text-xl">
+            <Link to="/" className="btn btn-ghost text-2xl">
                Civic-AId
             </Link>
          </div>
@@ -71,7 +71,7 @@ export default function Navbar() {
                </div>
             }
 
-            <Link to="/" className="text-xl font-bold">
+            <Link to="/" className="text-2xl font-bold">
                Civic-AId
             </Link>
 
