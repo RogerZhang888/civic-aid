@@ -1,4 +1,3 @@
-const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const pool = require("../config/db");
 const { callModel } = require('../services/llmService');
@@ -168,10 +167,10 @@ exports.submitQuery = async (req, res) => {
     const userId = req.user?.id || null;
     const uploadedFiles = req.files || [];
 
-    console.log("Received prompt:", prompt);
-    console.log("Location:", latitude, longitude);
-    console.log("Email:", email);
-    console.log("Uploaded files:", uploadedFiles);
+      console.log("Received prompt:", prompt);
+      console.log("Location:", latitude, longitude);
+      console.log("User ID:", userId);
+      console.log("Uploaded file:", uploadedFile);
 
     if (!prompt) {
       return res.status(400).json({ error: "Prompt is required" });

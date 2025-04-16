@@ -1,20 +1,18 @@
 export type Message = {
    id: string;
    text: string;
-   imgs: File[];
+   img: File | null;
    sender: "user";
    timestamp: Date;
 } | {
    id: string;
    text: string;
-   imgs: File[];
    sender: "ai";
    status: "pending";
    timestamp?: Date;
 } | {
    id: string;
    text: string;
-   imgs: File[];
    sender: "ai";
    status: "finished";
    timestamp: Date;
@@ -22,11 +20,11 @@ export type Message = {
 
 export type FormState = {
    text: string;
-   imgs: File[];
+   img: File | null;
 }
 
 export type User = {
-   id: string;
+   id: number;
    email: string;
    userName: string;
 }
@@ -43,8 +41,8 @@ export type RegisterFields = {
    confirmPassword: string
 }
 
-export type AuthContextType = {
+export type UserContextType = {
    currUser: User | null;
-   handleAddUserState: (u: User) => void;
-   handleRemoveUserState: () => void;
+   addUserState: (u: User) => void;
+   removeUserState: () => void;
 }

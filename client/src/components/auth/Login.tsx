@@ -3,11 +3,11 @@ import { LoginFields, User } from "../types";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import toast from "react-hot-toast";
-import { useAuth } from "./AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 
-const SERVER_URL = import.meta.env.SERVER_API_URL!;
+const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 const zodSchema = z.object({
    email: z.string().nonempty({ message: "Required" }).email({ message: "Invalid email" }),
@@ -15,8 +15,6 @@ const zodSchema = z.object({
 })
 
 export default function Login() {
-
-   const { handleAddUserState } = useAuth();
 
    const navigate = useNavigate();
 
@@ -32,6 +30,8 @@ export default function Login() {
       defaultValues: { email: "", password: "" },
    });
 
+   const queryClient = useQueryClient();
+
    async function loginHandler(data: LoginFields) {
 
       const { email, password } = data;
@@ -40,12 +40,20 @@ export default function Login() {
 
          console.log(`Attempting log in for ${email} ...`);
 
-         const res = await axios.post(`${SERVER_URL}/api/login`, 
+         const res = await axios.post(
+            `${SERVER_API_URL}/api/login`,
             { email, password },
-            { withCredentials: true }
+            { 
+               withCredentials: true,
+               headers: {
+                  'Content-Type': 'application/json'
+               }
+            }
          );
 
-         const newLoggedInUser = res.data.user as User;
+         const newLoggedInUser = res.data as User;
+
+         queryClient.setQueryData(['current-user'], newLoggedInUser);
 
          reset();
 
@@ -53,16 +61,18 @@ export default function Login() {
 
          console.log(`Log in successful! Details: \n${JSON.stringify(newLoggedInUser)}`);
 
-         handleAddUserState(newLoggedInUser)
-
-         navigate("/dashboard");
+         navigate("/profile");
 
       } catch (error) {
          
          console.log(`Log in for ${email} unsuccessful due to: \n${error}`);
 
-         if (error instanceof AxiosError) {
-            toast.error(`Login failed: ${error.message}.`);
+         if (axios.isAxiosError(error)) {
+            if (error.response) {
+               toast.error(`Login failed: ${error.response.data.error}.`);
+            } else {
+               toast.error(`Login failed: ${error.request}.`);
+            }
          } else {
             toast.error("An unknown error occured. Try again later.");
          }
@@ -113,7 +123,6 @@ export default function Login() {
                No account? <Link to="/auth/reg" className="link">Register</Link>
             </div>
          </div>
-
 
       </form>
    );

@@ -1,70 +1,164 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "./auth/AuthContext";
+import useUser from "./auth/useUser";
+import { useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import toast from "react-hot-toast";
+
+const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 export default function Navbar() {
    const { pathname } = useLocation();
-   const { currUser } = useAuth();
    const navigate = useNavigate();
 
+   const { data: user, isLoading } = useUser();
+
+   if (isLoading) {
+      return (
+         <div className="navbar shadow-sm bg-primary text-primary-content">
+            <Link to="/" className="btn btn-ghost text-xl">
+               Civic-AId
+            </Link>
+         </div>
+      );
+   }
+
    return (
-      <nav className="bg-blue-600 text-white shadow-lg" id="navbar">
-         <div className="mx-auto px-4 flex h-15">
-            <div className="flex items-center">
-               <Link to="/" className="text-xl font-bold">
-                  Civic-AId
-               </Link>
-            </div>
-
-            {currUser &&
-               <div className="flex items-center justify-between px-10 space-x-10 text-gray-300">
-
-                  <Link
-                     to="/chatbot"
-                     className={`hover:text-white transition ${pathname === "/chatbot" ? "text-white" : ""}`}
+      <div className="navbar shadow-sm bg-primary text-primary-content px-4">
+         <div className="navbar-start">
+            
+            {user &&
+               <div className="dropdown">
+                  <div
+                     tabIndex={0}
+                     role="button"
+                     className="btn btn-ghost lg:hidden"
                   >
-                     Chatbot
-                  </Link>
-
-                  <Link
-                     to="/profile"
-                     className={`hover:text-white transition ${pathname === "/profile" ? "text-white" : ""}`}
+                     <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                     >
+                        {" "}
+                        <path
+                           strokeLinecap="round"
+                           strokeLinejoin="round"
+                           strokeWidth="2"
+                           d="M4 6h16M4 12h8m-8 6h16"
+                        />{" "}
+                     </svg>
+                  </div>
+                  <ul
+                     tabIndex={0}
+                     className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-black"
                   >
-                     Profile
-                  </Link>
-
+                     <li>
+                        <Link
+                           to="/profile"
+                        >
+                           Profile
+                        </Link>
+                     </li>
+                     <li>
+                        <Link
+                           to="/chatbot"
+                        >
+                           Chatbot
+                        </Link>
+                     </li>
+                  </ul>
                </div>
             }
 
-            <div className="flex ms-auto items-center">
-               {currUser
-               ?  <button
-                     className="btn btn-sm btn-outline"
-                  >
-                     Log Out
-                  </button>
-               :  <button
-                     onClick={() => navigate("/auth")}
-                     className="btn btn-sm btn-outline"
-                  >
-                     Log In
-                  </button>
-               }
-            </div>
+            <Link to="/" className="text-xl font-bold">
+               Civic-AId
+            </Link>
 
+            {user && (
+               <div className="hidden lg:flex">
+                  <ul className="menu menu-horizontal px-4 space-x-2">
+                     <li>
+                        <Link
+                           to="/profile"
+                           className={`hover:text-white transition ${
+                              pathname === "/profile" ? "text-gray-400" : ""
+                           }`}
+                        >
+                           Profile
+                        </Link>
+                     </li>
+                     <li>
+                        <Link
+                           to="/chatbot"
+                           className={`hover:text-white transition ${
+                              pathname === "/chatbot" ? "text-gray-400" : ""
+                           }`}
+                        >
+                           Chatbot
+                        </Link>
+                     </li>
+                  </ul>
+               </div>
+            )}
          </div>
-      </nav>
+
+         <div className="navbar-end">
+            {user ? (
+               <div className="flex flex-row items-center space-x-4">
+                  <div>
+                     Welcome, <strong>{user.userName}</strong>
+                  </div>
+                  <LogoutButton />
+               </div>
+            ) : (
+               <button
+                  onClick={() => navigate("/auth")}
+                  className="btn btn-sm btn-outline"
+               >
+                  Log In
+               </button>
+            )}
+         </div>
+      </div>
    );
 }
 
-/**
- *                   <Link
-                     to="/auth"
-                     className={`px-3 py-2 rounded-md text-sm font-medium ${
-                        pathname === "/auth"
-                           ? "bg-gray-900 text-white"
-                           : "hover:bg-gray-700 hover:text-white"
-                     }`}
-                  >
-                     Login
-                  </Link>
- */
+function LogoutButton() {
+   const navigate = useNavigate();
+   const queryClient = useQueryClient();
+
+   async function logoutHandler() {
+      console.log("Logging user out...");
+
+      try {
+         await axios.post(
+            `${SERVER_API_URL}/api/logout`,
+            {},
+            { withCredentials: true }
+         );
+
+         queryClient.removeQueries({ queryKey: ["current-user"] });
+
+         console.log("Log out successful");
+
+         toast.success("You successfully logged out");
+
+         navigate("/");
+      } catch (error) {
+         console.log(`Log out unsuccessful due to: \n${error}`);
+
+         if (axios.isAxiosError(error)) {
+            toast.error(`Logout failed: ${error.message}.`);
+         } else {
+            toast.error("An unknown error occured. Try again later.");
+         }
+      }
+   }
+
+   return (
+      <button onClick={logoutHandler} className="btn btn-sm btn-outline">
+         Log Out
+      </button>
+   );
+}

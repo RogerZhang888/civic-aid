@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useEffect } from "react";
 import toast from "react-hot-toast";
 import MessagesDisplay from "./MessagesDisplay";
 import { FormState, Message } from "../types";
@@ -7,30 +6,24 @@ import ChatbotForm from "./ChatbotForm";
 import { useGeolocated } from "react-geolocated";
 import axios, { AxiosError } from "axios";
 import { v4 as uuidv4 } from "uuid";
-import { useAuth } from "../auth/AuthContext";
+import useUser from "../auth/useUser";
+import { Info } from "lucide-react";
 
 const initAIMsg: Message = {
    id: uuidv4(),
-   text: "Hello! I'm Civic-AId. Type something and I'll repeat it back to you.",
-   imgs: [],
+   text: "Hello! I'm Civic-AId. If you want to ask a question, type 'question'. If you want to report an issue, type 'report'.",
    sender: "ai",
    timestamp: new Date(),
    status: "finished"
 };
 
-const SERVER_URL = import.meta.env.SERVER_API_URL!;
-
-const MAX_IMAGES = 3;
-
-
+const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 export default function Chatbot() {
    const [messagesArr, setMessagesArr] = useState<Message[]>([initAIMsg]);
    const [isWaitingForRes, setIsWaitingForRes] = useState<boolean>(false);
-   const [formState, setFormState] = useState<FormState>({ text: "", imgs: [] });
-   const [imgsPreview, setImgsPreview] = useState<string[]>([]);
-   const [chatId, setChatId] = useState<string | null>(null);
-   
+   const [formState, setFormState] = useState<FormState>({ text: "", img: null });
+   const [imgPreview, setImgPreview] = useState<string | null>(null);   
 
    // get user's coordinates
    // browser will ask for permission
@@ -40,10 +33,11 @@ export default function Chatbot() {
       userDecisionTimeout: 5000,
    });
 
-   // get the current user
-   // won't be null since this is under a protected route
-   const { currUser } = useAuth();
-   if (!currUser) return;
+   const { data: user, isLoading } = useUser();
+
+   const { id: userId, email: userEmail } = user!;
+
+   if (isLoading) return <div>Loading chatbot...</div>
 
    // main form submit function
    async function handleSubmitForm() {
@@ -54,11 +48,11 @@ export default function Chatbot() {
       const aiMsgUUID = uuidv4();
 
       // generate user message
-      const { text, imgs } = formState;
+      const { text, img } = formState;
       const userMsg: Message = {
          id: userMsgUUID,
          text,
-         imgs,
+         img,
          sender: "user",
          timestamp: new Date(),
       };
@@ -67,7 +61,6 @@ export default function Chatbot() {
       const pendingAiMsg: Message = {
          id: aiMsgUUID,
          text: "",
-         imgs: [],
          sender: "ai",
          status: "pending",
       };
@@ -76,41 +69,51 @@ export default function Chatbot() {
       setMessagesArr(prev => [...prev, userMsg, pendingAiMsg])
 
       // reset formState and image previews
-      setFormState({ text: "", imgs: [] });
-      setImgsPreview([]);
+      setFormState({ text: "", img: null });
+      setImgPreview(null);
 
       // make the request body in the POST request
       const fd = new FormData();
       // append the text
-      fd.append('prompt', formState.text);
-      // append each image file
-      formState.imgs.forEach(img => fd.append('images', img));
+      fd.append('prompt', formState.text || "NO_TEXT_PROVIDED");
+      // append the image file if available
+      if (img) fd.append('image', img);
       // append user location data, if available
       if (coords) {
          fd.append('latitude', coords.latitude.toString());
          fd.append('longitude', coords.longitude.toString());
       }
       // append user info
-      // this is just dummy for now
-      fd.append('email', currUser!.email);
+      fd.append('user_id', userId.toString());
+
+      /**
+       *  fd will contain the following:
+       * - prompt: the TEXT input from the user, if it was empty, it will be "NO_TEXT_PROVIDED"
+       * - image: the image file uploaded by the user (if available)
+       * - latitude: the user's latitude (if available)
+       * - longitude: the user's longitude (if available)
+       * - user_id: the user's ID from the database
+       */
 
       try {
 
-         console.log(`User ${currUser} attempting to send a new query with text "${text}" and ${imgs.length} image(s)`);
+         console.log(`User ${userEmail} attempting to send a new query with text "${text}" and ${img ? img.name : "no image"}`);
+         if (coords) console.log(`User is at latitude ${coords.latitude.toString()} and longitude ${coords.longitude.toString()}`)
 
          // send HTTP POST request
-         const res = await axios.post(`${SERVER_URL}/api/queries`, fd,
+         const res = await axios.post(`${SERVER_API_URL}/api/query`, fd,
             {
                maxContentLength: 100 * 1024 * 1024,
                maxBodyLength: 100 * 1024 * 1024,
-               headers: { 'Content-Type': 'multipart/form-data' }
+               headers: { 'Content-Type': 'multipart/form-data' },
+               withCredentials: true,
             }
          )
 
          // extract res data (this format might change later)
          const { reply, confidence } = res.data as { reply: string, confidence: number };
 
-         console.log(`Server replied to ${currUser} querying "${text}" with "${reply}" that has confidence ${confidence}`);
+         console.log(`Server replied to ${userEmail} querying "${text}" with "${reply}" that has confidence ${confidence}`);
 
          setMessagesArr(prev => prev.map(msg => 
             msg.id === pendingAiMsg.id
@@ -125,7 +128,7 @@ export default function Chatbot() {
 
       } catch (error) {
 
-         console.log(`Server replied to ${currUser} querying "${text}" with an error: \n${error}`);
+         console.log(`Server replied to ${userEmail} querying "${text}" with an error: \n${error}`);
 
          if (error instanceof AxiosError) {
 
@@ -154,46 +157,38 @@ export default function Chatbot() {
       }
    }
 
-   // handle imgs upload
-   function handleFormImgsChange(param: FileList | number) {
+   // handle single img upload or removal
+   function handleFormImgChange(param: File | null) {
 
-      if (param instanceof FileList) {
-         // case: add files
+      if (param instanceof File) {
+         // case: add file
+      
+         const isImgFile = param.type.startsWith("image/");
    
-         if (!param || param.length === 0) return;
-   
-         const newImgFiles = Array.from(param).filter((file) =>
-            file.type.startsWith("image/")
-         );
-   
-         if (newImgFiles.length !== param.length) {
+         if (!isImgFile) {
             toast.error("Please upload only image files");
             return;
          }
    
-         if (formState.imgs.length + newImgFiles.length > MAX_IMAGES) {
-            toast.error(`Maximum ${MAX_IMAGES} images allowed`);
+         if (formState.img) {
+            toast.error("Please upload only one image file at a time");
             return;
          }
    
-         setFormState((pv) => ({ ...pv, imgs: [...pv.imgs, ...newImgFiles] }));
+         setFormState((pv) => ({ ...pv, img: param }));
    
          // Create preview URLs
-         newImgFiles.forEach((file) => {
-            const reader = new FileReader();
-            reader.onload = (event) =>
-               setImgsPreview((pv) => [
-                  ...(pv || []),
-                  event.target?.result as string,
-               ]);
-            reader.readAsDataURL(file);
-         });
+         const reader = new FileReader();
+         reader.onloadend = () => {
+            setImgPreview(reader.result as string);
+         };
+         reader.readAsDataURL(param);
 
       } else {
-         // case: remove files
+         // case: remove file
 
-         setFormState((pv) => ({ ...pv, imgs: pv.imgs.filter((_, i) => i !== param) }));
-         setImgsPreview((pv) => pv?.filter((_, i) => i !== param) || null);
+         setFormState((pv) => ({ ...pv, img: null }));
+         setImgPreview(null);
 
       }
 
@@ -215,16 +210,21 @@ export default function Chatbot() {
 
             <ChatbotForm
                handleSubmitForm={handleSubmitForm}
-               handleFormImgsChange={handleFormImgsChange}
+               handleFormImgChange={handleFormImgChange}
                handleFormTextChange={handleFormTextChange}
-               imgsPreview={imgsPreview}
+               imgPreview={imgPreview}
                formState={formState}
                isWaitingForRes={isWaitingForRes}
             />
 
-            <p className="text-xs m-2 text-center text-gray-500">
-               AI-generated, for reference only.
-            </p>
+            <div className="text-xs m-2 text-center text-gray-500">
+               {!coords && 
+                  <div className="font-bold flex flex-row items-center justify-center gap-1">
+                     <Info size={15} strokeWidth="3"/>This chatbot requires your location data for personalised recommendations.
+                  </div>
+               }
+               <div>AI-generated, for reference only.</div>
+            </div>
 
          </div>
 

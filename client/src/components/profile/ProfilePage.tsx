@@ -1,18 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import useUser from "../auth/useUser";
 
 export default function ProfilePage() {
 
-   const { isPending, isError, data, error } = useQuery({
-      queryKey: ['stuff'],
-      queryFn: () => axios.get("https://jsonplaceholder.typicode.com/todos/1").then(res => res.data)
-   });
+   const { data: user, isLoading } = useUser();
+
+   if (isLoading) return <div>Loading...</div>
 
    return (
       <section className="w-full h-full flex flex-col items-center space-y-4 p-4">
          <div className="text-xl font-bold">Your Profile</div>
 
-         <div className="font-5xl">{JSON.stringify(data)}</div>
+         <div>Hello, {user!.userName}!</div>
+
+         <pre>{JSON.stringify(user)}</pre>
 
          <div>
             <div className="collapse collapse-plus border border-1">
