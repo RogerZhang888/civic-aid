@@ -31,23 +31,43 @@ const systempromptTemplates = {
 }
 
 const responseParsers = {
-    parseTypeDecision: (res) => {
+    typeDecisionParser: (res) => {
         // QUESTION, REPORT + CONFIDENCE, VALID
+        let r = {type: undefined, valid: undefined, confidence: undefined}
+
         return res
     },
     defaultParser: (res) => {
         // Just standard reply + confidence parser
+        return res
+    },
+    reportParser: (res) => {
         return res
     }
 }
 
 const updateQueriesDB = (params)  => {
     params = {userId, chatId, userprompt, media, systemprompt, response, isValid, toReply, confidence}
-    console.log("Updated DB", )
+    console.log("Updated Queries table", params)
+}
+
+const getChatHistory = async (chatId) => {
+    // TODO: Check this SQL command
+    return pool.query("SELECT * FROM Queries WHERE chat_id = $1", chatId)
+}
+
+const getConfidence = (score) => {
+    // TOOD: Confirm boundaries
+    if (score > 0.8) return 'HIGH'
+    else if (score > 0.4) return 'MED'
+    else return 'LOW'
 }
 
 // TOOD: media support
-function userquery(userprompt, userId, chatId) {
+const userquery = async (userprompt, userId, chatId) => {
+    const chatHistory = await getChatHistory(chatId)
+    let queriesTracker = []
+
     async function queryLLM(query, parseResponse=responseParsers.defaultParser, reply='NEVER') {
         // reply enum: NEVER, ALWAYS, HIGH: 
         // NEVER means this output is never used as a reply, 
@@ -57,78 +77,94 @@ function userquery(userprompt, userId, chatId) {
         // TODO: check whats the arguments required etc for calling model
         let parsedRes
         while (!parsedRes?.valid) {
-            parsedRes = await callModel(query, getChatHistory(chatId)).then((res) => {
+            parsedRes = await callModel(query).then((res) => {
                 parsed = parseResponse(res)
-                updateQueriesDB({userId, chatId, userprompt, systemprompt:query, response:parsed.reply, isValid: parsed.valid, toReply:reply=='ALWAYS'?parsed.reply:(reply='HIGH'&&parsed.confidence==HIGH)?parsed.reply:null, confidence:parsed.confidence})
+                queryParams = {
+                    userId, 
+                    chatId, 
+                    userprompt, 
+                    systemprompt:query, 
+                    response:parsed.reply, 
+                    isValid: parsed.valid, 
+                    toReply:
+                        reply=='ALWAYS'?parsed.reply
+                        :(reply='HIGH'&&getConfidence(parsed.confidence)=='HIGH')?parsed.reply
+                        :null, 
+                    confidence:parsed.confidence
+                }
+                updateQueriesDB(queryParams) // For long term record in DB
+                queriesTracker.push(queryParams) // For temporary tracking
+
                 return parsed
             }).catch((err) => {
                 console.log('Error calling model', err)
                 return {valid:false}
             })
         }
-        // TOOD: better way to reprompt for invalid output format
+        // TOOD: better way to reprompt for invalid output format?
 
         return parsedRes
     }
 
     let reply
-    while (!reply) {
-        // CHAIN prompts until a reply condition is met
-        // TODO: queryLLM function missing parser specifications
-        if (chat[chatId].type == UNDECIDED) {
-            systemprompt = systempromptTemplates.getTypeDecisionTemplate(userprompt)
-            response = queryLLM(systemprompt, responseParsers.parseTypeDecision, 'NEVER')
-            
-            if (response.confidence == LOW || response.confidence == MED) {
-                systemprompt = systempromptTemplates.clarifyTypeDecisionTemplate(userprompt)
-                response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-                reply = response.reply
-            } else if (response.confidence == HIGH) {
-                chat[chatId].type = response.type
-            }
+    // TODO: queryLLM function missing parser specifications
+    if (!chat[chatId].type) {
+        systemprompt = systempromptTemplates.getTypeDecisionTemplate(userprompt)
+        response = queryLLM(systemprompt, responseParsers.typeDecisionParser, 'NEVER')
+        
+        if (getConfidence(response.confidence) == 'LOW' || getConfidence(response.confidence) == 'MED') {
+            systemprompt = systempromptTemplates.clarifyTypeDecisionTemplate(userprompt)
+            response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            reply = response.reply
+        } else if (getConfidence(response.confidence) == 'HIGH') {
+            chat[chatId].type = response.type
         }
+    }
 
-        if (chat[chatId].type == REPORT) {
-            let systemprompt = systempromptTemplates.getReportTemplate(userprompt)
-            response = queryLLM(systemprompt, responseParsers.defaultParser, 'HIGH')
+    if (chat[chatId].type == 'report') {
+        let systemprompt = systempromptTemplates.getReportTemplate(userprompt)
+        response = queryLLM(systemprompt, responseParsers.reportParser, 'HIGH')
 
-            if (response.confidence == LOW) {
-                systemprompt = systempromptTemplates.clarifyReportTemplateLow(userprompt)
-                response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-                reply=response.reply
-            } else if (response.confidence == MED) {
-                systemprompt = systempromptTemplates.clarifyReportTemplateMed(userprompt)
-                response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-                reply = response.reply 
-            } else if (response.confidence == HIGH) {
-                // By the original prompt, this should be a report format already?? TODO: verify this
-                reply = response.reply 
-            }
+        if (getConfidence(response.confidence) == 'LOW') {
+            systemprompt = systempromptTemplates.clarifyReportTemplateLow(userprompt)
+            response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            reply=response.reply
+        } else if (getConfidence(response.confidence) == 'MED') {
+            systemprompt = systempromptTemplates.clarifyReportTemplateMed(userprompt)
+            response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            reply = response.reply 
+        } else if (getConfidence(response.confidence) == 'HIGH') {
+            // By the original prompt, this should be a report format already?? TODO: verify this
+            reply = response.reply 
         }
+    }
 
-        if (chat[chatId].type == QUESTION) {
-            let systemprompt = systempromptTemplates.getQuestionTemplate(userprompt)
-            response = queryLLM(systemprompt, responseParsers.defaultParser, 'HIGH')
+    if (chat[chatId].type == 'question') {
+        let systemprompt = systempromptTemplates.getQuestionTemplate(userprompt)
+        response = queryLLM(systemprompt, responseParsers.defaultParser, 'HIGH')
 
-            if (response.confidence == LOW) {
-                systemprompt = systempromptTemplates.clarifyQuestionTemplateLow(userprompt)
-                response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-                reply = response.reply 
-            } else if (response.confidence == MED) {
-                systemprompt = systempromptTemplates.clarifyQuestionTemplateMed(userprompt)
-                response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-                reply = response.reply 
-            } else if (response.confidence == HIGH) {
-                reply = response.reply 
-            }
+        if (getConfidence(response.confidence) == 'LOW') {
+            systemprompt = systempromptTemplates.clarifyQuestionTemplateLow(userprompt)
+            response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            reply = response.reply 
+        } else if (getConfidence(response.confidence) == 'MED') {
+            systemprompt = systempromptTemplates.clarifyQuestionTemplateMed(userprompt)
+            response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            reply = response.reply 
+        } else if (getConfidence(response.confidence) == 'HIGH') {
+            reply = response.reply 
         }
     }
     
+    return {
+        queries: queriesTracker,
+        reply
+    }
 }
 
 exports.submitQuery = async (req, res) => {
   try {
-    const { prompt, latitude, longitude, email } = req.body;
+    const { prompt, latitude, longitude, email, chatId } = req.body;
     const userId = req.user?.id || null;
     const uploadedFiles = req.files || [];
 
@@ -142,67 +178,39 @@ exports.submitQuery = async (req, res) => {
     }
 
     // Process and store uploaded files (mock URLs for now)
-    const savedMedia = uploadedFiles.map(file => {
-      const ext = path.extname(file.originalname);
-      const id = uuidv4();
-      const filename = `${id}${ext}`;
-      const mockUrl = `/uploads/${filename}`;
-      return {
-        originalName: file.originalname,
-        mimeType: file.mimetype,
-        url: mockUrl,
-      };
-    });
+    // const savedMedia = uploadedFiles.map(file => {
+    //   const ext = path.extname(file.originalname);
+    //   const id = uuidv4();
+    //   const filename = `${id}${ext}`;
+    //   const mockUrl = `/uploads/${filename}`;
+    //   return {
+    //     originalName: file.originalname,
+    //     mimeType: file.mimetype,
+    //     url: mockUrl,
+    //   };
+    // });
 
-    const queryType = 'query'; // or 'report' — set based on context or user input
-    const imagePath = uploadedFiles.length > 0 ? uploadedFiles[0].path : null;
+    // const queryType = 'query'; // or 'report' — set based on context or user input
+    // const imagePath = uploadedFiles.length > 0 ? uploadedFiles[0].path : null;
 
 
-    let llmResponse;
+    let queryResult;
     try {
-      llmResponse = await callModel({
-        query: prompt,
-        queryType,
-        imagePath
-      });
+        userquery(prompt, userId, chatId)
     } catch (err) {
-      console.error("LLM model call failed:", err);
-      return res.status(500).json({ error: "Model failed to generate a response." });
+        console.error("Error handling user query", err);
+        return res.status(500).json({ error: "Failed to generate a response." });
     }
 
+    userquery(prompt, userId, chatId).then((r) => {
+        res.json({
+            reply: r.reply,
+            queries: r.queries, 
+        })
+    })
 
-    // Save query to DB
-    const result = await pool.query(
-      `INSERT INTO Queries 
-       (user_id, chat_id, user_prompt, system_prompt, response, valid, reply, confidence) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-       RETURNING id, created_at`,
-      [
-        userId,
-        chatId,
-        prompt,
-        "System prompt placeholder",
-        llmResponse.answer,
-        true,
-        llmResponse.answer,
-        llmResponse.confidence?.score || 0
-      ]
-    );
-    
-
-    // TODO: optionally save file paths in a separate table tied to queryId
-
-    res.json({
-      queryId: result.rows[0].id,
-      reply: llmResponse.answer,
-      confidence: llmResponse.confidence,  
-      uploadedMedia: savedMedia,
-      location: latitude && longitude ? { latitude, longitude } : null,
-      email,
-    });
-
-  } catch (error) {
-    console.error("Submit query error:", error);
-    res.status(500).json({ error: error.message });
-  }
+    } catch (error) {
+        console.error("Submit query error:", error);
+        res.status(500).json({ error: error.message });
+    }
 };
