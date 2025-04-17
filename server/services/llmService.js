@@ -6,6 +6,11 @@ const path = require('path');
  * Assumes the Python script exposes a callable entrypoint like: use_model(query, query_type, image_path)
  */
 exports.callModel = async ({ query, queryType, imagePath = null }) => {
+    // TEMPORARY CODE FOR TESTING
+    return new Promise((res, rej) => {
+        resolve(`{\"type\":\"query\", \"confidence\":\"0.9\", \"source\":\"\"}`)
+    })
+
   return new Promise((resolve, reject) => {
     const scriptPath = path.join(__dirname, '../../chatbot/chatbotmodels/MainChatbotWithSSL.py'); // adjust this
     const command = imagePath

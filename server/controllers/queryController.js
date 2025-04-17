@@ -1,47 +1,43 @@
 const { v4: uuidv4 } = require('uuid');
-const pool = require("../config/db");
+const pgsql = require("../config/db");
 const { callModel } = require('../services/llmService');
-
-const systempromptTemplates = {
-    getTypeDecisionTemplate: (userprompt) => {
-        return `Decide Type for ${userprompt}`
-    },
-    clarifyTypeDecisionTemplate: (userprompt) => {
-        return `Ask the user follow up to clarify if this is a report or question`
-    },
-    getReportTemplate: (userprompt) => {
-        return `Generate report and confidence for ${userprompt}`
-    },
-    clarifyReportTemplateLow: (userprompt) => {
-        return `Ask for clarification for ${userprompt}`
-    },
-    clarifyReportTemplateMed: (userprompt) => {
-        return `Summarise ${userprompt}, ask for clarification`
-    },
-    getQuestionTemplate: (userprompt) => {
-        return `Respond to question ${userprompt}`
-    },
-    clarifyQuestionTemplateLow: (userprompt) => {
-        return `Provide preliminary response and ask for clarification for ${userprompt}`
-    },
-    clarifyQuestionTemplateMed: (userprompt) => {
-        return `Respond to ${userprompt}, ask for clarification`
-    },
-}
+const { systempromptTemplates } = require('../promptbook/promptbook');
 
 const responseParsers = {
     typeDecisionParser: (res) => {
         // QUESTION, REPORT + CONFIDENCE, VALID
         let r = {type: undefined, valid: undefined, confidence: undefined}
+        let parsed = JSON.parse(res)
 
-        return res
+        if (!type in parsed || !confidence in parsed) r.valid = false
+        else {
+            r = {
+                type: parsed.type,
+                confidence: parsed.confidence,
+                valid: true
+            }
+        }
+
+        return r
     },
     defaultParser: (res) => {
-        // Just standard reply + confidence parser
-        return res
+        // Just standard answer + confidence parser
+        let r = {answer: undefined, valid: undefined, confidence: undefined}
+        let parsed = JSON.parse(res)
+
+        if (!answer in parsed || !confidence in parsed) r.valid = false
+        else {
+            r = {
+                answer: parsed.answer,
+                confidence: parsed.confidence,
+                valid: true
+            }
+        }
+
+        return r
     },
     reportParser: (res) => {
-        return res
+        return JSON.parse(res)
     }
 }
 
@@ -52,7 +48,9 @@ const updateQueriesDB = (params)  => {
 
 const getChatHistory = async (chatId) => {
     // TODO: Check this SQL command
-    return pool.query("SELECT * FROM Queries WHERE chat_id = $1", chatId)
+    let chatHistory = pgsql.query("SELECT * FROM Queries WHERE chat_id = $1", chatId);
+    console.log("Extracting chat history", chatHistory)
+    return chatHistory
 }
 
 const getConfidence = (score) => {
@@ -192,20 +190,14 @@ exports.submitQuery = async (req, res) => {
     // const queryType = 'query'; // or 'report' — set based on context or user input
     // const imagePath = uploadedFiles.length > 0 ? uploadedFiles[0].path : null;
 
-
-    let queryResult;
-    try {
-        userquery(prompt, userId, chatId)
-    } catch (err) {
-        console.error("Error handling user query", err);
-        return res.status(500).json({ error: "Failed to generate a response." });
-    }
-
     userquery(prompt, userId, chatId).then((r) => {
         res.json({
             reply: r.reply,
             queries: r.queries, 
         })
+    }).catch((err) => {
+        console.error("Error handling user query", err);
+        return res.status(500).json({ error: "Failed to generate a response." });
     })
 
     } catch (error) {
