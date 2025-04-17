@@ -4,15 +4,15 @@ import { FormState } from "../types"
 
 export default function ChatbotForm({
    handleSubmitForm,
-   handleFormImgChange,
-   handleFormTextChange,
+   setImage,
+   setText,
    imgPreview,
    formState,
    isWaitingForRes,
 }: {
    handleSubmitForm: () => Promise<void>
-   handleFormImgChange: (x: File | null) => void
-   handleFormTextChange: (x: string) => void
+   setImage: (x: File | null) => void
+   setText: (x: string) => void
    imgPreview: string | null
    formState: FormState
    isWaitingForRes: boolean
@@ -54,7 +54,7 @@ export default function ChatbotForm({
                   </div>
                   <button
                      type="button"
-                     onClick={() => handleFormImgChange(null)}
+                     onClick={() => setImage(null)}
                      className="absolute -top-2 -right-2 bg-black text-white rounded-full p-1
                      hover:bg-gray-700 hover:cursor-pointer transition duration-300 ease-in-out"
                   >
@@ -75,7 +75,7 @@ export default function ChatbotForm({
                   ta.style.height = 'auto';
                   ta.style.height = `${ta.scrollHeight}px`;
                }
-               handleFormTextChange(ta.value)
+               setText(ta.value)
             }}
             onKeyDown={e => {
                if (e.key === 'Enter' && !e.shiftKey) {
@@ -100,7 +100,7 @@ export default function ChatbotForm({
                const { files } = e.target;
                if (!files || files.length === 0) return;
 
-               handleFormImgChange(files[0]);
+               setImage(files[0]);
             }}
             accept="image/*"
             className="hidden"

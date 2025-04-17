@@ -5,7 +5,6 @@ import { ErrorBoundary } from "react-error-boundary";
 import AuthRoutesWrapper from "./components/auth/AuthRoutesWrapper";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
-import Chatbot from "./components/chatbot/Chatbot";
 import MainLayout from "./components/MainLayout";
 import ProfilePage from "./components/profile/ProfilePage";
 import HomePage from "./components/HomePage";
@@ -31,11 +30,7 @@ export default function App() {
                      */}
                   <Route element={<ProtectedRoutesWrapper/>}>
 
-                     <Route path="/chatbot/:chatId?" element={<ChatbotWrapper/>}>
-
-                        <Route index element={<Chatbot />} />
-
-                     </Route>
+                     <Route path="/chatbot/:currChatId?" element={<ChatbotWrapper/>}/>
 
                      <Route path="/profile" element={<ProfilePage/>} />
 

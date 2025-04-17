@@ -4,20 +4,30 @@ import { useGeolocated } from "react-geolocated";
 import axios, { AxiosError } from "axios";
 import { v4 as uuidv4 } from "uuid";
 import { Info } from "lucide-react";
-import { useParams } from "react-router";
 
 import useUser from "../auth/useUser";
 import ChatbotForm from "./ChatbotForm";
-import { FormState, Message } from "../types";
+import { Chat, FormState, Message } from "../types";
 import MessagesDisplay from "./MessagesDisplay";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
-export default function Chatbot() {
+export default function Chatbot({ 
+   currChatId,
+   chats,
+   handleStartNewChat,
+   handleUpdateChat
+}: { 
+   currChatId: string | undefined
+   chats: Chat[]
+   handleStartNewChat: (x: string, y: Message, z: string) => void
+   handleUpdateChat: (x: string, y: Message) => void
+}) {
 
-   const { chatId } = useParams<{ chatId: string }>();
+   const isNewChat = !currChatId;
+   const currChat = chats.find(chat => chat.id === currChatId) || null;
 
-   const [messagesArr, setMessagesArr] = useState<Message[]>([]);
+   const [messages, setMessages] = useState<Message[]>([]);
    const [isWaitingForRes, setIsWaitingForRes] = useState<boolean>(false);
    const [formState, setFormState] = useState<FormState>({ text: "", img: null });
    const [imgPreview, setImgPreview] = useState<string | null>(null);
@@ -30,23 +40,21 @@ export default function Chatbot() {
       userDecisionTimeout: 5000,
    });
 
-   const { data: user, isLoading } = useUser();
+   const { data: user } = useUser();
 
-   useEffect(() => {
-      setMessagesArr([
-         {
-            id: uuidv4(),
-            text: `Hello! I'm Civic-AId. This is chat ${chatId}.`,
-            sender: "ai",
-            timestamp: new Date(),
-            status: "finished"
-         }
-      ]);
-   }, [chatId]);
+   // useEffect(() => {
+   //    setMessages([
+   //       {
+   //          id: uuidv4(),
+   //          text: `Hello! I'm Civic-AId. This is chat ${chatId}.`,
+   //          sender: "ai",
+   //          timestamp: new Date(),
+   //          status: "finished"
+   //       }
+   //    ]);
+   // }, [chatId]);
 
    const { id: userId, email: userEmail } = user!;
-
-   if (isLoading) return <div>Loading chatbot...</div>
 
    // main form submit function
    async function handleSubmitForm() {
@@ -75,7 +83,7 @@ export default function Chatbot() {
       };
 
       // add both to messages array
-      setMessagesArr(prev => [...prev, userMsg, pendingAiMsg])
+      setMessages(prev => [...prev, userMsg, pendingAiMsg])
 
       // reset formState and image previews
       setFormState({ text: "", img: null });
@@ -84,7 +92,7 @@ export default function Chatbot() {
       // make the request body in the POST request
       const fd = new FormData();
       // append the text
-      fd.append('prompt', formState.text || "NO_TEXT_PROVIDED");
+      fd.append('prompt', formState.text || "NO TEXT PROVIDED");
       // append the image file if available
       if (img) fd.append('image', img);
       // append user location data, if available
@@ -92,25 +100,24 @@ export default function Chatbot() {
          fd.append('latitude', coords.latitude.toString());
          fd.append('longitude', coords.longitude.toString());
       }
-      // append user info
-      fd.append('user_id', userId.toString());
+      // if chatId is available, append it too, if not "NEW CHAT"
+      fd.append('chat_id', currChatId || "NEW CHAT");
 
       /**
        *  fd will contain the following:
-       * - prompt: the TEXT input from the user, if it was empty, it will be "NO_TEXT_PROVIDED"
+       * - prompt: the TEXT input from the user, if it was empty, it will be "NO TEXT PROVIDED"
        * - image: the image file uploaded by the user (if available)
        * - latitude: the user's latitude (if available)
        * - longitude: the user's longitude (if available)
-       * - user_id: the user's ID from the database
+       * - chat_id: the chat ID from the URL, if not available, it will be "NEW CHAT"
        */
+
+      console.log(fd);
 
       try {
 
-         console.log(`User ${userEmail} attempting to send a new query in chat id ${chatId} with text "${text}" and ${img ? img.name : "no image"}`);
-         if (coords) console.log(`User is at latitude ${coords.latitude.toString()} and longitude ${coords.longitude.toString()}`)
-
          // send HTTP POST request
-         const res = await axios.post(`${SERVER_API_URL}/api/query`, fd,
+         const res = await axios.post(`${SERVER_API_URL}/api/uery`, fd,
             {
                maxContentLength: 100 * 1024 * 1024,
                maxBodyLength: 100 * 1024 * 1024,
@@ -124,7 +131,7 @@ export default function Chatbot() {
 
          console.log(`Server replied to ${userEmail} querying "${text}" with "${reply}" that has confidence ${confidence}`);
 
-         setMessagesArr(prev => prev.map(msg => 
+         setMessages(prev => prev.map(msg => 
             msg.id === pendingAiMsg.id
                ?  {
                   ...msg,
@@ -141,7 +148,7 @@ export default function Chatbot() {
 
          if (error instanceof AxiosError) {
 
-            setMessagesArr(prev => prev.map(msg => 
+            setMessages(prev => prev.map(msg => 
                msg.id === pendingAiMsg.id 
                ?  { ...msg, text: error.message, status: "finished", timestamp: new Date() }
                :  msg
@@ -151,7 +158,7 @@ export default function Chatbot() {
 
          } else {
 
-            setMessagesArr(prev => prev.map(msg => 
+            setMessages(prev => prev.map(msg => 
                msg.id === pendingAiMsg.id 
                ?  { ...msg, text: "An unknown error occured. Try again later.", status: "finished", timestamp: new Date() }
                :  msg
@@ -167,7 +174,7 @@ export default function Chatbot() {
    }
 
    // handle single img upload or removal
-   function handleFormImgChange(param: File | null) {
+   function setImage(param: File | null) {
 
       if (param instanceof File) {
          // case: add file
@@ -204,23 +211,66 @@ export default function Chatbot() {
    }
 
    // handle formState text change
-   function handleFormTextChange(newText: string) {
+   function setText(newText: string) {
       setFormState((pv) => ({ ...pv, text: newText }));
+   }
+
+   if (isNewChat) {
+      return (
+         <div className="h-full flex flex-1 flex-col">
+            {/* Main content - centered */}
+            <div className="flex-1 flex flex-col items-center justify-center space-y-3">
+               <div className="flex flex-row items-center space-x-3">
+                  <img
+                     src="../../../public/DeepSeek.png"
+                     alt="logo"
+                     className="w-15"
+                  />
+                  <div className="text-2xl">
+                     Your AI assistant for civic engagement!
+                  </div>
+               </div>
+               <div>
+                  How can I help you today?
+               </div>
+               <ChatbotForm
+                  handleSubmitForm={handleSubmitForm}
+                  setImage={setImage}
+                  setText={setText}
+                  imgPreview={imgPreview}
+                  formState={formState}
+                  isWaitingForRes={isWaitingForRes}
+               />
+            </div>
+         
+            {/* Footer - sticky bottom */}
+            <div className="sticky bottom-0 bg-white"> {/* Added bg-white to ensure visibility */}
+               <div className="text-xs m-2 text-center text-gray-500">
+                  {!coords && 
+                  <div className="font-bold flex flex-row items-center justify-center gap-1">
+                     <Info size={15} strokeWidth="3"/>This chatbot requires your location data for personalised recommendations.
+                  </div>
+                  }
+                  <div>AI-generated, for reference only.</div>
+               </div>
+            </div>
+         </div>
+      )
    }
 
    return (
       <div className="h-full flex flex-1 flex-col">
 
          <div className="flex-1 overflow-y-auto">
-            <MessagesDisplay messagesArr={messagesArr} />
+            <MessagesDisplay messages={messages} />
          </div>
 
          <div className="sticky bottom-0">
 
             <ChatbotForm
                handleSubmitForm={handleSubmitForm}
-               handleFormImgChange={handleFormImgChange}
-               handleFormTextChange={handleFormTextChange}
+               setImage={setImage}
+               setText={setText}
                imgPreview={imgPreview}
                formState={formState}
                isWaitingForRes={isWaitingForRes}

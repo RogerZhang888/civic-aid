@@ -18,6 +18,12 @@ export type Message = {
    timestamp: Date;
 }
 
+export type Chat = {
+   id: string;
+   title: string;
+   messages: Message[];
+}
+
 export type FormState = {
    text: string;
    img: File | null;
