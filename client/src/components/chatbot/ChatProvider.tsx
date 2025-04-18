@@ -229,8 +229,6 @@ export default function ChatProvider({
 
          chatsDispatch({ type: "ADD_NEW_CHAT", payload: newChat });
 
-         navigate(`/chat/${newChatUUID}`);
-
          return newChatUUID;
 
       }
@@ -311,10 +309,9 @@ export default function ChatProvider({
 
          chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer, chatId: chatId, queryId: newQueryUUID } });
 
-      }
+         navigate(`/chatbot/${chatId}`);
 
-
-      catch (error) {
+      } catch (error) {
 
          console.log(`Server replied with an error: \n${error}`);
 

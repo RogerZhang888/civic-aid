@@ -18,7 +18,8 @@ const zodSchema = z.object({
       .nonempty({ message: "Required" })
       .email({ message: "Invalid email" }),
 
-   password: z.string(),
+   password: z.string()
+      .nonempty({ message: "Required" }),
    //   .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, { message: "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number" }),
 
    confirmPassword: z.string()
@@ -85,7 +86,7 @@ export default function Register() {
          <fieldset className="fieldset">
             <legend className="fieldset-legend text-sm">Username</legend>
             <input
-               {...register("userName", { required: true })}
+               {...register("userName")}
                type="text"
                autoFocus={true}
                className="input text-lg w-full"
@@ -96,7 +97,7 @@ export default function Register() {
          <fieldset className="fieldset">
             <legend className="fieldset-legend text-sm">Email</legend>
             <input
-               {...register("email", { required: true })}
+               {...register("email")}
                type="email"
                className="input text-lg w-full"
             />
@@ -106,7 +107,7 @@ export default function Register() {
          <fieldset className="fieldset">
             <legend className="fieldset-legend text-sm">Password</legend>
             <input
-               {...register("password", { required: true })}
+               {...register("password")}
                type="password"
                className="input text-lg w-full"
             />
@@ -116,7 +117,7 @@ export default function Register() {
          <fieldset className="fieldset">
             <legend className="fieldset-legend text-sm">Confirm Password</legend>
             <input
-               {...register("confirmPassword", { required: true })}
+               {...register("confirmPassword")}
                type="password"
                className="input text-lg w-full"
             />
