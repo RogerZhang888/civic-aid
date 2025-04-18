@@ -220,7 +220,7 @@ export default function ChatProvider({
             { withCredentials: true }
          )
          chatsDispatch({ type: "ADD_NEW_CHAT", payload: newChat });
-         setTimeout(() => navigate(`/chat/${newChatUUID}`), 50);
+        
          return newChatUUID;
       }
       catch (error) {
@@ -292,10 +292,9 @@ export default function ChatProvider({
 
          chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer, chatId: chatId, queryId: newQueryUUID } });
 
-      }
+         navigate(`/chatbot/${chatId}`);
 
-
-      catch (error) {
+      } catch (error) {
 
          console.log(`Server replied with an error: \n${error}`);
 

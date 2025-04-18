@@ -88,7 +88,7 @@ export default function Login() {
          <fieldset className="fieldset">
             <legend className="fieldset-legend text-sm">Email</legend>
             <input
-               {...register("email", { required: true })}
+               {...register("email")}
                type="email"
                onBlur={() => trigger("email")}
                autoFocus={true}
@@ -100,7 +100,7 @@ export default function Login() {
          <fieldset className="fieldset">
             <legend className="fieldset-legend text-sm">Password</legend>
             <input
-               {...register("password", { required: true })}
+               {...register("password")}
                type="password"
                onBlur={() => trigger("password")}
                className="input text-lg w-full"
