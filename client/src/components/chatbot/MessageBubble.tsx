@@ -1,47 +1,36 @@
 import { memo } from "react";
-import { Message } from "../types";
+import { Query } from "../types";
 import { Image } from "lucide-react";
+import React from "react";
 
 function MessageBubble({
    message,
-   formatTime,
 }: {
-   message: Message;
-   formatTime: (d: Date) => string;
+   message: Query;
 }) {
-   // user message case
-   if (message.sender === "user") {
-      return (
-         <div key={message.id} className="chat chat-end tracking-wide">
+
+   return (
+      <React.Fragment key={message.id}>         
+         <div className="chat chat-end tracking-wide">
             <div className="chat-bubble space-y-1">
-               {message.text && <div>{message.text}</div>}
-               {message.img&&
+               {message.question && <div>{message.question}</div>}
+               {message.img &&
                   <div className="text-xs flex items-center space-x-1">
                      <Image size={16} />
                      <span>Image attached</span>
                   </div>
                }
             </div>
-            <div className="chat-footer mt-1">
-               {formatTime(message.timestamp)}
+         </div>
+         <div className="chat chat-start tracking-wide">
+            <div className="chat-bubble chat-bubble-primary">
+               {message.status === "pending" 
+                  ?  <span className="loading loading-dots loading-md"/>
+                  :  <div>{message.answer}</div>
+               }
             </div>
          </div>
-      );
-   }
-
-   // AI message case
-   return (
-      <div key={message.id} className="chat chat-start tracking-wide">
-         <div className="chat-bubble chat-bubble-primary">
-            {message.status === "pending" 
-               ?  <span className="loading loading-dots loading-md"/>
-               :  <div>{message.text}</div>
-            }
-         </div>
-         <div className="chat-footer text-sm mt-1">
-            {message.timestamp && formatTime(message.timestamp)}
-         </div>
-      </div>
+      </React.Fragment>
    );
 }
 

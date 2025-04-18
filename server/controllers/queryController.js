@@ -205,3 +205,14 @@ exports.submitQuery = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+function simulateLLMResponse() {
+   return new Promise((resolve) => {
+      setTimeout(() => {
+         resolve({
+            answer: generate({ exactly: 20, join: ' ' }),
+            confidence: 0.9,
+         });
+      }, 1000);
+   });
+}

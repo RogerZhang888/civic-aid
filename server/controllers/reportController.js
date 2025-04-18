@@ -1,5 +1,5 @@
-import pgsql from "../config/db";
-import { v4 as uuidv4 } from "uuid";
+import pgsql from "../config/db.js";
+import { v4 as uuidv4 } from 'uuid';
 
 // manually creates a report based on: 
 // 1. user_id (from JWT)

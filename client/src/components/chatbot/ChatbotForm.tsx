@@ -1,22 +1,17 @@
 import { ArrowUp, Image, X } from "lucide-react";
 import { useMemo, useRef } from "react"
-import { FormState } from "../types"
+import { useChatContext } from "./ChatContext";
 
-export default function ChatbotForm({
-   handleSubmitForm,
-   handleFormImgChange,
-   handleFormTextChange,
-   imgPreview,
-   formState,
-   isWaitingForRes,
-}: {
-   handleSubmitForm: () => Promise<void>
-   handleFormImgChange: (x: File | null) => void
-   handleFormTextChange: (x: string) => void
-   imgPreview: string | null
-   formState: FormState
-   isWaitingForRes: boolean
-}) {
+export default function ChatbotForm() {
+
+   const {
+      formState,
+      imgPreview,
+      handleAddQuery,
+      updateFormImage,
+      updateFormText,
+      isWaiting,
+   } = useChatContext();
 
    const fileInputRef = useRef<HTMLInputElement>(null);
    const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -35,7 +30,7 @@ export default function ChatbotForm({
          onSubmit={e => {
             e.preventDefault();
             if (validationError) return;
-            handleSubmitForm();
+            handleAddQuery();
             if (textAreaRef.current) textAreaRef.current.style.height = 'auto';
          }}
          className="bg-gray-200 rounded-xl p-4 mt-2 w-4/5 md:w-2/3 mx-auto
@@ -54,7 +49,7 @@ export default function ChatbotForm({
                   </div>
                   <button
                      type="button"
-                     onClick={() => handleFormImgChange(null)}
+                     onClick={() => updateFormImage(null)}
                      className="absolute -top-2 -right-2 bg-black text-white rounded-full p-1
                      hover:bg-gray-700 hover:cursor-pointer transition duration-300 ease-in-out"
                   >
@@ -75,7 +70,7 @@ export default function ChatbotForm({
                   ta.style.height = 'auto';
                   ta.style.height = `${ta.scrollHeight}px`;
                }
-               handleFormTextChange(ta.value)
+               updateFormText(ta.value)
             }}
             onKeyDown={e => {
                if (e.key === 'Enter' && !e.shiftKey) {
@@ -83,7 +78,7 @@ export default function ChatbotForm({
                   // Enter on its own will submit the form
                   e.preventDefault();
                   if (validationError) return;
-                  handleSubmitForm();
+                  handleAddQuery();
                   if (textAreaRef.current) textAreaRef.current.style.height = 'auto';
                }
             }}
@@ -100,7 +95,7 @@ export default function ChatbotForm({
                const { files } = e.target;
                if (!files || files.length === 0) return;
 
-               handleFormImgChange(files[0]);
+               updateFormImage(files[0]);
             }}
             accept="image/*"
             className="hidden"
@@ -138,7 +133,7 @@ export default function ChatbotForm({
             <div className="relative group">
                <button
                   type="submit"
-                  disabled={isWaitingForRes || !!validationError}
+                  disabled={isWaiting || !!validationError}
                   className=" 
                   bg-blue-600 text-white rounded-full p-2 w-10 h-10 flex justify-center items-center 
                   disabled:opacity-50 disabled:cursor-default 
