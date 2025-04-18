@@ -2,15 +2,15 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, MessageSquare, Plus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Chat } from "../types";
+import { useChatContext } from "./ChatContext";
 
-export default function ChatSidebar({ 
-   currChatId,
-   chats
-}: { 
-   currChatId: string | undefined
-   chats: Chat[]
-}) {
+export default function ChatSidebar() {
+
+   const {
+      chats,
+      currChatId
+   } = useChatContext();
+
    const [isExpanded, setIsExpanded] = useState(false);
    const navigate = useNavigate();
 
@@ -38,7 +38,10 @@ export default function ChatSidebar({
                      transition: { ease: "easeInOut"}
                   }}
                >
-                  <button className="flex items-center space-x-1 btn btn-info">
+                  <button 
+                     className="flex items-center space-x-1 btn btn-info"
+                     onClick={() => navigate("/chatbot")}
+                  >
                      <Plus size={25} />
                      <span className="text-xs">New chat</span>
                   </button>

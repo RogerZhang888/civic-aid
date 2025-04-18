@@ -1,22 +1,14 @@
 import { memo, useEffect, useRef } from "react";
-import { Message } from "../types";
+import { Query } from "../types";
 import MessageBubble from "./MessageBubble";
 
 function MessagesDisplay({
    messages
 }: {
-   messages: Message[]
+   messages: Query[]
 }) {
 
    const messagesEndRef = useRef<HTMLDivElement>(null);
-
-   // Format timestamp
-   function formatTime(d: Date) {
-      return d.toLocaleTimeString([], {
-         hour: "2-digit",
-         minute: "2-digit",
-      });
-   };
 
    // Auto-scroll to bottom whenever messages changes
    useEffect(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), [messages]);
@@ -24,7 +16,7 @@ function MessagesDisplay({
    return (
       <div className="overflow-y-auto p-4 text-lg">
 
-         {messages.map(msg => <MessageBubble message={msg} formatTime={formatTime} key={msg.id} />)}
+         {messages.map(msg => <MessageBubble message={msg} />)}
 
          <div ref={messagesEndRef} />
 
