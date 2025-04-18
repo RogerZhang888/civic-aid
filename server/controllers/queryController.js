@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const pgsql = require("../config/db");
 const { callModel } = require('../services/llmService');
-
+const { generate } = require('random-words');
 
 exports.submitQuery = async (req, res) => {
 
@@ -9,21 +9,10 @@ exports.submitQuery = async (req, res) => {
 
    try {
 
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate delay
-
-      // return res.json({ reply: "This is a mock reply", confidence: 0.9 });
-      // Extract form fields from req.body (processed by multer)
-      const { prompt, latitude, longitude, user_id } = req.body;
-      const userId = req.user?.id || user_id || null; // Use authenticated user ID if available
-
-      // File available in req.file
-      const uploadedFile = req.file;
-
-      console.log("Received prompt:", prompt);
-      console.log("Location:", latitude, longitude);
-      console.log("User ID:", userId);
-      console.log("Uploaded file:", uploadedFile);
-
+      // Extract from req.body (processed by multer) and auth middleware
+      const { prompt, chat_id } = req.body;
+      const userId = req.user.id;
+      
       // Process and store uploaded files (mock URLs for now)
       // const savedMedia = uploadedFiles.map((file) => {
       //    return {
@@ -35,55 +24,60 @@ exports.submitQuery = async (req, res) => {
       //    };
       // });
 
-      const queryType = "query";
-      const imagePath = uploadedFile?.path || null;
+      // let llmResponse;
+      // try {
+      //    llmResponse = await callModel({
+      //       query: prompt,
+      //       queryType,
+      //       imagePath
+      // });
+      // } catch (err) {
+      //    console.error("LLM model call failed:", err);
+      //    return res.status(500).json({ error: "Model failed to generate a response." });
+      // }
 
-    let llmResponse;
-    try {
-      llmResponse = await callModel({
-        query: prompt,
-        queryType,
-        imagePath
-      });
-    } catch (err) {
-      console.error("LLM model call failed:", err);
-      return res.status(500).json({ error: "Model failed to generate a response." });
-    }
+      // Simulate response for now
+      const { answer, confidence } = await simulateLLMResponse();
 
-    console.log(llmResponse)
+      console.log(answer)
 
-      // Save query to DB
-      // TODO: CHANGE TO NEON DB!!
-      // const result = await pgsql.query(
-      //    `INSERT INTO Queries
-      //  (user_id, chat_id, user_prompt, system_prompt, response, valid, reply, confidence)
-      //  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      //  RETURNING id, created_at`,
-      //    [
-      //       userId,
-      //       chatId,
-      //       prompt,
-      //       "System prompt placeholder",
-      //       llmResponse.answer,
-      //       true,
-      //       llmResponse.answer,
-      //       llmResponse.confidence?.score || 0,
-      //    ]
-      // );
-
-      // TODO: optionally save file paths in a separate table tied to queryId
+      // Insert the query into the database (fingers crossed)
+      await pgsql.query(
+         `INSERT INTO queries
+         (user_id, chat_id, user_prompt, media_url, query_location, system_prompt, response, sources, is_valid, to_reply, query_confidence)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+         [
+            userId, // user_id
+            chat_id, // chat_id
+            prompt, // user_prompt
+            [], // media_url: no media for now
+            null, // query_location: no location for now
+            "placeholder system prompt", // system_prompt: placeholder for now
+            answer, // response: llm response
+            [], // sources: no sources for now
+            true, // is_valid: true for now
+            true, // to_reply: true for now
+            confidence, // query_confidence
+         ]
+      );
 
       res.json({
-         // queryId: result.rows[0].id,
-         // reply: llmResponse.answer,
-         // confidence: llmResponse.confidence,
-         // uploadedMedia: savedMedia,
-         // location: latitude && longitude ? { latitude, longitude } : null,
-         // email,
-         reply: llmResponse
+         answer,
       });
+
    } catch (error) {
       console.error("Submit query error:", error);
       res.status(500).json({ error: error.message });
    }
 };
+
+function simulateLLMResponse() {
+   return new Promise((resolve) => {
+      setTimeout(() => {
+         resolve({
+            answer: generate({ exactly: 20, join: ' ' }),
+            confidence: 0.9,
+         });
+      }, 1000);
+   });
+}

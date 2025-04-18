@@ -5,18 +5,16 @@ exports.startNewChat = async (req, res) => {
    try {
       const userId = req.user.id; // from auth middleware
 
-      const newChatId = uuidv4();
+      console.log(req.body)
 
-      const result = await pgsql.query(
-         `INSERT INTO chats (id, user_id, type) VALUES ($1, $2, $3) RETURNING *`,
-         [newChatId, userId, 'unknown']
+      const { id, title, type, createdAt } = req.body;
+
+      await pgsql.query(
+         `INSERT INTO chats (id, user_id, type, created_at, title) VALUES ($1, $2, $3, $4, $5)`,
+         [id, userId, type, createdAt, title]
       );
 
-      if (result.length === 0) {
-         return res.status(500).json({ error: "Failed to create new chat" });
-      }
-
-      res.status(201).json(result[0]);
+      res.status(201).json({ success: true });
    } catch (err) {
       console.error("Failed to create new chat:", err);
       res.status(500).json({ error: "Failed to create new chat" });
@@ -24,36 +22,46 @@ exports.startNewChat = async (req, res) => {
 };
 
 exports.getChatHistory = async (req, res) => {
+
+   console.log("GETTING ALL CHAT HISTORY FOR USER");
+
    try {
       const userId = req.user.id; // from auth middleware
-      // const chatId = req.params.chatId; // get chatId from request parameters
-      // right now each user only has a single chat
-      // (TODO) WE WILL IMPLEMENT MULTIPLE CHATS ONCE THIS WORKS
 
       const chatRes = await pgsql.query(
          `SELECT * FROM chats WHERE user_id = $1`,
          [userId]
       );
 
-      if (chatRes.length === 0) {
-         return res.status(404).json({ error: "No chats found" });
-      };
+      console.log(chatRes)
 
-      const chatId = chatRes[0].id;
+      res.status(200).json(chatRes);
+      
+   } catch (err) {
+      console.error("Failed to fetch chat history:", err);
+      res.status(500).json({ error: "Failed to fetch user's chat history" });
+   }
+};
+
+exports.getSpecificChatHistory = async (req, res) => {
+
+   console.log("GETTING SPECIFIC CHAT HISTORY FOR USER");
+
+   try {
+      const userId = req.user.id; // from auth middleware
+      const chatId = req.params.chatId; // from request parameters
 
       const queriesRes = await pgsql.query(
-         `SELECT * FROM queries WHERE chat_id = $1 ORDER BY timestamp DESC`,
-         [chatId]
+         `SELECT * FROM queries WHERE user_id = $1 AND chat_id = $2`,
+         [userId, chatId]
       );
 
-      if (queriesRes.length === 0) {
-         return res.status(404).json({ error: `No queries found for chat id ${chatId}` });
-      }
+      console.log(queriesRes)
 
       res.status(200).json(queriesRes);
       
    } catch (err) {
-      console.error("Failed to fetch chat history:", err);
-      res.status(500).json({ error: "Failed to fetch chat history" });
+      console.error("Failed to fetch specific chat history:", err);
+      res.status(500).json({ error: "Failed to fetch user's specific chat history" });
    }
-};
+}
