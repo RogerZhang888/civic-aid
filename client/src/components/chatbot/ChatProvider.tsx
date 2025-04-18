@@ -184,73 +184,54 @@ export default function ChatProvider({
    }
 
    async function handleAddQuery() {
-
       setIsWaiting(true);
-
-      let chatId = currChatId;
-
-      try {
-
-         if (!currChatId) {
-            chatId = await handleCreateNewChat();
-         }
    
-         await handleAddQueryToExistingChat(chatId!);
-         
+      try {
+         // create new chat if needed and use a local variable to avoid depending on currChatId mid-function
+         const chatId = currChatId || await handleCreateNewChat();
+   
+         // ensure we don't continue if chat creation failed
+         if (!chatId) throw new Error("Failed to create chat");
+   
+         await handleAddQueryToExistingChat(chatId);
+   
       } catch (error) { 
-
-         console.log(error);
-
+         console.error("Failed to add query:", error);
+         toast.error("Something went wrong while sending your message");
       } finally {
          setIsWaiting(false);
       }
-
    }
+   
 
    async function handleCreateNewChat() {
-
       const newChatUUID = uuidv4();
-
       const newChat: Chat = {
          id: newChatUUID,
          title: "New Chat",
          type: "unknown",
          createdAt: new Date(),
          queries: [],
-      };
-      
+      };     
       try {
-
          await axios.post(
             `${SERVER_API_URL}/api/chats`, 
             newChat,
             { withCredentials: true }
          )
-
          chatsDispatch({ type: "ADD_NEW_CHAT", payload: newChat });
-
-         navigate(`/chat/${newChatUUID}`);
-
+        
          return newChatUUID;
-
       }
-
       catch (error) {
-
          toast.error("Error creating new chat");
-
          console.log(`Server replied with an error: \n${error}`);
-
          return newChatUUID;
-
       }
-
    }
-
+   
    async function handleAddQueryToExistingChat(chatId: string) {
-
       const newQueryUUID = uuidv4();
-
       const { text, img } = formState;
 
       const newQuery: Query = {
@@ -311,10 +292,9 @@ export default function ChatProvider({
 
          chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer, chatId: chatId, queryId: newQueryUUID } });
 
-      }
+         navigate(`/chatbot/${chatId}`);
 
-
-      catch (error) {
+      } catch (error) {
 
          console.log(`Server replied with an error: \n${error}`);
 
