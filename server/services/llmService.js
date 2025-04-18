@@ -8,7 +8,7 @@ const path = require('path');
 exports.callModel = async ({ query, queryType, imagePath = null }) => {
     // TEMPORARY CODE FOR TESTING
     return new Promise((res, rej) => {
-        resolve(`{\"type\":\"query\", \"confidence\":\"0.9\", \"source\":\"\"}`)
+        res(`{\"type\":\"question\", \"confidence\":\"0.9\", \"answer\":\"This is my very good answer\"}`)
     })
 
   return new Promise((resolve, reject) => {

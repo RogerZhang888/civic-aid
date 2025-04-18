@@ -8,8 +8,9 @@ const responseParsers = {
         // QUESTION, REPORT + CONFIDENCE, VALID
         let r = {type: undefined, valid: undefined, confidence: undefined}
         let parsed = JSON.parse(res)
+        console.log("Type decision parser JSON parse result", parsed)
 
-        if (!type in parsed || !confidence in parsed) r.valid = false
+        if (!("type" in parsed) || !("confidence" in parsed)) r.valid = false
         else {
             r = {
                 type: parsed.type,
@@ -17,7 +18,7 @@ const responseParsers = {
                 valid: true
             }
         }
-
+        console.log("Type decision parser validty", r)
         return r
     },
     defaultParser: (res) => {
@@ -25,7 +26,7 @@ const responseParsers = {
         let r = {answer: undefined, valid: undefined, confidence: undefined}
         let parsed = JSON.parse(res)
 
-        if (!answer in parsed || !confidence in parsed) r.valid = false
+        if (!("answer" in parsed) || !("confidence" in parsed)) r.valid = false
         else {
             r = {
                 answer: parsed.answer,
@@ -42,15 +43,22 @@ const responseParsers = {
 }
 
 const updateQueriesDB = (params)  => {
+    // TODO: Actually update the DB
+    return;
     params = {userId, chatId, userprompt, media, systemprompt, response, isValid, toReply, confidence}
     console.log("Updated Queries table", params)
 }
 
 const getChatHistory = async (chatId) => {
     // TODO: Check this SQL command
-    let chatHistory = pgsql.query("SELECT * FROM Queries WHERE chat_id = $1", chatId);
+    let chatHistory = await pgsql.query("SELECT * FROM Queries WHERE chat_id = $1", [chatId]);
     console.log("Extracting chat history", chatHistory)
     return chatHistory
+}
+const getChat = async (chatId) => {
+    let chat = await pgsql.query("SELECT * FROM Chats WHERE id = $1", [chatId])
+    console.log("Extracting chat info", chat)
+    return chat[0]
 }
 
 const getConfidence = (score) => {
@@ -63,6 +71,7 @@ const getConfidence = (score) => {
 // TOOD: media support
 const userquery = async (userprompt, userId, chatId) => {
     const chatHistory = await getChatHistory(chatId)
+    const chat = await getChat(chatId)
     let queriesTracker = []
 
     async function queryLLM(query, parseResponse=responseParsers.defaultParser, reply='NEVER') {
@@ -70,22 +79,27 @@ const userquery = async (userprompt, userId, chatId) => {
         // NEVER means this output is never used as a reply, 
         // ALWAYS means this output will always be used as a reply, 
         // HIGH means this output will be used as a reply only when the confidence is HIGH
+        console.log("Querying LLM", query)
 
         // TODO: check whats the arguments required etc for calling model
         let parsedRes
-        while (!parsedRes?.valid) {
+        let promptcount = 0
+        // Provisional limit for 1 reprompt only for testing
+        while (!parsedRes?.valid && promptcount < 1) {
+            promptcount++
             parsedRes = await callModel(query).then((res) => {
+                console.log(`${promptcount}: Received raw LLM response`, res)
                 parsed = parseResponse(res)
                 queryParams = {
                     userId, 
                     chatId, 
                     userprompt, 
                     systemprompt:query, 
-                    response:parsed.reply, 
+                    response:parsed.answer, 
                     isValid: parsed.valid, 
                     toReply:
-                        reply=='ALWAYS'?parsed.reply
-                        :(reply='HIGH'&&getConfidence(parsed.confidence)=='HIGH')?parsed.reply
+                        reply=='ALWAYS'?parsed.answer
+                        :(reply='HIGH'&&getConfidence(parsed.confidence)=='HIGH')?parsed.answer
                         :null, 
                     confidence:parsed.confidence
                 }
@@ -100,56 +114,57 @@ const userquery = async (userprompt, userId, chatId) => {
         }
         // TOOD: better way to reprompt for invalid output format?
 
+        console.log(`Result for query ${query}`, parsedRes)
         return parsedRes
     }
 
     let reply
     // TODO: queryLLM function missing parser specifications
-    if (!chat[chatId].type) {
+    if (chat.type == 'unknown') {
         systemprompt = systempromptTemplates.getTypeDecisionTemplate(userprompt)
-        response = queryLLM(systemprompt, responseParsers.typeDecisionParser, 'NEVER')
+        response = await queryLLM(systemprompt, responseParsers.typeDecisionParser, 'NEVER')
         
         if (getConfidence(response.confidence) == 'LOW' || getConfidence(response.confidence) == 'MED') {
             systemprompt = systempromptTemplates.clarifyTypeDecisionTemplate(userprompt)
-            response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-            reply = response.reply
+            response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            reply = response.answer
         } else if (getConfidence(response.confidence) == 'HIGH') {
-            chat[chatId].type = response.type
+            chat.type = response.type
         }
     }
 
-    if (chat[chatId].type == 'report') {
+    if (chat.type == 'report') {
         let systemprompt = systempromptTemplates.getReportTemplate(userprompt)
-        response = queryLLM(systemprompt, responseParsers.reportParser, 'HIGH')
+        response = await queryLLM(systemprompt, responseParsers.reportParser, 'HIGH')
 
         if (getConfidence(response.confidence) == 'LOW') {
             systemprompt = systempromptTemplates.clarifyReportTemplateLow(userprompt)
-            response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-            reply=response.reply
+            response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            reply=response.answer
         } else if (getConfidence(response.confidence) == 'MED') {
             systemprompt = systempromptTemplates.clarifyReportTemplateMed(userprompt)
-            response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-            reply = response.reply 
+            response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            reply = response.answer 
         } else if (getConfidence(response.confidence) == 'HIGH') {
             // By the original prompt, this should be a report format already?? TODO: verify this
-            reply = response.reply 
+            reply = response.answer 
         }
     }
 
-    if (chat[chatId].type == 'question') {
+    if (chat.type == 'question') {
         let systemprompt = systempromptTemplates.getQuestionTemplate(userprompt)
-        response = queryLLM(systemprompt, responseParsers.defaultParser, 'HIGH')
+        response = await queryLLM(systemprompt, responseParsers.defaultParser, 'HIGH')
 
         if (getConfidence(response.confidence) == 'LOW') {
             systemprompt = systempromptTemplates.clarifyQuestionTemplateLow(userprompt)
-            response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-            reply = response.reply 
+            response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            reply = response.answer 
         } else if (getConfidence(response.confidence) == 'MED') {
             systemprompt = systempromptTemplates.clarifyQuestionTemplateMed(userprompt)
-            response = queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-            reply = response.reply 
+            response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            reply = response.answer 
         } else if (getConfidence(response.confidence) == 'HIGH') {
-            reply = response.reply 
+            reply = response.answer 
         }
     }
     
@@ -161,14 +176,14 @@ const userquery = async (userprompt, userId, chatId) => {
 
 exports.submitQuery = async (req, res) => {
   try {
-    const { prompt, latitude, longitude, email, chatId } = req.body;
+    const { prompt, latitude, longitude, chatId } = req.body;
     const userId = req.user?.id || null;
-    const uploadedFiles = req.files || [];
+    // const uploadedFiles = req.files || [];
 
       console.log("Received prompt:", prompt);
       console.log("Location:", latitude, longitude);
       console.log("User ID:", userId);
-      console.log("Uploaded file:", uploadedFile);
+    //   console.log("Uploaded file:", uploadedFile);
 
     if (!prompt) {
       return res.status(400).json({ error: "Prompt is required" });
