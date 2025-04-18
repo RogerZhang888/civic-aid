@@ -18,7 +18,8 @@ const zodSchema = z.object({
       .nonempty({ message: "Required" })
       .email({ message: "Invalid email" }),
 
-   password: z.string(),
+   password: z.string()
+      .nonempty({ message: "Required" }),
    //   .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, { message: "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number" }),
 
    confirmPassword: z.string()
