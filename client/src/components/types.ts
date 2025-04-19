@@ -27,8 +27,9 @@ export type ChatContextType = {
    formState: FormState;
    imgPreview: string | null;
    handleAddQuery: () => Promise<void>;
-   updateFormImage: (param: File | null) => void;
-   updateFormText: (param: string) => void;
+   updateFormImage: (_: File | null) => void;
+   updateFormText: (_: string) => void;
+   deleteChat: (_: string) => void;
    coords: GeolocationCoordinates | undefined;
    isWaiting: boolean;
 }
@@ -40,7 +41,7 @@ export type User = {
 }
 
 export type LoginFields = {
-   email: string;
+   userName: string;
    password: string;
 }
 
