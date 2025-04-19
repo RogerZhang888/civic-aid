@@ -39,7 +39,7 @@ export default function ChatSidebar() {
                   }}
                >
                   <button 
-                     className="flex items-center space-x-1 btn btn-info"
+                     className="flex bg-primary-content border-primary-content items-center space-x-1 btn btn-info hover:bg-primary-content/90 border-primary-content/90"
                      onClick={() => navigate("/chatbot")}
                   >
                      <Plus size={25} />
@@ -104,7 +104,7 @@ export default function ChatSidebar() {
                         ? chats.map(chat => (
                               <button
                                  key={chat.id}
-                                 className={`btn btn-outline btn-info ${currChatId === chat.id ? "btn-active" : ""}`}
+                                 className={`btn text-primary-content bg-primary border-primary btn-outline hover:bg-secondary shadow-none btn-info ${currChatId === chat.id ? "btn-active bg-secondary" : "bg-primary"}`}
                                  onClick={() => navigate(`/chatbot/${chat.id}`)}
                               >
                                  {chat.title}

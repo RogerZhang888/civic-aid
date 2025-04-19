@@ -15,15 +15,15 @@ export default function Navbar() {
 
    if (isLoading) {
       return (
-         <div className="navbar shadow-sm bg-primary text-primary-content">
+         <div className="navbar shadow-sm bg-secondary text-primary-content">
             <Link to="/" className="btn btn-ghost text-2xl">
-               Civic-AId
+               CivicAId
             </Link>
          </div>
       );
    }
-
    return (
+      
       <div className="navbar shadow-sm bg-primary text-primary-content px-4">
          <div className="navbar-start">
             
@@ -35,6 +35,7 @@ export default function Navbar() {
                   >
                      <AlignJustify size={25}/>
                   </button>
+
                   <ul
                      className="menu dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-black"
                   >
