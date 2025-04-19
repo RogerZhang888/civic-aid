@@ -1,46 +1,8 @@
 const { v4: uuidv4 } = require('uuid');
 const pgsql = require("../config/db");
 const { callModel } = require('../services/llmService');
-const { systempromptTemplates } = require('../promptbook/promptbook');
-
-const responseParsers = {
-    typeDecisionParser: (res) => {
-        // QUESTION, REPORT + CONFIDENCE, VALID
-        let r = {type: undefined, valid: undefined, confidence: undefined}
-        let parsed = JSON.parse(res)
-        console.log("Type decision parser JSON parse result", parsed)
-
-        if (!("type" in parsed) || !("confidence" in parsed)) r.valid = false
-        else {
-            r = {
-                type: parsed.type,
-                confidence: parsed.confidence,
-                valid: true
-            }
-        }
-        console.log("Type decision parser validty", r)
-        return r
-    },
-    defaultParser: (res) => {
-        // Just standard answer + confidence parser
-        let r = {answer: undefined, valid: undefined, confidence: undefined}
-        let parsed = JSON.parse(res)
-
-        if (!("answer" in parsed) || !("confidence" in parsed)) r.valid = false
-        else {
-            r = {
-                answer: parsed.answer,
-                confidence: parsed.confidence,
-                valid: true
-            }
-        }
-
-        return r
-    },
-    reportParser: (res) => {
-        return JSON.parse(res)
-    }
-}
+const { systempromptTemplates } = require('../services/promptbook');
+const { responseParsers } = require('../services/parsers');
 
 const updateQueriesDB = (params)  => {
     // TODO: Actually update the DB
@@ -95,13 +57,14 @@ const userquery = async (userprompt, userId, chatId) => {
                     chatId, 
                     userprompt, 
                     systemprompt:query, 
-                    response:parsed.answer, 
+                    response:res, 
                     isValid: parsed.valid, 
                     toReply:
                         reply=='ALWAYS'?parsed.answer
                         :(reply='HIGH'&&getConfidence(parsed.confidence)=='HIGH')?parsed.answer
                         :null, 
-                    confidence:parsed.confidence
+                    confidence:parsed.confidence,
+                    sources:parsed.sources,
                 }
                 updateQueriesDB(queryParams) // For long term record in DB
                 queriesTracker.push(queryParams) // For temporary tracking
@@ -118,7 +81,7 @@ const userquery = async (userprompt, userId, chatId) => {
         return parsedRes
     }
 
-    let reply
+    let answer
     // TODO: queryLLM function missing parser specifications
     if (chat.type == 'unknown') {
         systemprompt = systempromptTemplates.getTypeDecisionTemplate(userprompt)
@@ -127,7 +90,7 @@ const userquery = async (userprompt, userId, chatId) => {
         if (getConfidence(response.confidence) == 'LOW' || getConfidence(response.confidence) == 'MED') {
             systemprompt = systempromptTemplates.clarifyTypeDecisionTemplate(userprompt)
             response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-            reply = response.answer
+            answer = response.answer
         } else if (getConfidence(response.confidence) == 'HIGH') {
             chat.type = response.type
         }
@@ -140,14 +103,14 @@ const userquery = async (userprompt, userId, chatId) => {
         if (getConfidence(response.confidence) == 'LOW') {
             systemprompt = systempromptTemplates.clarifyReportTemplateLow(userprompt)
             response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-            reply=response.answer
+            answer=response.answer
         } else if (getConfidence(response.confidence) == 'MED') {
             systemprompt = systempromptTemplates.clarifyReportTemplateMed(userprompt)
             response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-            reply = response.answer 
+            answer = response.answer 
         } else if (getConfidence(response.confidence) == 'HIGH') {
             // By the original prompt, this should be a report format already?? TODO: verify this
-            reply = response.answer 
+            answer = response.answer 
         }
     }
 
@@ -158,23 +121,24 @@ const userquery = async (userprompt, userId, chatId) => {
         if (getConfidence(response.confidence) == 'LOW') {
             systemprompt = systempromptTemplates.clarifyQuestionTemplateLow(userprompt)
             response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-            reply = response.answer 
+            answer = response.answer 
         } else if (getConfidence(response.confidence) == 'MED') {
             systemprompt = systempromptTemplates.clarifyQuestionTemplateMed(userprompt)
             response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
-            reply = response.answer 
+            answer = response.answer 
         } else if (getConfidence(response.confidence) == 'HIGH') {
-            reply = response.answer 
+            answer = response.answer 
         }
     }
     
     return {
         queries: queriesTracker,
-        reply
+        answer
     }
 }
 
 exports.submitQuery = async (req, res) => {
+    // TODO: Add validation to verify that the user is accessing his own chat
   try {
     const { prompt, latitude, longitude, chatId } = req.body;
     const userId = req.user?.id || null;
@@ -206,9 +170,11 @@ exports.submitQuery = async (req, res) => {
     // const imagePath = uploadedFiles.length > 0 ? uploadedFiles[0].path : null;
 
     userquery(prompt, userId, chatId).then((r) => {
+        // TOOD: Remove queries history
         res.json({
-            reply: r.reply,
+            answer: r.answer,
             queries: r.queries, 
+            sources: r.sources,
         })
     }).catch((err) => {
         console.error("Error handling user query", err);
