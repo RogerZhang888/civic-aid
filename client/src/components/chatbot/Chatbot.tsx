@@ -17,7 +17,7 @@ export default function Chatbot() {
                <div className="flex flex-row items-center space-x-3">
                   
                   <div className="text-2xl">
-                     Your AI assistant for civic engagement!
+                     Hi! I'm CivLeo, your friendly neighbourhood assistant.
                   </div>
                </div>
                <div>How can I help you today?</div>

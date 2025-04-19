@@ -109,8 +109,8 @@ export default function ChatSidebar() {
                                  onClick={() => navigate(`/chatbot/${chat.id}`)}
                               >
                                  <button
-                                    className={`w-full btn btn-outline btn-info ${currChatId === chat.id ? "btn-active" : ""}`}
-                                    onClick={() => navigate(`/chatbot/${chat.id}`)}
+                                    
+
                                  >
                                     {chat.title}
                                  </button>
