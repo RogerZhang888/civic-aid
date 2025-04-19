@@ -38,6 +38,13 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 base_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device)
 
+# --- Freeze the image tower and visual projection ---
+for param in base_model.vision_model.parameters():
+    param.requires_grad = False
+
+for param in base_model.visual_projection.parameters():
+    param.requires_grad = False
+
 # --- Chunking Functions ---
 def chunk_text(text: str, processor: CLIPProcessor) -> List[str]:
     """Split text into CLIP-friendly chunks with overlap."""
@@ -186,7 +193,7 @@ def main():
     required_files = [
     "config.json",
     "preprocessor_config.json",
-    "pytorch_model.bin",  # or model.safetensors if using safe_serialization
+    #"pytorch_model.bin",  # or model.safetensors if using safe_serialization
     "special_tokens_map.json",
     "tokenizer_config.json",
     "vocab.json"
