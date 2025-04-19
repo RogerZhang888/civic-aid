@@ -57,7 +57,7 @@ export default function Navbar() {
             }
 
             <Link to="/" className="text-2xl font-bold">
-               Civic-AId
+               CivicAId
             </Link>
 
             {user && (
