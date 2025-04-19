@@ -2,45 +2,12 @@ import { Info } from "lucide-react";
 import ChatbotForm from "./ChatbotForm";
 import MessagesDisplay from "./MessagesDisplay";
 import { useChatContext } from "./ChatContext";
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
-const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL; 
-import { Chat } from "../types"; 
 
 export default function Chatbot() {
-   const { chats, currChatId, coords, chatsDispatch } = useChatContext();
-   const { chatId } = useParams();
-   const [isLoading, setIsLoading] = useState(false);
-   const [localChat, setLocalChat] = useState<Chat | null>(null);
 
-   const currChat = chats.find(chat => chat.id === currChatId || chat.id === chatId) || localChat;
+   const { chats, currChatId, coords } = useChatContext();
 
-   useEffect(() => {
-      if (!currChat && chatId) {
-         const fetchChat = async () => {
-            setIsLoading(true);
-            try {
-               const res = await axios.get(`${SERVER_API_URL}/api/chats/${chatId}`, { withCredentials: true });
-               setLocalChat(res.data);
-               chatsDispatch({ type: "ADD_NEW_CHAT", payload: res.data });
-            } catch (error) {
-               console.error("Failed to fetch chat:", error);
-            } finally {
-               setIsLoading(false);
-            }
-         };
-         fetchChat();
-      }
-   }, [chatId, currChat]);
-
-   if (isLoading) {
-      return (
-         <div className="h-full flex items-center justify-center">
-            <div className="text-gray-500">Loading chat...</div>
-         </div>
-      );
-   }
+   const currChat = chats.find(chat => chat.id === currChatId);
 
    if (!currChat) {
       return (

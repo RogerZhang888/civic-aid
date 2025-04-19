@@ -5,6 +5,7 @@ export type Query = {
    answer: string;
    timestamp: Date;
    status: "pending" | "finished" | "error";
+   sources?: string[];
 }
 
 export type Chat = {
