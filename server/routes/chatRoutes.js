@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
-const { startNewChat, getChatHistory, getSpecificChatHistory } = require('../controllers/chatController');
+const { 
+   startNewChat, 
+   getChatHistory, 
+   getSpecificChatHistory,
+   deleteSpecificChat
+} = require('../controllers/chatController');
 
 // Endpoint to start a new chat for a user
 router.post('/chats', authMiddleware, startNewChat);
@@ -11,5 +16,8 @@ router.get('/chats', authMiddleware, getChatHistory);
 
 // Endpoint to get chat history for a specific chat
 router.get('/chats/:chatId', authMiddleware, getSpecificChatHistory);
+
+// Endpoint to delete a chat
+router.delete('/chats/:chatId', authMiddleware, deleteSpecificChat);
 
 module.exports = router;

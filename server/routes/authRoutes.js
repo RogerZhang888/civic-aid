@@ -61,47 +61,34 @@ router.post("/login", async (req, res) => {
 
    try {
 
-      const { email: reqEmail, password } = req.body;
-      const pgsqlLoginRes = await pgsql.query("SELECT * FROM users WHERE email = $1", [reqEmail]);
-
-      // this is an array of rows that match query
-      // pgsqlLoginRes = [
-      //    {
-      //      id: 17,
-      //      name: 'qwertyuiop',
-      //      password: '$2b$10$lqcBkJQxzOIX3LWiLmlYP.oIJcdijYILBqgglmvmu4D1vAJYqsHOa',
-      //      email: 'jhwang0324@gmail.com',
-      //      singpass_verified: false
-      //    }
-      // ]
-      // if user exists, will have length 1
-      // will have id, name, password, email, singpass_verified fields
+      const { userName: reqUserName, password } = req.body;
+      const pgsqlLoginRes = await pgsql.query("SELECT * FROM users WHERE name = $1", [reqUserName]);
 
       if (pgsqlLoginRes.length === 0 || !(await bcrypt.compare(password, pgsqlLoginRes[0].password))) {
          console.log("invalid credentials");
          return res.status(401).json({ error: "invalid credentials" });
       }
 
-      const { id, name: userName, email: resEmail } = pgsqlLoginRes[0];
+      const { id, name: resUserName, email: resEmail } = pgsqlLoginRes[0];
 
       const token = jwt.sign(
          { 
             id,
-            userName: userName,
+            userName: resUserName,
             email: resEmail
          },
          process.env.JWT_SECRET,
          { expiresIn: 60 * 60 }
       );
 
-      console.log(`User ${resEmail} logged in successfully`);
+      console.log(`User ${resUserName} logged in successfully`);
 
       res.cookie("token", token, { 
          httpOnly: true,
          secure: process.env.NODE_ENV === "production",
          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
       });
-      res.json({ id, userName, email: resEmail });
+      res.json({ id, userName: resUserName, email: resEmail });
 
    } catch (error) {
       console.log(error);

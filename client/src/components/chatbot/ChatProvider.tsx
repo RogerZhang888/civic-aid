@@ -12,9 +12,56 @@ type Action =
    | { type: "UPDATE_ALL_QUERIES_OF_CHAT"; payload: { chatId: string, queries: Query[] } }
    | { type: "ADD_NEW_CHAT"; payload: Chat }
    | { type: "UPDATE_CHAT_WITH_NEW_QUERY"; payload: { newQuery: Query, chatId: string } }
-   | { type: "UPDATE_QUERY_WITH_ANSWER"; payload: { answer: string, chatId: string, queryId: string } };
+   | { type: "UPDATE_QUERY_WITH_ANSWER"; payload: { answer: string, chatId: string, queryId: string } }
+   | { type: "DELETE_CHAT"; payload: { chatId: string } }
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
+
+function chatReducer(state: Chat[], action: Action): Chat[] {
+   switch (action.type) {
+
+      case "GET_ALL_CHATS":
+         return action.payload;
+      
+      case "UPDATE_ALL_QUERIES_OF_CHAT":
+         return state.map(chat => 
+            chat.id === action.payload.chatId
+               ?  { ...chat, queries: action.payload.queries }
+               :  chat
+         );
+
+      case "ADD_NEW_CHAT":
+         return [...state, action.payload];
+
+      case "UPDATE_CHAT_WITH_NEW_QUERY":
+         return state.map(chat => 
+            chat.id === action.payload.chatId
+               ?  { ...chat, queries: [...chat.queries, action.payload.newQuery] }
+               :  chat
+         );
+      
+      case "UPDATE_QUERY_WITH_ANSWER":
+         return state.map(chat => 
+            chat.id === action.payload.chatId
+               ?  {
+                  ...chat,
+                  queries: chat.queries.map(query => 
+                     query.id === action.payload.queryId
+                        ?  { ...query, answer: action.payload.answer, status: "finished" }
+                        :  query
+                  )
+               }
+               :  chat
+         );
+      
+      case "DELETE_CHAT":
+         return state.filter(chat => chat.id !== action.payload.chatId);
+
+      default:
+         throw new Error('Unknown action');
+
+   }
+}
 
 export default function ChatProvider({ 
    children, 
@@ -90,49 +137,6 @@ export default function ChatProvider({
 
    }, [currChatId])
 
-   function chatReducer(state: Chat[], action: Action): Chat[] {
-      switch (action.type) {
-
-         case "GET_ALL_CHATS":
-            return action.payload;
-         
-         case "UPDATE_ALL_QUERIES_OF_CHAT":
-            return state.map(chat => 
-               chat.id === action.payload.chatId
-                  ?  { ...chat, queries: action.payload.queries }
-                  :  chat
-            );
-
-         case "ADD_NEW_CHAT":
-            return [...state, action.payload];
-
-         case "UPDATE_CHAT_WITH_NEW_QUERY":
-            return state.map(chat => 
-               chat.id === action.payload.chatId
-                  ?  { ...chat, queries: [...chat.queries, action.payload.newQuery] }
-                  :  chat
-            );
-         
-         case "UPDATE_QUERY_WITH_ANSWER":
-            return state.map(chat => 
-               chat.id === action.payload.chatId
-                  ?  {
-                     ...chat,
-                     queries: chat.queries.map(query => 
-                        query.id === action.payload.queryId
-                           ?  { ...query, answer: action.payload.answer, status: "finished" }
-                           :  query
-                     )
-                  }
-                  :  chat
-            );
-
-         default:
-            throw new Error('Unknown action');
-
-      }
-   }
-
    // get user's coordinates
    // browser will ask for permission
    // if no permission granted, wont be sent in formdata
@@ -203,7 +207,6 @@ export default function ChatProvider({
       }
    }
    
-
    async function handleCreateNewChat() {
 
       console.log("Creating new chat");
@@ -316,11 +319,27 @@ export default function ChatProvider({
       }
    }
 
+   async function deleteChat(chatIdToDelete: string) {
+      try {
+         await axios.delete(
+            `${SERVER_API_URL}/api/chats/${chatIdToDelete}`,
+            { withCredentials: true }
+         );
+         chatsDispatch({ type: "DELETE_CHAT", payload: { chatId: chatIdToDelete } });
+         toast.success(`Chat ${chatIdToDelete} deleted successfully`);
+         navigate("/chatbot");
+      } catch (error) {
+         console.error("Failed to delete chat:", error);
+         toast.error("Failed to delete chat");
+      }
+   }
+
    return (
       <ChatContext.Provider value={{ 
          handleAddQuery,
          updateFormImage,
          updateFormText,
+         deleteChat,
          chats,
          formState,
          imgPreview,
