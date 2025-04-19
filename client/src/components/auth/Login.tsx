@@ -116,7 +116,7 @@ export default function Login() {
             <button
                type="submit"
                disabled={!isDirty || !isValid || isSubmitting}
-               className="btn btn-wide btn-lg btn-success"
+               className="btn btn-wide btn-lg bg-primary-content text-primary hover:bg-primary hover:text-primary-content"
             >
                {isSubmitting 
                   ?  <span className="loading loading-dots loading-md"/>
@@ -124,7 +124,7 @@ export default function Login() {
                }
             </button>
             <div>
-               No account? <Link to="/auth/reg" className="link">Register</Link>
+               No account? <Link to="/auth/reg" className="link link-hover">Register</Link>
             </div>
          </div>
 
