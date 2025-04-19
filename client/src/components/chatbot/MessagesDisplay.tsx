@@ -16,7 +16,7 @@ function MessagesDisplay({
    return (
       <div className="overflow-y-auto p-4 text-lg">
 
-         {messages.map(msg => <MessageBubble message={msg} />)}
+         {messages.map(msg => <MessageBubble message={msg} key={msg.id}/>)}
 
          <div ref={messagesEndRef} />
 

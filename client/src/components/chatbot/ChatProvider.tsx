@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
 
 type Action = 
-   | { type: "INIT"; payload: Chat[] }
+   | { type: "GET_ALL_CHATS"; payload: Chat[] }
    | { type: "UPDATE_ALL_QUERIES_OF_CHAT"; payload: { chatId: string, queries: Query[] } }
    | { type: "ADD_NEW_CHAT"; payload: Chat }
    | { type: "UPDATE_CHAT_WITH_NEW_QUERY"; payload: { newQuery: Query, chatId: string } }
@@ -52,7 +52,7 @@ export default function ChatProvider({
             createdAt: new Date(chat.created_at),
             queries: [],
          }));
-         chatsDispatch({ type: "INIT", payload: formattedChats });
+         chatsDispatch({ type: "GET_ALL_CHATS", payload: formattedChats });
       }
 
       fetchAllChats()
@@ -93,7 +93,7 @@ export default function ChatProvider({
    function chatReducer(state: Chat[], action: Action): Chat[] {
       switch (action.type) {
 
-         case "INIT":
+         case "GET_ALL_CHATS":
             return action.payload;
          
          case "UPDATE_ALL_QUERIES_OF_CHAT":
@@ -183,20 +183,20 @@ export default function ChatProvider({
       setFormState((pv) => ({ ...pv, text: newText }));
    }
 
+   // handle form submission
    async function handleAddQuery() {
       setIsWaiting(true);
    
       try {
-         // create new chat if needed and use a local variable to avoid depending on currChatId mid-function
+
          const chatId = currChatId || await handleCreateNewChat();
    
-         // ensure we don't continue if chat creation failed
          if (!chatId) throw new Error("Failed to create chat");
    
          await handleAddQueryToExistingChat(chatId);
    
       } catch (error) { 
-         console.error("Failed to add query:", error);
+         console.error("Failed to send query:", error);
          toast.error("Something went wrong while sending your message");
       } finally {
          setIsWaiting(false);
@@ -205,32 +205,40 @@ export default function ChatProvider({
    
 
    async function handleCreateNewChat() {
+
+      console.log("Creating new chat");
+
       const newChatUUID = uuidv4();
+
       const newChat: Chat = {
          id: newChatUUID,
-         title: "New Chat",
+         title: newChatUUID.slice(0, 7),
          type: "unknown",
          createdAt: new Date(),
          queries: [],
-      };     
+      };
+
       try {
          await axios.post(
             `${SERVER_API_URL}/api/chats`, 
             newChat,
             { withCredentials: true }
          )
+
          chatsDispatch({ type: "ADD_NEW_CHAT", payload: newChat });
-        
+
+         console.log(`New chat ${newChatUUID} created successfully `);
+
          return newChatUUID;
-      }
-      catch (error) {
+      } catch (error) {
          toast.error("Error creating new chat");
          console.log(`Server replied with an error: \n${error}`);
-         return newChatUUID;
       }
+
    }
    
-   async function handleAddQueryToExistingChat(chatId: string) {
+   async function handleAddQueryToExistingChat(chatIdToAddQueryTo: string) {
+
       const newQueryUUID = uuidv4();
       const { text, img } = formState;
 
@@ -243,24 +251,20 @@ export default function ChatProvider({
          timestamp: new Date(),
       };
 
-      chatsDispatch({ type: "UPDATE_CHAT_WITH_NEW_QUERY", payload: { newQuery, chatId }});
+      chatsDispatch({ type: "UPDATE_CHAT_WITH_NEW_QUERY", payload: { newQuery, chatId: chatIdToAddQueryTo }});
 
       // reset formState and image previews
       setFormState({ text: "", img: null });
       setImgPreview(null);
 
-      // make the request body in the POST request
       const fd = new FormData();
-      // append the text
       fd.append('prompt', text || "NO TEXT PROVIDED");
-      // append the image file if available
       if (img) fd.append('image', img);
-      // append user location data, if available
       if (coords) {
          fd.append('latitude', coords.latitude.toString());
          fd.append('longitude', coords.longitude.toString());
       }
-      fd.append('chat_id', chatId);
+      fd.append('chat_id', chatIdToAddQueryTo);
 
       /**
        *  fd will contain the following:
@@ -268,15 +272,17 @@ export default function ChatProvider({
        * - image: the image file uploaded by the user (if available)
        * - latitude: the user's latitude (if available)
        * - longitude: the user's longitude (if available)
-       * - chat_id: the chat ID from the URL (will be available, this is an existing chat)
+       * - chat_id: the chat ID
        */
 
+      console.log("FormData to be sent to server:");
       console.log(fd);
 
       try {
 
-         // send HTTP POST request
-         const res = await axios.post(`${SERVER_API_URL}/api/query`, fd,
+         const res = await axios.post(
+            `${SERVER_API_URL}/api/query`, 
+            fd,
             {
                maxContentLength: 100 * 1024 * 1024,
                maxBodyLength: 100 * 1024 * 1024,
@@ -285,14 +291,13 @@ export default function ChatProvider({
             }
          )
 
-         // extract res data (this format might change later)
          const { answer } = res.data as { answer: string };
 
          console.log(`Server replied with "${answer}"`);
 
-         chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer, chatId: chatId, queryId: newQueryUUID } });
+         chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer, chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
 
-         navigate(`/chatbot/${chatId}`);
+         navigate(`/chatbot/${chatIdToAddQueryTo}`);
 
       } catch (error) {
 
@@ -300,11 +305,11 @@ export default function ChatProvider({
 
          if (axios.isAxiosError(error)) {
 
-            chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer: error.message, chatId: chatId, queryId: newQueryUUID } });
+            chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer: error.message, chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
 
          } else {
 
-            chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer: "An unknown error occurred", chatId: chatId, queryId: newQueryUUID } });
+            chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer: "An unknown error occurred", chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
    
          }
 

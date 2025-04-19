@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, MessageSquare, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageSquare, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useChatContext } from "./ChatContext";
@@ -101,19 +101,30 @@ export default function ChatSidebar() {
                >
                   <div className="flex flex-col space-y-3">
                      {chats.length > 0
-                        ? chats.map(chat => (
-                              <button
+                        ?  chats.map(chat =>
+                              <div
                                  key={chat.id}
+
                                  className={`btn text-primary-content bg-primary border-primary btn-outline hover:bg-secondary shadow-none btn-info ${currChatId === chat.id ? "btn-active bg-secondary" : "bg-primary"}`}
                                  onClick={() => navigate(`/chatbot/${chat.id}`)}
                               >
-                                 {chat.title}
-                              </button>
-                           ))
+                                 <button
+                                    className={`w-full btn btn-outline btn-info ${currChatId === chat.id ? "btn-active" : ""}`}
+                                    onClick={() => navigate(`/chatbot/${chat.id}`)}
+                                 >
+                                    {chat.title}
+                                 </button>
+
+                                 <button
+                                    className="absolute btn btn-circle btn-warning btn-xs right-2 top-1/2 -translate-y-1/2"
+                                 >
+                                    <Trash2 size={15} />
+                                 </button>
+                              </div>
+                           )
                         :  <div className="text-center text-sm">
                               No chats available. Start a new chat!
                            </div>
-
                      }
                   </div>
                </motion.div>
