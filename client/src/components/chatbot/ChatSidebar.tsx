@@ -39,8 +39,9 @@ export default function ChatSidebar() {
                      transition: { ease: "easeInOut" },
                   }}
                >
-                  <button
-                     className="flex items-center space-x-1 btn btn-info"
+
+                  <button 
+                     className="flex bg-primary-content border-primary-content items-center space-x-1 btn btn-info hover:bg-primary-content/90 border-primary-content/90"
                      onClick={() => navigate("/chatbot")}
                   >
                      <Plus size={25} />

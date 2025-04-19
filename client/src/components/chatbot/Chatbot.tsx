@@ -13,23 +13,24 @@ export default function Chatbot() {
       return (
          <div className="h-full flex flex-1 flex-col">
             <div className="flex-1 flex flex-col items-center justify-center space-y-3">
+            <img src="/mascot.png" alt="logo" className="w-50" />
                <div className="flex flex-row items-center space-x-3">
-                  <img src="/DeepSeek.png" alt="logo" className="w-15" />
+                  
                   <div className="text-2xl">
-                     Your AI assistant for civic engagement!
+                     Hi! I'm CivLeo, your friendly neighbourhood assistant.
                   </div>
                </div>
                <div>How can I help you today?</div>
                <ChatbotForm/>
             </div>
-            <div className="sticky bottom-0 bg-white">
+            <div className="sticky bottom-0">
                <div className="text-xs m-2 text-center text-gray-500">
                   {!coords && 
                      <div className="font-bold flex flex-row items-center justify-center gap-1">
                         <Info size={15} strokeWidth="3"/>This chatbot requires your location data for personalised recommendations.
                      </div>
                   }
-                  <div>CivicAId can make mistakes. Check official government websites for important information.</div>
+                  <div >CivicAId can make mistakes. Check official government websites for important information.</div>
                </div>
             </div>
          </div>
@@ -50,7 +51,7 @@ export default function Chatbot() {
                      <Info size={15} strokeWidth="3"/>This chatbot requires your location data for personalised recommendations.
                   </div>
                }
-               <div>AI-generated, for reference only.</div>
+               <div>CivicAId can make mistakes. Check official government websites for important information.</div>
             </div>
          </div>
       </div>

@@ -14,7 +14,8 @@ function MessagesDisplay({
    useEffect(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), [messages]);
 
    return (
-      <div className="overflow-y-auto p-4 text-lg">
+      
+      <div className=" p-4 text-lg">
 
          {messages.map(msg => <MessageBubble message={msg} key={msg.id}/>)}
 
