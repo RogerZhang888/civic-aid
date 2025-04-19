@@ -14,6 +14,16 @@ import time
 from sklearn.feature_extraction.text import TfidfVectorizer
 from scipy.sparse import save_npz, load_npz
 import pickle
+import nltk
+from nltk.corpus import wordnet
+
+def setup_nltk_once():
+    nltk_data_path = os.path.join(os.path.expanduser("~"), "nltk_data", "corpora", "wordnet")
+    if not os.path.exists(nltk_data_path):
+        nltk.download('wordnet')
+        nltk.download('omw-1.4')
+
+setup_nltk_once()
 
 INDEX_FILES = {
     'hnsw_index': 'government_chunks_hnsw.index',
@@ -39,13 +49,14 @@ clip_model = CLIPModel.from_pretrained(MODEL_PATH, local_files_only=True).to(dev
 
 # DeepSeek API configuration
 DEEPSEEK_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEEPSEEK_API_KEY = "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"
+DEEPSEEK_API_KEY = "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"
 
 class HybridRetriever:
     def __init__(self, database):
         self.database = database
         self.vectorizer = TfidfVectorizer(stop_words='english')
         self.tfidf_matrix = None
+
         
     def build_tfidf(self):
         """Build TF-IDF matrix from database chunks"""
@@ -57,7 +68,8 @@ class HybridRetriever:
         vector_indices, vector_distances = index.knn_query(query_embedding, k=top_k*2)
         
         # Keyword search
-        query_vec = self.vectorizer.transform([query_text])
+        expanded_query = expand_query(query_text)
+        query_vec = self.vectorizer.transform([expanded_query])
         keyword_scores = (self.tfidf_matrix @ query_vec.T).toarray().flatten()
         keyword_top = np.argsort(keyword_scores)[-top_k*2:][::-1]
         
@@ -76,6 +88,19 @@ class HybridRetriever:
         top_scores = [score for _, score in combined_scores[:top_k]]
         
         return top_indices, top_scores
+
+def expand_query(query: str) -> str:
+    expanded_terms = []
+    for word in query.split():
+        synonyms = wordnet.synsets(word)
+        lemmas = set([word])  # include original word
+        for syn in synonyms:
+            for lemma in syn.lemmas():
+                name = lemma.name().replace('_', ' ')
+                if name.lower() != word.lower():
+                    lemmas.add(name)
+        expanded_terms.extend(lemmas)
+    return ' '.join(expanded_terms)
 
 def check_existing_index():
     """Check if all index files exist and are valid"""
@@ -265,7 +290,7 @@ def rag_search(query: str, database: Dict, index, retriever, top_k: int = 3, ima
     avg_score = float(np.mean(scores))
     max_score = float(np.max(scores))
     
-    use_rag = avg_score > 0.55 and max_score > 0.85
+    use_rag = avg_score > 0.1 and max_score > 0.1
     
     if use_rag:
         prompt = f"""### Context:
@@ -311,37 +336,7 @@ def process_and_index_data(file_path: str):
     
     save_index_files(index, database, embeddings, retriever)
     return index, database, embeddings, retriever
-'''
-if __name__ == "__main__":
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(SCRIPT_DIR, "..", "govsg_crawler_2", "gov_text_output_cleaned.jl")
-    data_path = os.path.normpath(data_path)
-    
-    if not os.path.exists(data_path):
-        raise FileNotFoundError(f"Data file not found at: {data_path}")
-    
-    index, database, _, retriever = process_and_index_data(data_path)
-    
-    query = "The glass panel in the community centre is broken."
-    image_path = None  # Replace with actual path if needed
-    
-    if image_path is not None:
-        result = rag_search(query, database, index, retriever, image=image_path, prompter="")
-    else:
-        result = rag_search(query, database, index, retriever, prompter="")
-    
-    print(f"\nQuery: {query}")
-    print("\nAnswer:")
-    print(result["answer"])
-    
-    if result["sources"]:
-        print("\nSources:")
-        for src in result["sources"]:
-            print(f"- {src['source_text']}\n  {src['url']}")
-    
-    #print("\nConfidence:", result["confidence"]["score"], "/5")
-    #print("Rationale:", result["confidence"]["rationale"])
-'''
+
 def call_model(text_query, prompt, image_path=None):
     SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(SCRIPT_DIR, "..", "govsg_crawler_2", "gov_text_output_cleaned.jl")
@@ -360,15 +355,27 @@ def call_model(text_query, prompt, image_path=None):
     else:
         result = rag_search(query, database, index, retriever, prompter=prompt)
     
-    print(f"\nQuery: {query}")
+    # print(f"\nQuery: {query}")
     print("\nAnswer:")
     print(result["answer"])
-    print(result["used_rag"])
-    if result["sources"]:
-        print("\nSources:")
-        for src in result["sources"]:
-            print(f"- {src['source_text']}\n  {src['url']}")
+    # print(result["used_rag"])
+    # if result["sources"]:
+    #     print("\nSources:")
+    #     for src in result["sources"]:
+    #         print(f"- {src['source_text']}\n  {src['url']}")
     
     #return result
 
-call_model("How to apply for BTO flat","You are a Singapore government advisor, answer the question with the aid of context given, if any.")
+prompt = "You are a Singapore government chatbot that handles incident reports. With the help of the context provided, assist the government to summarise the incident as below. Your output is sent to the reviewing team, not the citizen reporting. Also output how urgent the issue is, and how confident you are on a scale of 0 to 1. Also indicate which sources you used, both from the context provided and otherwise. Format output: \
+{\
+    'Incident Summary': <your answer here>, \
+    'Agency responsible': <your answer here>, \
+    'Recommended steps for the agency': <your answer here>, \
+    'Location (if any)': <your answer here>,\
+    'Urgency': '0.6', \
+    'Confidence': '0.6', \
+    'Source 1' : <url here>, \
+    'Source 2' : <url here>, \
+     ... \
+}"
+call_model("There is a broken streetlamp at 570270", prompt)
