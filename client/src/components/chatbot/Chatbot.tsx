@@ -23,14 +23,14 @@ export default function Chatbot() {
                <div>How can I help you today?</div>
                <ChatbotForm/>
             </div>
-            <div className="sticky bottom-0 bg-white">
+            <div className="sticky bottom-0">
                <div className="text-xs m-2 text-center text-gray-500">
                   {!coords && 
                      <div className="font-bold flex flex-row items-center justify-center gap-1">
                         <Info size={15} strokeWidth="3"/>This chatbot requires your location data for personalised recommendations.
                      </div>
                   }
-                  <div>CivicAId can make mistakes. Check official government websites for important information.</div>
+                  <div >CivicAId can make mistakes. Check official government websites for important information.</div>
                </div>
             </div>
          </div>

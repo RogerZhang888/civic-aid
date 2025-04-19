@@ -135,7 +135,7 @@ export default function ChatbotForm() {
                   type="submit"
                   disabled={isWaiting || !!validationError}
                   className=" 
-                  bg-blue-600 text-white rounded-full p-2 w-10 h-10 flex justify-center items-center 
+                  bg-primary text-white rounded-full p-2 w-10 h-10 flex justify-center items-center 
                   disabled:opacity-50 disabled:cursor-default 
                   hover:bg-blue-900 hover:cursor-pointer disabled:hover:bg-blue-600 disabled:hover:cursor-not-allowed
                   transition duration-300 ease-in-out"
