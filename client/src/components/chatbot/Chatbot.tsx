@@ -1,229 +1,59 @@
-import { useState } from "react";
-import toast from "react-hot-toast";
-import MessagesDisplay from "./MessagesDisplay";
-import { FormState, Message } from "../types";
+import { Info } from "lucide-react";
 import ChatbotForm from "./ChatbotForm";
-import { useGeolocated } from "react-geolocated";
-import axios, { AxiosError } from "axios";
-import { v4 as uuidv4 } from "uuid";
-import useUser from "../auth/useUser";
-
-const initAIMsg: Message = {
-   id: uuidv4(),
-   text: "Hello! I'm Civic-AId. If you want to ask a question, type 'question'. If you want to report an issue, type 'report'.",
-   imgs: [],
-   sender: "ai",
-   timestamp: new Date(),
-   status: "finished"
-};
-
-const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
-
-const MAX_IMAGES = 3;
+import MessagesDisplay from "./MessagesDisplay";
+import { useChatContext } from "./ChatContext";
 
 export default function Chatbot() {
-   const [messagesArr, setMessagesArr] = useState<Message[]>([initAIMsg]);
-   const [isWaitingForRes, setIsWaitingForRes] = useState<boolean>(false);
-   const [formState, setFormState] = useState<FormState>({ text: "", imgs: [] });
-   const [imgsPreview, setImgsPreview] = useState<string[]>([]);   
 
-   // get user's coordinates
-   // browser will ask for permission
-   // if no permission granted, wont be sent in formdata
-   const { coords } = useGeolocated({
-      positionOptions: { enableHighAccuracy: false },
-      userDecisionTimeout: 5000,
-   });
+   const { chats, currChatId, coords } = useChatContext();
 
-   const { data: user, isLoading } = useUser();
+   const currChat = chats.find(chat => chat.id === currChatId);
 
-   const { id: userId, email: userEmail } = user!;
-
-   if (isLoading) return <div>Loading chatbot...</div>
-
-   // main form submit function
-   async function handleSubmitForm() {
-
-      setIsWaitingForRes(true);
-
-      const userMsgUUID = uuidv4();
-      const aiMsgUUID = uuidv4();
-
-      // generate user message
-      const { text, imgs } = formState;
-      const userMsg: Message = {
-         id: userMsgUUID,
-         text,
-         imgs,
-         sender: "user",
-         timestamp: new Date(),
-      };
-
-      // generate pending AI message
-      const pendingAiMsg: Message = {
-         id: aiMsgUUID,
-         text: "",
-         imgs: [],
-         sender: "ai",
-         status: "pending",
-      };
-
-      // add both to messages array
-      setMessagesArr(prev => [...prev, userMsg, pendingAiMsg])
-
-      // reset formState and image previews
-      setFormState({ text: "", imgs: [] });
-      setImgsPreview([]);
-
-      // make the request body in the POST request
-      const fd = new FormData();
-      // append the text
-      fd.append('prompt', formState.text);
-      // append each image file
-      formState.imgs.forEach(img => fd.append('images', img));
-      // append user location data, if available
-      if (coords) {
-         fd.append('latitude', coords.latitude.toString());
-         fd.append('longitude', coords.longitude.toString());
-      }
-      // append user info
-      fd.append('user_id', userId.toString());
-
-      try {
-
-         console.log(`User ${userEmail} attempting to send a new query with text "${text}" and ${imgs.length} image(s)`);
-         if (coords) console.log(`User is at latitude ${coords.latitude.toString()} and longitude ${coords.longitude.toString()}`)
-
-         // send HTTP POST request
-         const res = await axios.post(`${SERVER_API_URL}/api/queries`, fd,
-            {
-               maxContentLength: 100 * 1024 * 1024,
-               maxBodyLength: 100 * 1024 * 1024,
-               headers: { 'Content-Type': 'multipart/form-data' }
-            }
-         )
-
-         // extract res data (this format might change later)
-         const { reply, confidence } = res.data as { reply: string, confidence: number };
-
-         console.log(`Server replied to ${userEmail} querying "${text}" with "${reply}" that has confidence ${confidence}`);
-
-         setMessagesArr(prev => prev.map(msg => 
-            msg.id === pendingAiMsg.id
-               ?  {
-                  ...msg,
-                  text: `The reply was "${reply}" with confidence ${confidence}`,
-                  status: "finished",
-                  timestamp: new Date()
-               }
-               :  msg
-         ));
-
-      } catch (error) {
-
-         console.log(`Server replied to ${userEmail} querying "${text}" with an error: \n${error}`);
-
-         if (error instanceof AxiosError) {
-
-            setMessagesArr(prev => prev.map(msg => 
-               msg.id === pendingAiMsg.id 
-               ?  { ...msg, text: error.message, status: "finished", timestamp: new Date() }
-               :  msg
-            ));
-   
-            console.error("Request error during submission:", error.message);
-
-         } else {
-
-            setMessagesArr(prev => prev.map(msg => 
-               msg.id === pendingAiMsg.id 
-               ?  { ...msg, text: "An unknown error occured. Try again later.", status: "finished", timestamp: new Date() }
-               :  msg
-            ));
-   
-            console.error("Unknown error during submission:", error);
-
-         }
-
-      } finally {
-         setIsWaitingForRes(false);
-      }
-   }
-
-   // handle imgs upload
-   function handleFormImgsChange(param: FileList | number) {
-
-      if (param instanceof FileList) {
-         // case: add files
-   
-         if (!param || param.length === 0) return;
-   
-         const newImgFiles = Array.from(param).filter((file) =>
-            file.type.startsWith("image/")
-         );
-   
-         if (newImgFiles.length !== param.length) {
-            toast.error("Please upload only image files");
-            return;
-         }
-   
-         if (formState.imgs.length + newImgFiles.length > MAX_IMAGES) {
-            toast.error(`Maximum ${MAX_IMAGES} images allowed`);
-            return;
-         }
-   
-         setFormState((pv) => ({ ...pv, imgs: [...pv.imgs, ...newImgFiles] }));
-   
-         // Create preview URLs
-         newImgFiles.forEach((file) => {
-            const reader = new FileReader();
-            reader.onload = (event) =>
-               setImgsPreview((pv) => [
-                  ...(pv || []),
-                  event.target?.result as string,
-               ]);
-            reader.readAsDataURL(file);
-         });
-
-      } else {
-         // case: remove files
-
-         setFormState((pv) => ({ ...pv, imgs: pv.imgs.filter((_, i) => i !== param) }));
-         setImgsPreview((pv) => pv?.filter((_, i) => i !== param) || null);
-
-      }
-
-   }
-
-   // handle formState text change
-   function handleFormTextChange(newText: string) {
-      setFormState((pv) => ({ ...pv, text: newText }));
+   if (!currChat) {
+      return (
+         <div className="h-full flex flex-1 flex-col">
+            <div className="flex-1 flex flex-col items-center justify-center space-y-3">
+            <img src="/mascot.png" alt="logo" className="w-50" />
+               <div className="flex flex-row items-center space-x-3">
+                  
+                  <div className="text-2xl">
+                     Your AI assistant for civic engagement!
+                  </div>
+               </div>
+               <div>How can I help you today?</div>
+               <ChatbotForm/>
+            </div>
+            <div className="sticky bottom-0 bg-white">
+               <div className="text-xs m-2 text-center text-gray-500">
+                  {!coords && 
+                     <div className="font-bold flex flex-row items-center justify-center gap-1">
+                        <Info size={15} strokeWidth="3"/>This chatbot requires your location data for personalised recommendations.
+                     </div>
+                  }
+                  <div>CivicAId can make mistakes. Check official government websites for important information.</div>
+               </div>
+            </div>
+         </div>
+      )
    }
 
    return (
-      <div className="h-full flex flex-col">
-
+      <div className="h-full flex flex-1 flex-col">
          <div className="flex-1 overflow-y-auto">
-            <MessagesDisplay messagesArr={messagesArr} />
+            <MessagesDisplay messages={currChat.queries} />
          </div>
 
          <div className="sticky bottom-0">
-
-            <ChatbotForm
-               handleSubmitForm={handleSubmitForm}
-               handleFormImgsChange={handleFormImgsChange}
-               handleFormTextChange={handleFormTextChange}
-               imgsPreview={imgsPreview}
-               formState={formState}
-               isWaitingForRes={isWaitingForRes}
-            />
-
-            <p className="text-xs m-2 text-center text-gray-500">
-               AI-generated, for reference only.
-            </p>
-
+            <ChatbotForm/>
+            <div className="text-xs m-2 text-center text-gray-500">
+               {!coords && 
+                  <div className="font-bold flex flex-row items-center justify-center gap-1">
+                     <Info size={15} strokeWidth="3"/>This chatbot requires your location data for personalised recommendations.
+                  </div>
+               }
+               <div>CivicAId can make mistakes. Check official government websites for important information.</div>
+            </div>
          </div>
-
       </div>
    );
 }

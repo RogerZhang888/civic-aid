@@ -1,28 +1,36 @@
-export type Message = {
+export type Query = {
    id: string;
-   text: string;
-   imgs: File[];
-   sender: "user";
+   question: string;
+   img: File | null;
+   answer: string;
    timestamp: Date;
-} | {
+   status: "pending" | "finished" | "error";
+   sources?: string[];
+}
+
+export type Chat = {
    id: string;
-   text: string;
-   imgs: File[];
-   sender: "ai";
-   status: "pending";
-   timestamp?: Date;
-} | {
-   id: string;
-   text: string;
-   imgs: File[];
-   sender: "ai";
-   status: "finished";
-   timestamp: Date;
+   title: string;
+   type: "question" | "report" | "unknown";
+   createdAt: Date;
+   queries: Query[];
 }
 
 export type FormState = {
    text: string;
-   imgs: File[];
+   img: File | null;
+}
+
+export type ChatContextType = {
+   chats: Chat[];
+   currChatId: string | undefined;
+   formState: FormState;
+   imgPreview: string | null;
+   handleAddQuery: () => Promise<void>;
+   updateFormImage: (param: File | null) => void;
+   updateFormText: (param: string) => void;
+   coords: GeolocationCoordinates | undefined;
+   isWaiting: boolean;
 }
 
 export type User = {
@@ -41,10 +49,4 @@ export type RegisterFields = {
    email: string;
    password: string;
    confirmPassword: string
-}
-
-export type UserContextType = {
-   currUser: User | null;
-   addUserState: (u: User) => void;
-   removeUserState: () => void;
 }

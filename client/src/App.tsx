@@ -5,12 +5,12 @@ import { ErrorBoundary } from "react-error-boundary";
 import AuthRoutesWrapper from "./components/auth/AuthRoutesWrapper";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
-import Chatbot from "./components/chatbot/Chatbot";
 import MainLayout from "./components/MainLayout";
 import ProfilePage from "./components/profile/ProfilePage";
 import HomePage from "./components/HomePage";
 import NotFound from "./components/NotFound";
 import ProtectedRoutesWrapper from "./components/auth/ProtectedRoutesWrapper";
+import ChatbotWrapper from "./components/chatbot/ChatbotWrapper";
 
 export default function App() {
    return (
@@ -21,16 +21,16 @@ export default function App() {
 
                <Route element={<MainLayout/>}>
 
-                  <Route path="/" element={<HomePage/>} />
+                  <Route index element={<HomePage/>} />
 
                   {/* 
                      The /chatbot and /profile routes are protected
                      only authenticated users can go there
-                     if not, redirected to /login
+                     if not, redirected to /auth
                      */}
                   <Route element={<ProtectedRoutesWrapper/>}>
 
-                     <Route path="/chatbot" element={<Chatbot />} />
+                     <Route path="/chatbot/:currChatId?" element={<ChatbotWrapper/>}/>
 
                      <Route path="/profile" element={<ProfilePage/>} />
 

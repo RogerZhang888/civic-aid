@@ -1,12 +1,11 @@
 const express = require('express');
-const router = express.Router();
 const multer = require('multer');
+const queryController = require('../controllers/queryController');
+const authMiddleware = require('../middleware/authMiddleware');
+
+const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
-const queryController = require('../controllers/queryController');
-const auth = require('../middleware/auth');
-
-// Upload multiple images as 'images'
-router.post('/queries', auth, upload.array('images'), queryController.submitQuery);
+router.post('/query', authMiddleware, upload.single('image'), queryController.submitQuery);
 
 module.exports = router;

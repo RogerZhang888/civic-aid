@@ -1,22 +1,17 @@
 import { ArrowUp, Image, X } from "lucide-react";
 import { useMemo, useRef } from "react"
-import { FormState } from "../types"
+import { useChatContext } from "./ChatContext";
 
-export default function ChatbotForm({
-   handleSubmitForm,
-   handleFormImgsChange,
-   handleFormTextChange,
-   imgsPreview,
-   formState,
-   isWaitingForRes,
-}: {
-   handleSubmitForm: () => Promise<void>
-   handleFormImgsChange: (x: FileList | number) => void
-   handleFormTextChange: (x: string) => void
-   imgsPreview: string[]
-   formState: FormState
-   isWaitingForRes: boolean
-}) {
+export default function ChatbotForm() {
+
+   const {
+      formState,
+      imgPreview,
+      handleAddQuery,
+      updateFormImage,
+      updateFormText,
+      isWaiting,
+   } = useChatContext();
 
    const fileInputRef = useRef<HTMLInputElement>(null);
    const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -26,43 +21,41 @@ export default function ChatbotForm({
    // must have either text or image, or both, present
    const validationError = useMemo(() => {
       if (formState.text.length > 400) return "Message must be ≤400 characters";
-      if (!formState.text.trim() && formState.imgs.length === 0) return "Message or image required";
+      if (!formState.text.trim() && !formState.img) return "Message or image required";
       return null;
-   }, [formState.text, formState.imgs.length]);
+   }, [formState.text, formState.img]);
 
    return (
       <form
          onSubmit={e => {
             e.preventDefault();
             if (validationError) return;
-            handleSubmitForm();
+            handleAddQuery();
             if (textAreaRef.current) textAreaRef.current.style.height = 'auto';
          }}
          className="bg-gray-200 rounded-xl p-4 mt-2 w-4/5 md:w-2/3 mx-auto
          flex flex-col relative shadow-lg"
       >  
-         {imgsPreview.length > 0 && 
+         {imgPreview && 
             <div className="flex flex-row space-x-3 mb-3">
-               {imgsPreview.map((prv, idx) => (
-                  <div key={idx} className="relative text-center bg-gray-300 rounded-lg p-1">
-                     <img 
-                        src={prv}
-                        alt={`Preview image ${idx + 1}`}
-                        className="max-h-20 rounded-lg"
-                     />
-                     <div className="text-sm text-gray-700 truncate max-w-[100px]">
-                        {formState.imgs[idx]?.name}
-                     </div>
-                     <button
-                        type="button"
-                        onClick={() => handleFormImgsChange(idx)}
-                        className="absolute -top-2 -right-2 bg-black text-white rounded-full p-1
-                        hover:bg-gray-700 hover:cursor-pointer transition duration-300 ease-in-out"
-                     >
-                        <X size={16} />
-                     </button>
+               <div className="relative text-center bg-gray-300 rounded-lg p-1">
+                  <img 
+                     src={imgPreview}
+                     alt="Preview"
+                     className="max-h-20 rounded-lg"
+                  />
+                  <div className="text-sm text-gray-700 truncate max-w-[100px]">
+                     {formState.img?.name}
                   </div>
-               ))}
+                  <button
+                     type="button"
+                     onClick={() => updateFormImage(null)}
+                     className="absolute -top-2 -right-2 bg-black text-white rounded-full p-1
+                     hover:bg-gray-700 hover:cursor-pointer transition duration-300 ease-in-out"
+                  >
+                     <X size={16} />
+                  </button>
+               </div>
             </div>
          }
 
@@ -77,7 +70,7 @@ export default function ChatbotForm({
                   ta.style.height = 'auto';
                   ta.style.height = `${ta.scrollHeight}px`;
                }
-               handleFormTextChange(ta.value)
+               updateFormText(ta.value)
             }}
             onKeyDown={e => {
                if (e.key === 'Enter' && !e.shiftKey) {
@@ -85,7 +78,7 @@ export default function ChatbotForm({
                   // Enter on its own will submit the form
                   e.preventDefault();
                   if (validationError) return;
-                  handleSubmitForm();
+                  handleAddQuery();
                   if (textAreaRef.current) textAreaRef.current.style.height = 'auto';
                }
             }}
@@ -102,10 +95,9 @@ export default function ChatbotForm({
                const { files } = e.target;
                if (!files || files.length === 0) return;
 
-               handleFormImgsChange(files)
+               updateFormImage(files[0]);
             }}
             accept="image/*"
-            multiple
             className="hidden"
          />
 
@@ -113,7 +105,7 @@ export default function ChatbotForm({
                <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={formState.imgs.length >= 3}
+                  disabled={!!formState.img}
                   className=" 
                      text-black bg-white rounded-full p-2 w-10 h-10 flex justify-center items-center 
                      disabled:opacity-50 disabled:cursor-default
@@ -131,9 +123,9 @@ export default function ChatbotForm({
                   pointer-events-none whitespace-nowrap
                   z-10"
                >
-                  {formState.imgs.length < 3
+                  {!formState.img
                      ?  "Upload an image"
-                     :  "Max: 3 images"
+                     :  "Max: 1 image"
                   }
                </div>
             </div>
@@ -141,7 +133,7 @@ export default function ChatbotForm({
             <div className="relative group">
                <button
                   type="submit"
-                  disabled={isWaitingForRes || !!validationError}
+                  disabled={isWaiting || !!validationError}
                   className=" 
                   bg-blue-600 text-white rounded-full p-2 w-10 h-10 flex justify-center items-center 
                   disabled:opacity-50 disabled:cursor-default 
