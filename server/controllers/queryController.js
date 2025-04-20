@@ -89,7 +89,7 @@ const userquery = async (userprompt, userId, chatId) => {
         
         if (getConfidence(response.confidence) == 'LOW' || getConfidence(response.confidence) == 'MED') {
             systemprompt = systempromptTemplates.clarifyTypeDecisionTemplate(userprompt)
-            response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            response = await queryLLM(systemprompt, responseParsers.noParser, 'ALWAYS')
             answer = response.answer
         } else if (getConfidence(response.confidence) == 'HIGH') {
             chat.type = response.type
@@ -102,11 +102,11 @@ const userquery = async (userprompt, userId, chatId) => {
 
         if (getConfidence(response.confidence) == 'LOW') {
             systemprompt = systempromptTemplates.clarifyReportTemplateLow(userprompt)
-            response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            response = await queryLLM(systemprompt, responseParsers.noParser, 'ALWAYS')
             answer=response.answer
         } else if (getConfidence(response.confidence) == 'MED') {
             systemprompt = systempromptTemplates.clarifyReportTemplateMed(userprompt)
-            response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            response = await queryLLM(systemprompt, responseParsers.noParser, 'ALWAYS')
             answer = response.answer 
         } else if (getConfidence(response.confidence) == 'HIGH') {
             // By the original prompt, this should be a report format already?? TODO: verify this
@@ -120,11 +120,11 @@ const userquery = async (userprompt, userId, chatId) => {
 
         if (getConfidence(response.confidence) == 'LOW') {
             systemprompt = systempromptTemplates.clarifyQuestionTemplateLow(userprompt)
-            response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            response = await queryLLM(systemprompt, responseParsers.noParser, 'ALWAYS')
             answer = response.answer 
         } else if (getConfidence(response.confidence) == 'MED') {
             systemprompt = systempromptTemplates.clarifyQuestionTemplateMed(userprompt)
-            response = await queryLLM(systemprompt, responseParsers.defaultParser, 'ALWAYS')
+            response = await queryLLM(systemprompt, responseParsers.noParser, 'ALWAYS')
             answer = response.answer 
         } else if (getConfidence(response.confidence) == 'HIGH') {
             answer = response.answer 
