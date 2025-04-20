@@ -17,7 +17,7 @@ const authMiddleware = (req, res, next) => {
    }
 
    if (!token) {
-      console.log("No token found");
+      console.log("NO TOKEN FOUND");
       return res.status(401).json({ error: "No valid JWT token" });
    }
 
@@ -26,16 +26,14 @@ const authMiddleware = (req, res, next) => {
    try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
    } catch (error) {
-      if (error.name === "TokenExpiredError") {
-         console.log("Token expired");
+      if (error.name === "TOKEN EXPIRED") {
          return res.status(401).json({ error: "Session expired. Please log in again." });
       }
-      console.log("Token invalid");
+      console.log("INVALID TOKEN");
       return res.status(401).json({ error: "Invalid token" });
    }
 
-   console.log("auth middleware has authenticated JWT, decoded JWT is:");
-   console.log(decoded);
+   console.log("AUTHENTICATED");
 
    req.user = decoded;
 

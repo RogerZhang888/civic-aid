@@ -39,8 +39,6 @@ exports.submitQuery = async (req, res) => {
       // Simulate response for now
       const { answer, confidence } = await simulateLLMResponse();
 
-      console.log(answer)
-
       // Insert the query into the database (fingers crossed)
       await pgsql.query(
          `INSERT INTO queries

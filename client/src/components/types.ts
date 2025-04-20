@@ -1,19 +1,41 @@
+export type StatusTypes = "pending" | "finished" | "error";
+
 export type Query = {
    id: string;
    question: string;
    img: File | null;
    answer: string;
    timestamp: Date;
-   status: "pending" | "finished" | "error";
+   status: StatusTypes;
    sources?: string[];
 }
 
 export type Chat = {
    id: string;
    title: string;
-   type: "question" | "report" | "unknown";
+   type: StatusTypes;
    createdAt: Date;
    queries: Query[];
+}
+
+export type AllowedAgencies = "MSO" | "NEA" | "LTA" | "HDB" | "NParks" | "SP Group" | "Town Councils" | "SPF" | "PUB";
+export type ReportStatusTypes = "pending" | "resolved";
+
+export type Report = {
+   id: string;
+   userId: string;
+   chatId: string;
+   title: string;
+   description: string;
+   mediaUrl: string[];
+   incidentLocation: GeolocationCoordinates | null;
+   agency: AllowedAgencies;
+   recommended_steps: string;
+   urgency: number;
+   reportConfidence: number;
+   status: ReportStatusTypes;
+   createdAt: Date;
+   resolvedAt: Date | null;
 }
 
 export type FormState = {
