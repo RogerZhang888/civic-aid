@@ -27,9 +27,10 @@ export type ChatContextType = {
    formState: FormState;
    imgPreview: string | null;
    handleAddQuery: () => Promise<void>;
-   updateFormImage: (_: File | null) => void;
-   updateFormText: (_: string) => void;
-   deleteChat: (_: string) => void;
+   updateFormImage: (x: File | null) => void;
+   updateFormText: (x: string) => void;
+   deleteChat: (x: string) => Promise<void>;
+   renameChat: (x: string, y: string) => Promise<void>;
    coords: GeolocationCoordinates | undefined;
    isWaiting: boolean;
 }

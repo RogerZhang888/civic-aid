@@ -15,7 +15,7 @@ function MessagesDisplay({
 
    return (
       
-      <div className=" p-4 text-lg">
+      <div className="p-4 text-lg">
 
          {messages.map(msg => <MessageBubble message={msg} key={msg.id}/>)}
 

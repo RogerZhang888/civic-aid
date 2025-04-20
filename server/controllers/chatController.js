@@ -20,6 +20,24 @@ exports.startNewChat = async (req, res) => {
    }
 };
 
+exports.updateChatName = async (req, res) => {
+   try {
+      const userId = req.user.id; // from auth middleware
+      const chatId = req.params.chatId; // from request parameters
+      const { title } = req.body; // new title from request body
+
+      await pgsql.query(
+         `UPDATE chats SET title = $1 WHERE user_id = $2 AND id = $3`,
+         [title, userId, chatId]
+      );
+
+      res.status(200).json({ success: true });
+   } catch (err) {
+      console.error("Failed to update chat name:", err);
+      res.status(500).json({ error: "Failed to update chat name" });
+   }
+}
+
 exports.getChatHistory = async (req, res) => {
 
    console.log("GETTING ALL CHAT HISTORY FOR USER");

@@ -7,7 +7,7 @@ require('dotenv').config();
 app.use(cors({
    origin: 'http://localhost:5173', // Explicitly allow your frontend origin
    credentials: true, // Allow credentials
-   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Allowed methods
    allowedHeaders: ['Content-Type', 'Authorization'] // Allowed headers
 }));
 app.use(express.json());
@@ -18,7 +18,7 @@ app.get('/health', async (req, res) => {
   try {
     res.status(200).json({ status: 'ok' });
   } catch (error) {
-    res.status(500).json({ error: 'Database connection failed' });
+    res.status(500).json({ error: 'Backend connection failed' });
   }
 });
 

@@ -11,7 +11,7 @@ function MessageBubble({
 
    return (
       <React.Fragment key={message.id}>         
-         <div className="chat chat-end tracking-wide mt-9">
+         <div className="chat chat-end tracking-wide">
             <div className="chat-bubble space-y-1">
                {message.question && <div>{message.question}</div>}
                {message.img &&
@@ -22,18 +22,18 @@ function MessageBubble({
                }
             </div>
          </div>
-         <div className="chat chat-start tracking-wide mt-5">
-         <div className="chat-image avatar relative top-6">
-            <div className="w-15 rounded-full">
-               <img src="/mascot.png" alt="logo" />
+         <div className="chat chat-start tracking-wide">
+            <div className="chat-image avatar relative top-6">
+               <div className="w-15 rounded-full">
+                  <img src="/mascot.png" alt="logo" />
+               </div>
             </div>
-         </div>
-         <div className="chat-bubble chat-bubble-primary">
-            {message.status === "pending" 
-               ? <span className="loading loading-dots loading-md" />
-               : <div>{message.answer}</div>
-            }
-         </div>
+            <div className="chat-bubble chat-bubble-primary">
+               {message.status === "pending" 
+                  ? <span className="loading loading-dots loading-md" />
+                  : <div>{message.answer}</div>
+               }
+            </div>
          </div>
 
       </React.Fragment>

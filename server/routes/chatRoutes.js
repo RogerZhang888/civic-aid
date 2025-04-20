@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const { 
-   startNewChat, 
+   startNewChat,
+   updateChatName,
    getChatHistory, 
    getSpecificChatHistory,
    deleteSpecificChat
@@ -10,6 +11,9 @@ const {
 
 // Endpoint to start a new chat for a user
 router.post('/chats', authMiddleware, startNewChat);
+
+// update name of a chat
+router.patch('/chats/:chatId', authMiddleware, updateChatName);
 
 // Endpoint to get all chats for a user
 router.get('/chats', authMiddleware, getChatHistory);
