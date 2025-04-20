@@ -14,6 +14,7 @@ type Action =
    | { type: "UPDATE_CHAT_WITH_NEW_QUERY"; payload: { newQuery: Query, chatId: string } }
    | { type: "UPDATE_QUERY_WITH_ANSWER"; payload: { answer: string, chatId: string, queryId: string } }
    | { type: "DELETE_CHAT"; payload: { chatId: string } }
+   | { type: "UPDATE_CHAT_TITLE"; payload: { chatId: string, newTitle: string } };
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -51,6 +52,13 @@ function chatReducer(state: Chat[], action: Action): Chat[] {
                         :  query
                   )
                }
+               :  chat
+         );
+         
+      case "UPDATE_CHAT_TITLE":
+         return state.map(chat =>
+            chat.id === action.payload.chatId
+               ?  { ...chat, title: action.payload.newTitle }
                :  chat
          );
       
@@ -215,7 +223,7 @@ export default function ChatProvider({
 
       const newChat: Chat = {
          id: newChatUUID,
-         title: newChatUUID.slice(0, 7),
+         title: "TITLE " + newChatUUID,
          type: "unknown",
          createdAt: new Date(),
          queries: [],
@@ -334,12 +342,28 @@ export default function ChatProvider({
       }
    }
 
+   async function renameChat(chatIdToRename: string, newTitle: string) {
+      try {
+         await axios.patch(
+            `${SERVER_API_URL}/api/chats/${chatIdToRename}`,
+            { title: newTitle },
+            { withCredentials: true }
+         );
+         chatsDispatch({ type: "UPDATE_CHAT_TITLE", payload: { chatId: chatIdToRename, newTitle } });
+         toast.success(`Chat ${chatIdToRename} renamed successfully`);
+      } catch (error) {
+         console.error("Failed to rename chat:", error);
+         toast.error("Failed to rename chat");
+      }
+   }
+
    return (
       <ChatContext.Provider value={{ 
          handleAddQuery,
          updateFormImage,
          updateFormText,
          deleteChat,
+         renameChat,
          chats,
          formState,
          imgPreview,
