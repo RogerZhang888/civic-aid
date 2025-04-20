@@ -1,5 +1,6 @@
 import pgsql from "../config/db.js";
 import { v4 as uuidv4 } from 'uuid';
+import { generate } from "random-words";
 
 // manually creates a report based on: 
 // 1. user_id (from JWT)
@@ -16,14 +17,23 @@ export async function createReport(req, res) {
       const userId = req.user.id;
 
       const chat = await pgsql.query(
-         "SELECT * FROM chats WHERE id = $1",
-         [chat_id]
+         "SELECT * FROM chats WHERE id = $1 AND user_id = $2",
+         [chat_id, userId]
       );
 
       if (chat.length === 0) {
          return res
             .status(403)
-            .json({ error: `Chat with id ${chat_id} not found` });
+            .json({ error: `No record exists for user ${userId} and chat ${chat_id}` });
+      }
+
+      const currentReports = await pgsql.query(
+         "SELECT * FROM reports WHERE chat_id = $1 AND user_id = $2",
+         [chat_id, userId]
+      );
+
+      if (currentReports.length > 0) {
+         return res.status(403).json({ error: `A report already exists for user ${userId} and chat ${chat_id}` });
       }
 
       // run LLM on the entire chat to decide
@@ -33,17 +43,30 @@ export async function createReport(req, res) {
       // @ Sohan
 
       const newReportId = uuidv4();
-      const report_confidence = 0.8; // Placeholder confidence score
       const agency = "NEA"; // Placeholder agency
-      const description = "This is a test report"; // Placeholder description
+      const title = generate({ exactly: 4, join: ' ' }); // Placeholder title
+      const description = generate({ exactly: 100, join: ' ' }); // Placeholder description
 
       // Insert report
       const result = await pgsql.query(
          `INSERT INTO reports 
-         (id, user_id, chat_id, description, media_url, report_confidence, agency) 
-         VALUES ($1, $2, $3, $4, $5) 
+         (id, user_id, chat_id, title, description, media_url, incident_location, agency, recommended_steps, urgency, report_confidence, status) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
          RETURNING *`,
-         [newReportId, userId, chat_id, description, "https://some.media.com", report_confidence, agency]
+         [
+            newReportId, // id
+            userId, // user_id
+            chat_id, // chat_id
+            title, // title: placeholder for now
+            description, // description: placeholder for now
+            [], // media_url: no media for now
+            null, // incident_location: no location for now
+            agency, // agency: placeholder for now
+            [], // recommended_steps: no steps for now
+            0.6666, // urgency: placeholder for now
+            0.5555, // report_confidence: placeholder for now
+            "pending", // status: pending by default
+         ]
       );
 
       if (result.length === 0) {
@@ -65,16 +88,38 @@ export async function getReport(req, res) {
 
    try {
       const reportId = req.params.id;
-      const result = await query(
+      const result = await pgsql.query(
          "SELECT * FROM reports WHERE id = $1", 
          [reportId]
       );
 
       if (result.length === 0) {
-         return res.status(404).json({ error: "Report not found" });
+         return res.status(404).json({ error: `Report ${reportId} not found` });
       }
       
       res.json(result[0]);
+   } catch (error) {
+      res.status(500).json({ error: error.message });
+   }
+}
+
+// gets all reports made by a user
+export async function getUserReports(req, res) {
+
+   console.log("GETTING ALL USER REPORTS");
+
+   try {
+      const userId = req.user.id;
+      const result = await pgsql.query(
+         "SELECT * FROM reports WHERE user_id = $1", 
+         [userId]
+      );
+
+      if (result.length === 0) {
+         return res.status(404).json({ error: `No reports found for user ${userId}` });
+      }
+
+      res.json(result);
    } catch (error) {
       res.status(500).json({ error: error.message });
    }
@@ -104,7 +149,7 @@ export async function updateReportStatus(req, res) {
       }
 
       // Explicitly return updated record
-      const result = await query(
+      const result = await pgsql.query(
          `UPDATE reports 
          SET status = $1 
          WHERE id = $2 
@@ -113,7 +158,7 @@ export async function updateReportStatus(req, res) {
       );
 
       if (result.length === 0) {
-         return res.status(404).json({ error: "Report not found" });
+         return res.status(404).json({ error: `Report ${reportId} not found` });
       }
 
       res.json(result[0]);

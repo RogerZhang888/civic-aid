@@ -122,9 +122,8 @@ function ChatsButtonColumn() {
    useEffect(() => {
       const handleClickOutside = () => {
          setOpenMenuId(null);
-         if (editingChatId) {
-            handleSaveEdit();
-         }
+         setEditingChatId(null);
+         setEditedTitle("");
       };
       document.addEventListener("click", handleClickOutside);
       return () => document.removeEventListener("click", handleClickOutside);

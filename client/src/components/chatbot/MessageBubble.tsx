@@ -11,7 +11,7 @@ function MessageBubble({
 
    return (
       <React.Fragment key={message.id}>         
-         <div className="chat chat-end tracking-wide">
+         <div className="chat chat-end tracking-wide mt-3">
             <div className="chat-bubble space-y-1">
                {message.question && <div>{message.question}</div>}
                {message.img &&
