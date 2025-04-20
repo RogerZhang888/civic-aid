@@ -71,20 +71,13 @@ function chatReducer(state: Chat[], action: Action): Chat[] {
    }
 }
 
-export default function ChatProvider({ 
-   children, 
-   currChatId, 
-}: { 
-   children: React.ReactNode; 
-   currChatId: string | undefined; 
-}) {
+export default function ChatProvider({ children, currChatId, }: { children: React.ReactNode; currChatId: string | undefined; }) {
 
    const [formState, setFormState] = useState<FormState>({ text: "", img: null });
    const [imgPreview, setImgPreview] = useState<string | null>(null);
    const [isWaiting, setIsWaiting] = useState<boolean>(false);
    const initChats: Chat[] = [];
    const [chats, chatsDispatch] = useReducer(chatReducer, initChats);
-
    const navigate = useNavigate();
 
    useEffect(() => {

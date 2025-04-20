@@ -3,6 +3,17 @@ const pgsql = require("../config/db");
 const { callModel } = require('../services/llmService');
 const { generate } = require('random-words');
 
+function simulateLLMResponse() {
+   return new Promise((resolve) => {
+      setTimeout(() => {
+         resolve({
+            answer: generate({ exactly: 20, join: ' ' }),
+            confidence: 0.9,
+         });
+      }, 1000);
+   });
+}
+
 exports.submitQuery = async (req, res) => {
 
 	console.log("RECEIVED REQUEST TO SUBMIT QUERY:");
@@ -12,6 +23,10 @@ exports.submitQuery = async (req, res) => {
       // Extract from req.body (processed by multer) and auth middleware
       const { prompt, chat_id } = req.body;
       const userId = req.user.id;
+      const latitude = parseFloat(req.body.latitude);
+      const longitude = parseFloat(req.body.longitude);
+      const hasCoords = !isNaN(latitude) && !isNaN(longitude);
+
       
       // Process and store uploaded files (mock URLs for now)
       // const savedMedia = uploadedFiles.map((file) => {
@@ -43,21 +58,36 @@ exports.submitQuery = async (req, res) => {
       await pgsql.query(
          `INSERT INTO queries
          (user_id, chat_id, user_prompt, media_url, query_location, system_prompt, response, sources, is_valid, to_reply, query_confidence)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-         [
-            userId, // user_id
-            chat_id, // chat_id
-            prompt, // user_prompt
-            [], // media_url: no media for now
-            null, // query_location: no location for now
-            "placeholder system prompt", // system_prompt: placeholder for now
-            answer, // response: llm response
-            [], // sources: no sources for now
-            true, // is_valid: true for now
-            true, // to_reply: true for now
-            confidence, // query_confidence
-         ]
+         VALUES ($1, $2, $3, $4, ${hasCoords ? `ST_SetSRID(ST_MakePoint($5, $6), 4326)` : 'NULL'}, $7, $8, $9, $10, $11, $12)`,
+         hasCoords
+            ? [
+                 userId,
+                 chat_id,
+                 prompt,
+                 [],
+                 longitude, // X (lng)
+                 latitude,  // Y (lat)
+                 "placeholder system prompt",
+                 answer,
+                 [],
+                 true,
+                 true,
+                 confidence,
+              ]
+            : [
+                 userId,
+                 chat_id,
+                 prompt,
+                 [],
+                 "placeholder system prompt",
+                 answer,
+                 [],
+                 true,
+                 true,
+                 confidence,
+              ]
       );
+      
 
       res.json({
          answer,
@@ -69,13 +99,3 @@ exports.submitQuery = async (req, res) => {
    }
 };
 
-function simulateLLMResponse() {
-   return new Promise((resolve) => {
-      setTimeout(() => {
-         resolve({
-            answer: generate({ exactly: 20, join: ' ' }),
-            confidence: 0.9,
-         });
-      }, 1000);
-   });
-}
