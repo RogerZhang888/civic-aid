@@ -68,7 +68,7 @@ export default function Navbar() {
                         <Link
                            to="/profile"
                            className={`hover:text-white transition ${
-                              pathname === "/profile" ? "text-gray-400" : ""
+                              pathname === "/profile" ? "text-primary-content" : ""
                            }`}
                         >
                            Profile
@@ -78,12 +78,21 @@ export default function Navbar() {
                         <Link
                            to="/chatbot"
                            className={`hover:text-white transition ${
-                              pathname === "/chatbot" ? "text-gray-400" : ""
+                              pathname === "/chatbot" ? "text-primary-content" : ""
                            }`}
                         >
                            Chatbot
                         </Link>
                      </li>
+                     <li>
+                        <Link
+                           to="/about"
+                           className={`hover:text-white transition ${pathname === "/about" ? "text-primary-content" : ""}`}
+                        >
+                           About
+                        </Link>
+                     </li>
+
                   </ul>
                </div>
             )}

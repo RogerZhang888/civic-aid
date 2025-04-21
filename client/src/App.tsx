@@ -11,6 +11,7 @@ import HomePage from "./components/HomePage";
 import NotFound from "./components/NotFound";
 import ProtectedRoutesWrapper from "./components/auth/ProtectedRoutesWrapper";
 import ChatbotWrapper from "./components/chatbot/ChatbotWrapper";
+import About from "./components/about/About"; 
 
 export default function App() {
    return (
@@ -49,6 +50,8 @@ export default function App() {
                   </Route>
 
                   <Route path="*" element={<NotFound />} />
+
+                  <Route path="/about" element={<About />} />
 
                </Route>
                
