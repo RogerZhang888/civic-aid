@@ -1,0 +1,35 @@
+export default {
+   homePg: "Selamat datang ke CivicAId!",
+   welcome: "Selamat datang, ",
+   profile: "Profil",
+   chatbot: "Chatbot",
+   language: "Bahasa",
+ 
+   login: "Log Masuk",
+   logout: "Log Keluar",
+   username: "Nama Pengguna",
+   password: "Kata Laluan",
+   required: "Diperlukan",
+   email: "E-mel",
+   confirmPassword: "Sahkan Kata Laluan",
+   haveAccount: "Ada akaun?",
+   noAccount: "Tiada akaun?",
+ 
+   register: "Daftar",
+   usernameNoSpace: "Nama pengguna tidak boleh ada ruang",
+   usernameChar: "Nama pengguna mesti antara 3 hingga 50 aksara",
+   invalidEmail: "E-mel tidak sah",
+   psdsMustMatch: "Kata laluan mesti sama",
+ 
+   newChat: "Sembang Baru",
+   newChatTop: "Hai! Saya CivLeo, pembantu kawasan kejiranan anda.",
+   newChatBottom: "Apa yang boleh saya bantu hari ini?",
+   textArea: "Tanya apa-apa",
+   disclaimer: "CivicAId mungkin membuat kesilapan. Semak laman web kerajaan untuk maklumat penting.",
+   location: "Chatbot ini memerlukan data lokasi anda untuk cadangan peribadi.",
+ 
+   uploadImage: "Muat naik gambar",
+   maxImage: "Maksimum: 1 gambar",
+   messageTooLong: "Mesej mesti ≤400 aksara",
+   emptyForm: "Mesej atau gambar diperlukan",
+};

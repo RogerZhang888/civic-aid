@@ -2,12 +2,20 @@ import { Info } from "lucide-react";
 import ChatbotForm from "./ChatbotForm";
 import MessagesDisplay from "./MessagesDisplay";
 import { useChatContext } from "./ChatContext";
+import useTranslation from "../language/useTranslation";
 
 export default function Chatbot() {
 
-   const { chats, currChatId, coords } = useChatContext();
+   const { chats, currChatId, coords, isFetchingAChat } = useChatContext();
+   const { t } = useTranslation();
 
    const currChat = chats.find(chat => chat.id === currChatId);
+
+   if (isFetchingAChat) return (
+      <section className="h-full flex flex-1 justify-center items-center">
+         <div className="text-2xl">Loading your chat...</div>
+      </section>
+   )
 
    if (!currChat) {
       return (
@@ -17,20 +25,20 @@ export default function Chatbot() {
                <div className="flex flex-row items-center space-x-3">
                   
                   <div className="text-2xl">
-                     Hi! I'm CivLeo, your friendly neighbourhood assistant.
+                     {t('newChatTop')}
                   </div>
                </div>
-               <div>How can I help you today?</div>
+               <div>{t('newChatBottom')}</div>
                <ChatbotForm/>
             </div>
             <div className="sticky bottom-0">
                <div className="text-xs m-2 text-center text-gray-500">
                   {!coords && 
                      <div className="font-bold flex flex-row items-center justify-center gap-1">
-                        <Info size={15} strokeWidth="3"/>This chatbot requires your location data for personalised recommendations.
+                        <Info size={15} strokeWidth="3"/>{t('location')}
                      </div>
                   }
-                  <div >CivicAId can make mistakes. Check official government websites for important information.</div>
+                  <div>{t("disclaimer")}</div>
                </div>
             </div>
          </div>
@@ -53,10 +61,10 @@ export default function Chatbot() {
             <div className="text-xs m-2 text-center text-gray-500">
                {!coords && 
                   <div className="font-bold flex flex-row items-center justify-center gap-1">
-                     <Info size={15} strokeWidth="3"/>This chatbot requires your location data for personalised recommendations.
+                     <Info size={15} strokeWidth="3"/>{t('location')}
                   </div>
                }
-               <div>CivicAId can make mistakes. Check official government websites for important information.</div>
+               <div>{t("disclaimer")}</div>
             </div>
          </div>
       </div>

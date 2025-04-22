@@ -1,8 +1,11 @@
 import { ArrowUp, Image, X } from "lucide-react";
 import { useMemo, useRef } from "react"
 import { useChatContext } from "./ChatContext";
+import useTranslation from "../language/useTranslation";
 
 export default function ChatbotForm() {
+
+   const { t } = useTranslation();
 
    const {
       formState,
@@ -20,10 +23,10 @@ export default function ChatbotForm() {
    // text between 0 and 400 charcters, inclusive
    // must have either text or image, or both, present
    const validationError = useMemo(() => {
-      if (formState.text.length > 400) return "Message must be ≤400 characters";
-      if (!formState.text.trim() && !formState.img) return "Message or image required";
+      if (formState.text.length > 400) return t('messageTooLong');
+      if (!formState.text.trim() && !formState.img) return t('emptyForm');
       return null;
-   }, [formState.text, formState.img]);
+   }, [formState.text, formState.img, t]);
 
    return (
       <form
@@ -60,7 +63,7 @@ export default function ChatbotForm() {
          }
 
          <textarea
-            placeholder="Ask anything"
+            placeholder={t('textArea')}
             ref={textAreaRef}
             value={formState.text}
             rows={1}
@@ -87,19 +90,19 @@ export default function ChatbotForm() {
 
          <div className="absolute flex flex-row space-x-2 right-2 bottom-2">
 
-         <input
-            type="file"
-            ref={fileInputRef}
-            onChange={e => {
+            <input
+               type="file"
+               ref={fileInputRef}
+               onChange={e => {
 
-               const { files } = e.target;
-               if (!files || files.length === 0) return;
+                  const { files } = e.target;
+                  if (!files || files.length === 0) return;
 
-               updateFormImage(files[0]);
-            }}
-            accept="image/*"
-            className="hidden"
-         />
+                  updateFormImage(files[0]);
+               }}
+               accept="image/*"
+               className="hidden"
+            />
 
             <div className="relative group">
                <button
@@ -124,8 +127,8 @@ export default function ChatbotForm() {
                   z-10"
                >
                   {!formState.img
-                     ?  "Upload an image"
-                     :  "Max: 1 image"
+                     ?  t('uploadImage')
+                     :  t('maxImage')
                   }
                </div>
             </div>
@@ -137,7 +140,7 @@ export default function ChatbotForm() {
                   className=" 
                   bg-primary text-white rounded-full p-2 w-10 h-10 flex justify-center items-center 
                   disabled:opacity-50 disabled:cursor-default 
-                  hover:bg-blue-900 hover:cursor-pointer disabled:hover:bg-blue-600 disabled:hover:cursor-not-allowed
+                  hover:bg-secondary hover:cursor-pointer disabled:hover:bg-primary disabled:hover:cursor-not-allowed
                   transition duration-300 ease-in-out"
                >
                   <ArrowUp strokeWidth={3} size={25}/>

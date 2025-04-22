@@ -11,10 +11,12 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useChatContext } from "./ChatContext";
+import useTranslation from "../language/useTranslation";
 
 export default function ChatSidebar() {
    const [isExpanded, setIsExpanded] = useState(false);
    const navigate = useNavigate();
+   const { t } = useTranslation();
 
    return (
       <motion.div
@@ -44,7 +46,7 @@ export default function ChatSidebar() {
                      onClick={() => navigate("/chatbot")}
                   >
                      <Plus size={25} />
-                     <span className="text-xs">New chat</span>
+                     <span className="text-xs">{t('newChat')}</span>
                   </button>
                   <button
                      className="btn btn-square btn-sm"

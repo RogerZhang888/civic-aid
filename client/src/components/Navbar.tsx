@@ -1,16 +1,16 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import useUser from "./auth/useUser";
-import { useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import toast from "react-hot-toast";
 import { AlignJustify } from "lucide-react";
-
-const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
+import { useLanguageContext } from "./language/LanguageContext";
+import { Languages } from "./types";
+import useTranslation from "./language/useTranslation";
+import LogoutButton from "./auth/LogoutButton";
 
 export default function Navbar() {
    const { pathname } = useLocation();
    const navigate = useNavigate();
-
+   const { t } = useTranslation();
+   const { language, toggleLanguage } = useLanguageContext();
    const { data: user, isLoading } = useUser();
 
    if (isLoading) {
@@ -43,7 +43,7 @@ export default function Navbar() {
                         <Link
                            to="/profile"
                         >
-                           Profile
+                           {t('profile')}
                         </Link>
                      </li>
                      <li>
@@ -52,6 +52,24 @@ export default function Navbar() {
                         >
                            Chatbot
                         </Link>
+                     </li>
+                     <li>
+                        <details className="dropdown">
+                           <summary>Language</summary>
+                           <div className="dropdown-content bg-base-100 rounded-box z-1 shadow-sm text-nowrap">
+                              <div className="join join-vertical">
+                                 {Languages.map(lang =>
+                                    <button
+                                       key={lang.code}
+                                       className={`join-item btn btn-secondary btn-outline ${lang.code === language ? "btn-active" : ""}`}
+                                       onClick={() => toggleLanguage(lang.code)}
+                                    >
+                                       {lang.display}
+                                    </button>
+                                 )}
+                              </div>
+                           </div>
+                        </details>
                      </li>
                   </ul>
                </div>
@@ -63,7 +81,7 @@ export default function Navbar() {
 
             {user && (
                <div className="hidden lg:flex">
-                  <ul className="menu menu-horizontal px-4 space-x-2">
+                  <ul className="menu menu-horizontal pl-4 space-x-4">
                      <li>
                         <Link
                            to="/profile"
@@ -71,7 +89,7 @@ export default function Navbar() {
                               pathname === "/profile" ? "text-primary-content" : ""
                            }`}
                         >
-                           Profile
+                           {t('profile')}
                         </Link>
                      </li>
                      <li>
@@ -81,7 +99,7 @@ export default function Navbar() {
                               pathname === "/chatbot" ? "text-primary-content" : ""
                            }`}
                         >
-                           Chatbot
+                           {t('chatbot')}
                         </Link>
                      </li>
                      <li>
@@ -96,14 +114,35 @@ export default function Navbar() {
                   </ul>
                </div>
             )}
+
+            <div className="hidden lg:flex">
+               <ul className={`menu menu-horizontal ${user ? "" : "px-4"}`}>
+                  <li>
+                     <details className="dropdown">
+                        <summary>{t('language')}</summary>
+                        <div className="dropdown-content bg-base-100 rounded-box z-1 shadow-sm text-nowrap">
+                           <div className="join join-vertical">
+                              {Languages.map(lang =>
+                                 <button
+                                    key={lang.code}
+                                    className={`join-item btn btn-secondary btn-outline ${lang.code === language ? "btn-active" : ""}`}
+                                    onClick={() => toggleLanguage(lang.code)}
+                                 >
+                                    {lang.display}
+                                 </button>
+                              )}
+                           </div>
+                        </div>
+                     </details>
+                  </li>
+               </ul>
+            </div>
          </div>
 
          <div className="navbar-end">
             {user ? (
                <div className="flex flex-row items-center space-x-4">
-                  <div>
-                     Welcome, <strong>{user.userName}</strong>
-                  </div>
+                  <div>{t('welcome')}<strong>{user.userName}</strong></div>
                   <LogoutButton />
                </div>
             ) : (
@@ -111,7 +150,7 @@ export default function Navbar() {
                   onClick={() => navigate("/auth")}
                   className="btn btn-sm btn-outline"
                >
-                  Log In
+                  {t('login')}
                </button>
             )}
          </div>
@@ -119,41 +158,4 @@ export default function Navbar() {
    );
 }
 
-function LogoutButton() {
-   const navigate = useNavigate();
-   const queryClient = useQueryClient();
 
-   async function logoutHandler() {
-      console.log("Logging user out...");
-
-      try {
-         await axios.post(
-            `${SERVER_API_URL}/api/logout`,
-            {},
-            { withCredentials: true }
-         );
-
-         queryClient.removeQueries({ queryKey: ["current-user"] });
-
-         console.log("Log out successful");
-
-         toast.success("You successfully logged out");
-
-         navigate("/");
-      } catch (error) {
-         console.log(`Log out unsuccessful due to: \n${error}`);
-
-         if (axios.isAxiosError(error)) {
-            toast.error(`Logout failed: ${error.message}.`);
-         } else {
-            toast.error("An unknown error occured. Try again later.");
-         }
-      }
-   }
-
-   return (
-      <button onClick={logoutHandler} className="btn btn-sm btn-outline">
-         Log Out
-      </button>
-   );
-}

@@ -1,4 +1,4 @@
-export type StatusTypes = "pending" | "finished" | "error";
+export type QueryStatusTypes = "pending" | "finished" | "error";
 
 export type Query = {
    id: string;
@@ -6,19 +6,21 @@ export type Query = {
    img: File | null;
    answer: string;
    timestamp: Date;
-   status: StatusTypes;
+   status: QueryStatusTypes;
    sources?: string[];
 }
+
+export type ChatTypes = "unknown" | "question" | "report";
 
 export type Chat = {
    id: string;
    title: string;
-   type: StatusTypes;
+   type: ChatTypes;
    createdAt: Date;
    queries: Query[];
 }
 
-export type AllowedAgencies = "MSO" | "NEA" | "LTA" | "HDB" | "NParks" | "SP Group" | "Town Councils" | "SPF" | "PUB";
+export type AllowedAgencies = "MSO" | "NEA" | "LTA" | "HDB" | "NParks" | "SP Group" | "Town Councils" | "SPF" | "PUB" | "Others";
 export type ReportStatusTypes = "pending" | "resolved";
 
 export type Report = {
@@ -55,6 +57,7 @@ export type ChatContextType = {
    renameChat: (x: string, y: string) => Promise<void>;
    coords: GeolocationCoordinates | undefined;
    isWaiting: boolean;
+   isFetchingAChat: boolean;
 }
 
 export type User = {
@@ -73,4 +76,18 @@ export type RegisterFields = {
    email: string;
    password: string;
    confirmPassword: string
+}
+
+export type SiteLanguages = "en" | "zh" | "ms" | "ta";
+
+export const Languages: { display: string, code: SiteLanguages }[] = [
+   { display: "English", code: "en" },
+   { display: "中文", code: "zh" },
+   { display: "Bahasa Melayu", code: "ms" },
+   { display: "தமிழ்", code: "ta" },
+];
+
+export type LanguageContextType = {
+   language: SiteLanguages;
+   toggleLanguage: (x: SiteLanguages) => void;
 }

@@ -6,17 +6,14 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import useTranslation from "../language/useTranslation";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
-
-const zodSchema = z.object({
-   userName: z.string().nonempty({ message: "Required" }),
-   password: z.string().nonempty({ message: "Required" }),
-})
 
 export default function Login() {
 
    const navigate = useNavigate();
+   const { t } = useTranslation();
 
    // form handler
    const {
@@ -26,7 +23,12 @@ export default function Login() {
       trigger,
       reset
    } = useForm<LoginFields>({
-      resolver: zodResolver(zodSchema),
+      resolver: zodResolver(
+         z.object({
+            userName: z.string().nonempty({ message: t('required') }),
+            password: z.string().nonempty({ message: t('required') }),
+         })
+      ),
       defaultValues: { userName: "", password: "" },
    });
 
@@ -90,7 +92,7 @@ export default function Login() {
       >
 
          <fieldset className="fieldset">
-            <legend className="fieldset-legend text-sm">Username</legend>
+            <legend className="fieldset-legend text-sm">{t('username')}</legend>
             <input
                {...register("userName")}
                type="text"
@@ -102,7 +104,7 @@ export default function Login() {
          </fieldset>
 
          <fieldset className="fieldset">
-            <legend className="fieldset-legend text-sm">Password</legend>
+            <legend className="fieldset-legend text-sm">{t('password')}</legend>
             <input
                {...register("password")}
                type="password"
@@ -120,11 +122,11 @@ export default function Login() {
             >
                {isSubmitting 
                   ?  <span className="loading loading-dots loading-md"/>
-                  :  "Log In"
+                  :  t('login')
                }
             </button>
             <div>
-               No account? <Link to="/auth/reg" className="link link-hover">Register</Link>
+               {t('noAccount')}{' '}<Link to="/auth/reg" className="link link-hover">{t('register')}</Link>
             </div>
          </div>
 
