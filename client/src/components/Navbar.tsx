@@ -24,7 +24,7 @@ export default function Navbar() {
    }
    return (
       
-      <div className="navbar shadow-sm bg-primary text-primary-content px-4">
+      <div className="navbar shadow-sm bg-primary text-primary-content px-4 z-1 fixed">
          <div className="navbar-start">
             
             {user &&
