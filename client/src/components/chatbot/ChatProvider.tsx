@@ -12,6 +12,7 @@ type Action =
    | { type: "UPDATE_ALL_QUERIES_OF_CHAT"; payload: { chatId: string, queries: Query[] } }
    | { type: "ADD_NEW_CHAT"; payload: Chat }
    | { type: "UPDATE_CHAT_WITH_NEW_QUERY"; payload: { newQuery: Query, chatId: string } }
+   | { type: "DELETE_QUERY"; payload: { chatId: string, queryId: string } }
    | { type: "UPDATE_QUERY_WITH_ANSWER"; payload: { answer: string, chatId: string, queryId: string } }
    | { type: "DELETE_CHAT"; payload: { chatId: string } }
    | { type: "UPDATE_CHAT_TITLE"; payload: { chatId: string, newTitle: string } };
@@ -54,6 +55,16 @@ function chatReducer(state: Chat[], action: Action): Chat[] {
                }
                :  chat
          );
+      
+      case "DELETE_QUERY":
+         return state.map(chat => 
+            chat.id === action.payload.chatId
+               ?  {
+                  ...chat,
+                  queries: chat.queries.filter(q => q.id !== action.payload.queryId)
+               }
+               :  chat
+         );
          
       case "UPDATE_CHAT_TITLE":
          return state.map(chat =>
@@ -73,16 +84,19 @@ function chatReducer(state: Chat[], action: Action): Chat[] {
 
 export default function ChatProvider({ children, currChatId, }: { children: React.ReactNode; currChatId: string | undefined; }) {
 
+   const [chats, chatsDispatch] = useReducer(chatReducer, []);
+
    const [formState, setFormState] = useState<FormState>({ text: "", img: null });
    const [imgPreview, setImgPreview] = useState<string | null>(null);
    const [isWaiting, setIsWaiting] = useState<boolean>(false);
-   const initChats: Chat[] = [];
-   const [chats, chatsDispatch] = useReducer(chatReducer, initChats);
+   const [isFetchingAChat, setIsFetchingAChat] = useState<boolean>(false);
+
    const navigate = useNavigate();
 
    useEffect(() => {
 
       async function fetchAllChats() {
+         console.log("fetching all of user's chats...");
          const res = await axios.get(
             `${SERVER_API_URL}/api/chats`,
             { withCredentials: true }
@@ -100,18 +114,14 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
             createdAt: new Date(chat.created_at),
             queries: [],
          }));
+         console.log(`${formattedChats.length} chats fetched`);
          chatsDispatch({ type: "GET_ALL_CHATS", payload: formattedChats });
+         return formattedChats;
       }
 
-      fetchAllChats()
-
-   }, []);
-
-   useEffect(() => {
-
-      if (!currChatId) return;
-
       async function fetchQueriesForThisChat() {
+         setIsFetchingAChat(true);
+         console.log(`fetching chat ${currChatId}...`);
          const res = await axios.get(
             `${SERVER_API_URL}/api/chats/${currChatId}`,
             { withCredentials: true }
@@ -131,12 +141,20 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
             status: "finished",
             timestamp: new Date(query.created_at),
          }));
+         console.log(`${formattedQueries.length} queries fetched`);
          chatsDispatch({ type: "UPDATE_ALL_QUERIES_OF_CHAT", payload: { chatId: currChatId!, queries: formattedQueries } });
+         setIsFetchingAChat(false);
       }
 
-      fetchQueriesForThisChat()
+      if (chats.length === 0) {
+         fetchAllChats().then(() => {
+            if (currChatId) fetchQueriesForThisChat();
+         })
+      } else if (currChatId && chats.find(chat => chat.id === currChatId)?.queries.length === 0) {
+         fetchQueriesForThisChat()
+      }
 
-   }, [currChatId])
+   }, [currChatId, chats])
 
    // get user's coordinates
    // browser will ask for permission
@@ -192,20 +210,13 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
    async function handleAddQuery() {
       setIsWaiting(true);
    
-      try {
+      const chatId = currChatId || await handleCreateNewChat();
 
-         const chatId = currChatId || await handleCreateNewChat();
-   
-         if (!chatId) throw new Error("Failed to create chat");
-   
-         await handleAddQueryToExistingChat(chatId);
-   
-      } catch (error) { 
-         console.error("Failed to send query:", error);
-         toast.error("Something went wrong while sending your message");
-      } finally {
-         setIsWaiting(false);
-      }
+      if (!chatId) throw new Error("Failed to create chat");
+
+      await handleAddQueryToExistingChat(chatId);
+
+      setIsWaiting(false);
    }
    
    async function handleCreateNewChat() {
@@ -305,15 +316,21 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
 
       } catch (error) {
 
+         setFormState({ text, img });
+
          console.log(`Server replied with an error: \n${error}`);
 
          if (axios.isAxiosError(error)) {
 
-            chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer: error.message, chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
+            toast.error(error.message);
+
+            chatsDispatch({ type: "DELETE_QUERY", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
 
          } else {
 
-            chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer: "An unknown error occurred", chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
+            toast.error("Sorry, a reply could not be generated. Please try again.")
+
+            chatsDispatch({ type: "DELETE_QUERY", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
    
          }
 
@@ -362,7 +379,8 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          imgPreview,
          currChatId,
          coords,
-         isWaiting
+         isWaiting,
+         isFetchingAChat
       }}>
          {children}
       </ChatContext.Provider>

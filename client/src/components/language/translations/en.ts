@@ -1,0 +1,35 @@
+export default {
+   homePg: "Welcome to CivicAId!",
+   welcome: "Welcome, ",
+   profile: "Profile",
+   chatbot: "Chatbot",
+   language: "Language",
+
+   login: "Log In",
+   logout: "Log Out", 
+   username: "Username",
+   password: "Password",
+   required: "Required",
+   email: "Email",
+   confirmPassword: "Confirm Password",
+   haveAccount: "Have an account?",
+   noAccount: "No account?",
+
+   register: "Register",
+   usernameNoSpace: "Username cannot have spaces",
+   usernameChar: "Username must contain between 3 and 50 characters",
+   invalidEmail: "Invalid email",
+   psdsMustMatch: "Passwords Must Match",
+
+   newChat: "New Chat",
+   newChatTop: "Hi! I'm CivLeo, your friendly neighbourhood assistant.",
+   newChatBottom: "How can I help you today?",
+   textArea: "Ask anything",
+   disclaimer: "CivicAId can make mistakes. Check official government websites for important information.",
+   location: "This chatbot requires your location data for personalised recommendations.",
+
+   uploadImage: "Upload an image",
+   maxImage: "Max: 1 image",
+   messageTooLong: "Message must be ≤400 characters",
+   emptyForm: "Message or image required",
+};

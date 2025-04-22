@@ -46,7 +46,7 @@ exports.getChatHistory = async (req, res) => {
       const userId = req.user.id; // from auth middleware
 
       const chatRes = await pgsql.query(
-         `SELECT * FROM chats WHERE user_id = $1`,
+         `SELECT * FROM chats WHERE user_id = $1 ORDER BY created_at DESC`,
          [userId]
       );
 
@@ -69,7 +69,7 @@ exports.getSpecificChatHistory = async (req, res) => {
       const chatId = req.params.chatId; // from request parameters
 
       const queriesRes = await pgsql.query(
-         `SELECT * FROM queries WHERE user_id = $1 AND chat_id = $2`,
+         `SELECT * FROM queries WHERE user_id = $1 AND chat_id = $2 ORDER BY created_at ASC`,
          [userId, chatId]
       );
 
