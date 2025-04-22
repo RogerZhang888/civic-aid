@@ -2,3 +2,8 @@
 @plugin "daisyui" {
   themes: autumn, cupcake;
 }
+
+/* Add to your global CSS (e.g. index.css or App.css) */
+.clip-bottom-angle {
+  clip-path: polygon(0 0, 100% 100%, 0% 100%);
+}
