@@ -12,6 +12,8 @@ import NotFound from "./components/NotFound";
 import ProtectedRoutesWrapper from "./components/auth/ProtectedRoutesWrapper";
 import ChatbotWrapper from "./components/chatbot/ChatbotWrapper";
 import LanguageProvider from "./components/language/LanguageProvider";
+import About from "./components/about/About"; 
+
 
 export default function App() {
    return (
@@ -51,12 +53,15 @@ export default function App() {
                      </Route>
 
                      <Route path="*" element={<NotFound />} />
+                    
+                     <Route path="/about" element={<About />} />
 
                   </Route>
                   
                </Routes>
             </ErrorBoundary>
          </LanguageProvider>
+
       </BrowserRouter>
    );
 }
