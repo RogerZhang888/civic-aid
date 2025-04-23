@@ -1,3 +1,5 @@
+//deprecated
+
 type SpeechBubbleProps = {
   text: string;
   direction?: "left" | "right";
