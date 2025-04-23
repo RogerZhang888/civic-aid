@@ -11,7 +11,7 @@ export default function About() {
       ></div>
 
       {/* Each scroll section */}
-      <section className="relative w-full h-[100vh]">
+      <section className="relative w-full h-[500vh]">
         <CardSection imageSrc={mascot} imageAlt="Leo waving">
           👋 Hi there! Welcome to <span className="font-bold text-primary">CivicAId</span>. I’m <b>Leo</b>, your friendly SG Chatbot!<br />
           I’m here to help you with anything related to government services — from HDB queries to CPF questions, and more.
