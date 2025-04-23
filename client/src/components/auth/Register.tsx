@@ -5,28 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
+import useTranslation from "../language/useTranslation";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
-const zodSchema = z.object({
-   userName: z.string()
-      .nonempty({ message: "Required" })
-      .refine(s => !s.includes(' '), { message: "Username cannot have spaces" })
-      .refine(s => 3 <= s.length && s.length <= 50, { message: "Username must contain between 3 and 50 characters" }),
-
-   email: z.string()
-      .nonempty({ message: "Required" })
-      .email({ message: "Invalid email" }),
-
-   password: z.string()
-      .nonempty({ message: "Required" }),
-   //   .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, { message: "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number" }),
-
-   confirmPassword: z.string()
-
-}).refine(data => data.password === data.confirmPassword, { message: "Passwords must match", path: ["confirmPassword"] });
-
 export default function Register() {
+
+   const { t } = useTranslation();
    
    const {
       register,
@@ -35,7 +20,25 @@ export default function Register() {
       reset
    } = useForm<RegisterFields>({
       mode: "onChange",
-      resolver: zodResolver(zodSchema),
+      resolver: zodResolver(
+         z.object({
+            userName: z.string()
+               .nonempty({ message: t('required') })
+               .refine(s => !s.includes(' '), { message: t('usernameNoSpace') })
+               .refine(s => 3 <= s.length && s.length <= 50, { message: t('usernameChar') }),
+         
+            email: z.string()
+               .nonempty({ message: t('required') })
+               .email({ message: t('invalidEmail') }),
+         
+            password: z.string()
+               .nonempty({ message: t('required') }),
+            //   .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, { message: "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number" }),
+         
+            confirmPassword: z.string()
+         
+         }).refine(data => data.password === data.confirmPassword, { message: t('psdsMustMatch'), path: ["confirmPassword"] })
+      ),
       defaultValues: { userName: "", email: "", password: "", confirmPassword: "" },
    });
 
@@ -84,7 +87,7 @@ export default function Register() {
       >
 
          <fieldset className="fieldset">
-            <legend className="fieldset-legend text-sm">Username</legend>
+            <legend className="fieldset-legend text-sm">{t('username')}</legend>
             <input
                {...register("userName")}
                type="text"
@@ -95,7 +98,7 @@ export default function Register() {
          </fieldset>
 
          <fieldset className="fieldset">
-            <legend className="fieldset-legend text-sm">Email</legend>
+            <legend className="fieldset-legend text-sm">{t('email')}</legend>
             <input
                {...register("email")}
                type="email"
@@ -105,7 +108,7 @@ export default function Register() {
          </fieldset>
 
          <fieldset className="fieldset">
-            <legend className="fieldset-legend text-sm">Password</legend>
+            <legend className="fieldset-legend text-sm">{t('password')}</legend>
             <input
                {...register("password")}
                type="password"
@@ -115,7 +118,7 @@ export default function Register() {
          </fieldset>
 
          <fieldset className="fieldset">
-            <legend className="fieldset-legend text-sm">Confirm Password</legend>
+            <legend className="fieldset-legend text-sm">{t('confirmPassword')}</legend>
             <input
                {...register("confirmPassword")}
                type="password"
@@ -132,11 +135,11 @@ export default function Register() {
             >
                {isSubmitting 
                   ?  <span className="loading loading-dots loading-md"/>
-                  :  "Register"
+                  :  t('register')
                }
             </button>
             <div>
-               Have an account? <Link to="/auth" className="link">Log In</Link>
+            {t('haveAccount')}{' '}<Link to="/auth" className="link">{t('login')}</Link>
             </div>
          </div>
 

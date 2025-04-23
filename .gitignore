@@ -2,4 +2,8 @@ node_modules/
 .env
 *.log
 .DS_Store
+model.safetensors
+embeddings.npy
+government_chunks_hnsw.index
 chatbot/chatbotmodels/clip_lora_merged/model.safetensors
+

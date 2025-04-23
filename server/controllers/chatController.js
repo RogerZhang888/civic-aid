@@ -1,4 +1,3 @@
-const { v4: uuidv4 } = require("uuid");
 const pgsql = require("../config/db");
 
 exports.startNewChat = async (req, res) => {
@@ -21,6 +20,24 @@ exports.startNewChat = async (req, res) => {
    }
 };
 
+exports.updateChatName = async (req, res) => {
+   try {
+      const userId = req.user.id; // from auth middleware
+      const chatId = req.params.chatId; // from request parameters
+      const { title } = req.body; // new title from request body
+
+      await pgsql.query(
+         `UPDATE chats SET title = $1 WHERE user_id = $2 AND id = $3`,
+         [title, userId, chatId]
+      );
+
+      res.status(200).json({ success: true });
+   } catch (err) {
+      console.error("Failed to update chat name:", err);
+      res.status(500).json({ error: "Failed to update chat name" });
+   }
+}
+
 exports.getChatHistory = async (req, res) => {
 
    console.log("GETTING ALL CHAT HISTORY FOR USER");
@@ -29,7 +46,7 @@ exports.getChatHistory = async (req, res) => {
       const userId = req.user.id; // from auth middleware
 
       const chatRes = await pgsql.query(
-         `SELECT * FROM chats WHERE user_id = $1`,
+         `SELECT * FROM chats WHERE user_id = $1 ORDER BY created_at DESC`,
          [userId]
       );
 
@@ -52,7 +69,7 @@ exports.getSpecificChatHistory = async (req, res) => {
       const chatId = req.params.chatId; // from request parameters
 
       const queriesRes = await pgsql.query(
-         `SELECT * FROM queries WHERE user_id = $1 AND chat_id = $2`,
+         `SELECT * FROM queries WHERE user_id = $1 AND chat_id = $2 ORDER BY created_at ASC`,
          [userId, chatId]
       );
 
@@ -63,5 +80,27 @@ exports.getSpecificChatHistory = async (req, res) => {
    } catch (err) {
       console.error("Failed to fetch specific chat history:", err);
       res.status(500).json({ error: "Failed to fetch user's specific chat history" });
+   }
+};
+
+exports.deleteSpecificChat = async (req, res) => {
+   console.log("DELETING SPECIFIC CHAT FOR USER");
+
+   try {
+      const userId = req.user.id; // from auth middleware
+      const chatId = req.params.chatId; // from request parameters
+
+      await pgsql.query(
+         `DELETE FROM chats WHERE user_id = $1 AND id = $2`,
+         [userId, chatId]
+      );
+      // the chat id in neon db is set to cascade
+      // so all queries related to that chat will be deleted as well
+
+      res.status(200).json({ success: true });
+      
+   } catch (err) {
+      console.error("Failed to delete specific chat:", err);
+      res.status(500).json({ error: `Failed to delete chat with id ${chatId}` });
    }
 }

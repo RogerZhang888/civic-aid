@@ -1,18 +1,43 @@
+export type QueryStatusTypes = "pending" | "finished" | "error";
+
 export type Query = {
    id: string;
    question: string;
    img: File | null;
    answer: string;
    timestamp: Date;
-   status: "pending" | "finished" | "error";
+   status: QueryStatusTypes;
+   sources?: string[];
 }
+
+export type ChatTypes = "unknown" | "question" | "report";
 
 export type Chat = {
    id: string;
    title: string;
-   type: "question" | "report" | "unknown";
+   type: ChatTypes;
    createdAt: Date;
    queries: Query[];
+}
+
+export type AllowedAgencies = "MSO" | "NEA" | "LTA" | "HDB" | "NParks" | "SP Group" | "Town Councils" | "SPF" | "PUB" | "Others";
+export type ReportStatusTypes = "pending" | "resolved";
+
+export type Report = {
+   id: string;
+   userId: string;
+   chatId: string;
+   title: string;
+   description: string;
+   mediaUrl: string[];
+   incidentLocation: GeolocationCoordinates | null;
+   agency: AllowedAgencies;
+   recommended_steps: string;
+   urgency: number;
+   reportConfidence: number;
+   status: ReportStatusTypes;
+   createdAt: Date;
+   resolvedAt: Date | null;
 }
 
 export type FormState = {
@@ -26,10 +51,13 @@ export type ChatContextType = {
    formState: FormState;
    imgPreview: string | null;
    handleAddQuery: () => Promise<void>;
-   updateFormImage: (param: File | null) => void;
-   updateFormText: (param: string) => void;
+   updateFormImage: (x: File | null) => void;
+   updateFormText: (x: string) => void;
+   deleteChat: (x: string) => Promise<void>;
+   renameChat: (x: string, y: string) => Promise<void>;
    coords: GeolocationCoordinates | undefined;
    isWaiting: boolean;
+   isFetchingAChat: boolean;
 }
 
 export type User = {
@@ -39,7 +67,7 @@ export type User = {
 }
 
 export type LoginFields = {
-   email: string;
+   userName: string;
    password: string;
 }
 
@@ -48,4 +76,18 @@ export type RegisterFields = {
    email: string;
    password: string;
    confirmPassword: string
+}
+
+export type SiteLanguages = "en" | "zh" | "ms" | "ta";
+
+export const Languages: { display: string, code: SiteLanguages }[] = [
+   { display: "English", code: "en" },
+   { display: "中文", code: "zh" },
+   { display: "Bahasa Melayu", code: "ms" },
+   { display: "தமிழ்", code: "ta" },
+];
+
+export type LanguageContextType = {
+   language: SiteLanguages;
+   toggleLanguage: (x: SiteLanguages) => void;
 }

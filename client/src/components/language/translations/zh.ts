@@ -1,0 +1,35 @@
+export default {
+   homePg: "欢迎使用 CivicAId!",
+   welcome: "您好，",
+   profile: "用户资料",
+   chatbot: "智能助手",
+   language: "语言设置",
+
+   login: "登录",
+   logout: "登出",
+   username: "用户名",
+   password: "密码",
+   required: "必填项",
+   email: "电子邮箱",
+   confirmPassword: "确认密码",
+   haveAccount: "已有账户？",
+   noAccount: "没有账户？",
+
+   register: "注册",
+   usernameNoSpace: "用户名不可含空格",
+   usernameChar: "用户名必须包含3至50字符",
+   invalidEmail: "电子邮箱格式无效",
+   psdsMustMatch: "密码须一致",
+
+   newChat: "开启新对话",
+   newChatTop: "您好！我是 CivLeo, 您的友好邻里助手。",
+   newChatBottom: "今天需要什么帮助？",
+   textArea: "随意询问",
+   disclaimer: "CivicAId 可能出错。 重要事项请以政府官网信息为准。",
+   location: "需要获取您的位置数据，以便提供精准服务。",
+
+   uploadImage: "上传照片",
+   maxImage: "最多上传一张照片",
+   messageTooLong: "文字不可超过400字符",
+   emptyForm: "请输入文字或上传照片",
+};

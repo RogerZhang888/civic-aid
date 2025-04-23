@@ -187,13 +187,3 @@ exports.submitQuery = async (req, res) => {
     }
 };
 
-function simulateLLMResponse() {
-   return new Promise((resolve) => {
-      setTimeout(() => {
-         resolve({
-            answer: generate({ exactly: 20, join: ' ' }),
-            confidence: 0.9,
-         });
-      }, 1000);
-   });
-}

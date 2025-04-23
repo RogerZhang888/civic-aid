@@ -6,17 +6,14 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import useTranslation from "../language/useTranslation";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
-
-const zodSchema = z.object({
-   email: z.string().nonempty({ message: "Required" }).email({ message: "Invalid email" }),
-   password: z.string().nonempty({ message: "Required" }),
-})
 
 export default function Login() {
 
    const navigate = useNavigate();
+   const { t } = useTranslation();
 
    // form handler
    const {
@@ -26,23 +23,30 @@ export default function Login() {
       trigger,
       reset
    } = useForm<LoginFields>({
-      resolver: zodResolver(zodSchema),
-      defaultValues: { email: "", password: "" },
+      resolver: zodResolver(
+         z.object({
+            userName: z.string().nonempty({ message: t('required') }),
+            password: z.string().nonempty({ message: t('required') }),
+         })
+      ),
+      defaultValues: { userName: "", password: "" },
    });
 
    const queryClient = useQueryClient();
 
    async function loginHandler(data: LoginFields) {
 
-      const { email, password } = data;
+      console.log(data);
+
+      const { userName, password } = data;
 
       try {
 
-         console.log(`Attempting log in for ${email} ...`);
+         console.log(`Attempting log in for ${userName} ...`);
 
          const res = await axios.post(
             `${SERVER_API_URL}/api/login`,
-            { email, password },
+            { userName, password },
             { 
                withCredentials: true,
                headers: {
@@ -55,17 +59,19 @@ export default function Login() {
 
          queryClient.setQueryData(['current-user'], newLoggedInUser);
 
+         await queryClient.invalidateQueries({ queryKey: ['current-user']});
+
          reset();
 
          toast.success(`Welcome, ${newLoggedInUser.userName}`);
 
          console.log(`Log in successful! Details: \n${JSON.stringify(newLoggedInUser)}`);
 
-         navigate("/profile");
+         navigate("/chatbot");
 
       } catch (error) {
          
-         console.log(`Log in for ${email} unsuccessful due to: \n${error}`);
+         console.log(`Log in for ${userName} unsuccessful due to: \n${error}`);
 
          if (axios.isAxiosError(error)) {
             if (error.response) {
@@ -86,19 +92,19 @@ export default function Login() {
       >
 
          <fieldset className="fieldset">
-            <legend className="fieldset-legend text-sm">Email</legend>
+            <legend className="fieldset-legend text-sm">{t('username')}</legend>
             <input
-               {...register("email")}
-               type="email"
-               onBlur={() => trigger("email")}
+               {...register("userName")}
+               type="text"
+               onBlur={() => trigger("userName")}
                autoFocus={true}
                className="input text-lg w-full"
             />
-            <span className="fieldset-label text-sm text-red-600 h-3">{errors.email?.message}</span>
+            <span className="fieldset-label text-sm text-red-600 h-3">{errors.userName?.message}</span>
          </fieldset>
 
          <fieldset className="fieldset">
-            <legend className="fieldset-legend text-sm">Password</legend>
+            <legend className="fieldset-legend text-sm">{t('password')}</legend>
             <input
                {...register("password")}
                type="password"
@@ -112,15 +118,15 @@ export default function Login() {
             <button
                type="submit"
                disabled={!isDirty || !isValid || isSubmitting}
-               className="btn btn-wide btn-lg btn-success"
+               className="btn btn-wide btn-lg bg-primary-content text-primary hover:bg-primary hover:text-primary-content"
             >
                {isSubmitting 
                   ?  <span className="loading loading-dots loading-md"/>
-                  :  "Log In"
+                  :  t('login')
                }
             </button>
             <div>
-               No account? <Link to="/auth/reg" className="link">Register</Link>
+               {t('noAccount')}{' '}<Link to="/auth/reg" className="link link-hover">{t('register')}</Link>
             </div>
          </div>
 
