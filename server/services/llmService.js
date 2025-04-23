@@ -22,7 +22,7 @@ exports.callModel = async ({ query, queryType, imagePath = null }) => {
         clarifytype:"Could you clarify if you're reporting a fire hydrant flooding incident or asking a question about it? This will help me assist you better.",
         report:`\`\`\`json
 {
-    "summary": "The user reported a burst fire hydrant along Lim Chu Kang road, just outside Sungei Gedong camp, causing significant flooding in the area.",
+    "summary": "Test change. The user reported a burst fire hydrant along Lim Chu Kang road, just outside Sungei Gedong camp, causing significant flooding in the area.",
     "confidence": 0.9,
     "urgency": 0.9,
     "recommendedSteps": "Dispatch a team to inspect and repair the burst fire hydrant immediately to prevent further flooding and water wastage. Consider traffic management if the flooding affects road access.",
