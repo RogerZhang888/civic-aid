@@ -22,7 +22,7 @@ export default function Register() {
       mode: "onChange",
       resolver: zodResolver(
          z.object({
-            userName: z.string()
+            username: z.string()
                .nonempty({ message: t('required') })
                .refine(s => !s.includes(' '), { message: t('usernameNoSpace') })
                .refine(s => 3 <= s.length && s.length <= 50, { message: t('usernameChar') }),
@@ -39,20 +39,20 @@ export default function Register() {
          
          }).refine(data => data.password === data.confirmPassword, { message: t('psdsMustMatch'), path: ["confirmPassword"] })
       ),
-      defaultValues: { userName: "", email: "", password: "", confirmPassword: "" },
+      defaultValues: { username: "", email: "", password: "", confirmPassword: "" },
    });
 
    async function registerHandler(data: RegisterFields) {
 
-      const { userName, email, password } = data;
+      const { username, email, password } = data;
 
       try {
 
-         console.log(`Attempting to register new user ${userName} (${email}) ...`);
+         console.log(`Attempting to register new user ${username} (${email}) ...`);
 
          await axios.post(`${SERVER_API_URL}/api/register`, 
             { 
-               name: userName, 
+               username, 
                email, 
                password 
             }
@@ -89,12 +89,12 @@ export default function Register() {
          <fieldset className="fieldset">
             <legend className="fieldset-legend text-sm">{t('username')}</legend>
             <input
-               {...register("userName")}
+               {...register("username")}
                type="text"
                autoFocus={true}
                className="input text-lg w-full"
             />
-            <span className="fieldset-label text-sm text-red-600 h-3">{errors.userName?.message}</span>
+            <span className="fieldset-label text-sm text-red-600 h-3">{errors.username?.message}</span>
          </fieldset>
 
          <fieldset className="fieldset">
