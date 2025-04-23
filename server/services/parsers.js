@@ -1,7 +1,6 @@
 const extractJson = (raw) => {
     const jsonRegex = /\{\s*("[^"]+"\s*:\s*[^{}]+)(\s*,\s*"[^"]+"\s*:\s*[^{}]+)*\s*\}/
-    const sourceRegex = /[sS]ource[\s][0-9]+/
-    let jsonSection = raw.match(jsonRegex)
+    let jsonSection = raw.match(jsonRegex)[0]
     let obj = {}
     try {
         obj = JSON.parse(jsonSection)
@@ -19,7 +18,10 @@ export const responseParsers = {
         let parsed = extractJson(res)
         if (parsed.invalid) return {valid:false}
 
-        if (!("type" in parsed) || !("confidence" in parsed)) r.valid = false
+        if (
+            !(parsed.type === "report" || parsed.type === "question") || 
+            !(typeof parsed.confidence === "number")
+        ) r.valid = false
         else {
             r = {
                 type: parsed.type,
@@ -36,7 +38,14 @@ export const responseParsers = {
         let parsed = extractJson(res)
         if (parsed.invalid) return {valid:false}
 
-        if (!("answer" in parsed) || !("confidence" in parsed) || !("sources" in parsed)) r.valid = false
+        if (
+            !(typeof parsed.answer === "string") || 
+            !(typeof parsed.confidence === "number") || 
+            !(
+                Array.isArray(parsed.sources) && 
+                (parsed.sources.length === 0 || typeof parsed.sources[0] === "string")
+            )
+        ) r.valid = false
         else {
             r = {
                 answer: parsed.answer,
@@ -55,17 +64,21 @@ export const responseParsers = {
         if (parsed.invalid) return {valid:false}
 
         if (
-            !("summary" in parsed) ||
-            !("agency" in parsed) ||
-            !("confidence" in parsed) ||
-            !("sources" in parsed) ||
-            !("urgency" in parsed) ||
-            !("recommendedSteps" in parsed)
+            !(typeof parsed.summary === "string") ||
+            !(typeof parsed.agency === "string") ||
+            !(typeof parsed.confidence === "number") ||
+            !(
+                Array.isArray(parsed.sources) && 
+                (parsed.sources.length === 0 || typeof parsed.sources[0] === "string")
+            ) ||
+            !(typeof parsed.urgency === "number") ||
+            !(typeof parsed.recommendedSteps === "string")
         ) r.valid = false
         else {
             r = parsed
             r.valid = true
         }
+        return r
     },
     noParser: (res) => {
         return {answer:res, valid:true};

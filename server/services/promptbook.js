@@ -1,3 +1,5 @@
+const debug = true
+
 const preface = "You are a Singapore Government chatbot, "
 // TODO: consider adding meta prompts here for customised personality. 
 // TODO: consider adding guardrails in the prompts for non-Singapore / non-government related things
@@ -25,10 +27,10 @@ ${ending}`:
 
 export const systempromptTemplates = {
     getTypeDecisionTemplate: (userprompt) => {
-        return template(
+        return debug?"0":"" + template(
             preface+genericpreface+"Identify if the query below is a question or a report, and output how confident you are on a scale of 0 to 1, with a higher score representing higher confidence.",
 `Format your response as a JSON object with the fields 'type' and 'confidence'. \
-Type should be reported as either 'report' or 'query'. \
+Type should be reported as either 'report' or 'question'. \
 Confidence should be a decimal between 0 and 1 exclusive. 
 For example:
 {
@@ -45,7 +47,7 @@ For example:
     },
     clarifyTypeDecisionTemplate: (userprompt) => {
         // TODO: Formalise a length limit rather than just 'short'?
-        return template(
+        return debug?"1":"" + template(
             preface+genericpreface+"You were previously unable to confidently identify if the the user's query was a question or a report. Provide a short follow-up response to seek clarification from the user to decide if the user's query is a question or report. "
             ,
             "A single short plaintext paragraph.",
@@ -53,7 +55,7 @@ For example:
         )
     },
     getReportTemplate: (userprompt) => {
-        return template(
+        return debug?"2":"" + template(
             preface+reportpreface+`With the help of the context provided, assist the government to summarise the incident as below. \
 Your output is sent to the reviewing team, not the citizen reporting. \
 Also output how urgent the issue is, and how confident you are that you have a complete understanding of the user's report on a scale of 0 to 1, with a higher score representing greater urgency / confidence. \
@@ -80,7 +82,7 @@ For example:
         )
     },
     clarifyReportTemplateLow: (userprompt) => {
-        return template(
+        return debug?"3":"" + template(
             preface+reportpreface+"Earlier, the citizen submitted a report, \
 however, your confidence on your understanding was low. Provide a short follow-up response to seek clarification \
 from the user on the infomation required to be more confident of the report. ",
@@ -89,7 +91,7 @@ from the user on the infomation required to be more confident of the report. ",
         )
     },
     clarifyReportTemplateMed: (userprompt) => {
-        return template(
+        return debug?"4":"" + template(
             preface+reportpreface+"Earlier, the citizen submitted a report, \
 however, your confidence on your understanding was low. Provide a short follow-up response to summarise what you already know, and seek clarification \
 from the user on the infomation required to be more confident of the report. ",
@@ -100,7 +102,7 @@ However I can provide a better report with some additional information. <Follow 
         )
     },
     getQuestionTemplate: (userprompt) => {
-        return template(
+        return debug?"5":"" + template(
             preface+questionpreface+"With the help of the context provided, answer the question, giving actionable answers as much as possible. \
 Output how confident you are that you have a complete understanding of the user's question on a scale of 0 to 1, with a higher score representing greater understanding. \
 Also indicate which sources you used, both from the context provided and otherwise.",
@@ -121,7 +123,7 @@ For example:
         )
     },
     clarifyQuestionTemplateLow: (userprompt) => {
-        return template(
+        return debug?"6":"" + template(
             preface+questionpreface+"Earlier, the citizen submitted a question, \
 however, your confidence on the answer was low. Provide a short follow-up response to seek clarification \
 from the user on the infomation required to be more confident of your answer. ",
@@ -130,7 +132,7 @@ from the user on the infomation required to be more confident of your answer. ",
         )
     },
     clarifyQuestionTemplateMed: (userprompt) => {
-        return template(
+        return debug?"7":"" + template(
             preface+reportpreface+"Earlier, the citizen submitted a question, \
 however, your confidence on the answer was low. Provide a short follow-up response to summarise your current answer, and seek clarification \
 from the user on the infomation required to be more confident of your answer. ",
