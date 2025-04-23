@@ -158,6 +158,14 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
         return parsedRes
     }
 
+    if (userprompt == "") {
+        // MEDIA ONLY
+        return {
+            response:{
+                caption:"joe"
+            }
+        }
+    }
     if (chat.type == 'unknown') {
         systemprompt = systempromptTemplates.getTypeDecisionTemplate(userprompt)
         response = await queryLLM(systemprompt, responseParsers.typeDecisionParser, 'NEVER')
@@ -221,17 +229,18 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
 
 exports.submitQuery = async (req, res) => {
     try {
-        const { prompt, latitude, longitude, chatId } = req.body;
+        const { latitude, longitude, chatId } = req.body;
+        const prompt = req.body.prompt??""
         const userId = req.user?.id || null;
-        // const uploadedFiles = req.files || [];
+        const uploadedFile = req.file;
 
         console.log("Received prompt:", prompt);
         console.log("Location:", latitude, longitude);
         console.log("User ID:", userId);
-        //   console.log("Uploaded file:", uploadedFile);
+        console.log("Uploaded file:", uploadedFile);
 
-        if (!prompt) {
-        return res.status(400).json({ error: "Prompt is required" });
+        if ((!prompt) && (!uploadedFile)) {
+            return res.status(400).json({ error: "Prompt is required" });
         }
 
         const chat = await getChat(chatId).then((r) => {
