@@ -69,7 +69,7 @@ exports.getSpecificChatHistory = async (req, res) => {
       const chatId = req.params.chatId; // from request parameters
 
       const queriesRes = await pgsql.query(
-         `SELECT * FROM queries WHERE user_id = $1 AND chat_id = $2 ORDER BY created_at ASC`,
+         `SELECT * FROM queries WHERE user_id = $1 AND chat_id = $2 AND to_reply = true ORDER BY created_at ASC`,
          [userId, chatId]
       );
 
