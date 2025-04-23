@@ -73,9 +73,18 @@ exports.getSpecificChatHistory = async (req, res) => {
          [userId, chatId]
       );
 
-      console.log(queriesRes)
+      if (queriesRes.length > 0) {
+         console.log(queriesRes)
+         res.status(200).json(queriesRes);
+      } else {
+         // no queries associated with this chat: delete it
+         await pgsql.query(
+            `DELETE FROM chats WHERE user_id = $1 AND id = $2`,
+            [userId, chatId]
+         );
+         res.status(404).json({ error: "No queries for this chat" })
+      }
 
-      res.status(200).json(queriesRes);
       
    } catch (err) {
       console.error("Failed to fetch specific chat history:", err);

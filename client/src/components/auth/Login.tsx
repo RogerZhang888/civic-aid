@@ -25,11 +25,11 @@ export default function Login() {
    } = useForm<LoginFields>({
       resolver: zodResolver(
          z.object({
-            userName: z.string().nonempty({ message: t('required') }),
+            username: z.string().nonempty({ message: t('required') }),
             password: z.string().nonempty({ message: t('required') }),
          })
       ),
-      defaultValues: { userName: "", password: "" },
+      defaultValues: { username: "", password: "" },
    });
 
    const queryClient = useQueryClient();
@@ -38,15 +38,15 @@ export default function Login() {
 
       console.log(data);
 
-      const { userName, password } = data;
+      const { username, password } = data;
 
       try {
 
-         console.log(`Attempting log in for ${userName} ...`);
+         console.log(`Attempting log in for ${username} ...`);
 
          const res = await axios.post(
             `${SERVER_API_URL}/api/login`,
-            { userName, password },
+            { username, password },
             { 
                withCredentials: true,
                headers: {
@@ -63,7 +63,7 @@ export default function Login() {
 
          reset();
 
-         toast.success(`Welcome, ${newLoggedInUser.userName}`);
+         toast.success(`Welcome, ${newLoggedInUser.username}`);
 
          console.log(`Log in successful! Details: \n${JSON.stringify(newLoggedInUser)}`);
 
@@ -71,7 +71,7 @@ export default function Login() {
 
       } catch (error) {
          
-         console.log(`Log in for ${userName} unsuccessful due to: \n${error}`);
+         console.log(`Log in for ${username} unsuccessful due to: \n${error}`);
 
          if (axios.isAxiosError(error)) {
             if (error.response) {
@@ -94,13 +94,13 @@ export default function Login() {
          <fieldset className="fieldset">
             <legend className="fieldset-legend text-sm">{t('username')}</legend>
             <input
-               {...register("userName")}
+               {...register("username")}
                type="text"
-               onBlur={() => trigger("userName")}
+               onBlur={() => trigger("username")}
                autoFocus={true}
                className="input text-lg w-full"
             />
-            <span className="fieldset-label text-sm text-red-600 h-3">{errors.userName?.message}</span>
+            <span className="fieldset-label text-sm text-red-600 h-3">{errors.username?.message}</span>
          </fieldset>
 
          <fieldset className="fieldset">

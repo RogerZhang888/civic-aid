@@ -33,7 +33,7 @@ const authMiddleware = (req, res, next) => {
       return res.status(401).json({ error: "Invalid token" });
    }
 
-   console.log("AUTHENTICATED");
+   console.log(`AUTHENTICATED ${decoded.username} (id: ${decoded.id})`);
 
    req.user = decoded;
 
@@ -42,7 +42,7 @@ const authMiddleware = (req, res, next) => {
     * {
     *   id: (some number),
     *   email: (some email),
-    *   userName: (some name),
+    *   username: (some name),
     *   iat: (issued at time),
     *   exp: (expiration time),
     * }

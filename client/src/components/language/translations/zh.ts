@@ -3,6 +3,7 @@ export default {
    welcome: "您好，",
    profile: "用户资料",
    chatbot: "智能助手",
+   about: "关于网站",
    language: "语言设置",
 
    login: "登录",
@@ -21,6 +22,7 @@ export default {
    invalidEmail: "电子邮箱格式无效",
    psdsMustMatch: "密码须一致",
 
+   loadingChat: "加载对话信息中…",
    newChat: "开启新对话",
    newChatTop: "您好！我是 CivLeo, 您的友好邻里助手。",
    newChatBottom: "今天需要什么帮助？",

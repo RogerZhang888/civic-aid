@@ -10,7 +10,7 @@ export default function ProfilePage() {
 
    return (
       <section className="w-full h-full flex flex-col items-center space-y-4 p-4">
-         <div className="text-xl font-bold">{user?.userName}'s Reports</div>
+         <div className="text-xl font-bold">{user?.username}'s Reports</div>
 
          {isReportsLoading 
             ?  <div>Loading reports...</div>

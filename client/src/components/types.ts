@@ -63,16 +63,16 @@ export type ChatContextType = {
 export type User = {
    id: number;
    email: string;
-   userName: string;
+   username: string;
 }
 
 export type LoginFields = {
-   userName: string;
+   username: string;
    password: string;
 }
 
 export type RegisterFields = {
-   userName: string;
+   username: string;
    email: string;
    password: string;
    confirmPassword: string

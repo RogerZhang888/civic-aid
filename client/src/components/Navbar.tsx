@@ -142,7 +142,7 @@ export default function Navbar() {
          <div className="navbar-end">
             {user ? (
                <div className="flex flex-row items-center space-x-4">
-                  <div>{t('welcome')}<strong>{user.userName}</strong></div>
+                  <div>{t('welcome')}<strong>{user.username}</strong></div>
                   <LogoutButton />
                </div>
             ) : (
