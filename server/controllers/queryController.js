@@ -51,6 +51,57 @@ const getChat = async (chatId) => {
     if (chat.length === 0) return {id:null}
     return chat[0]
 }
+const updateChatType = async (chatId, type) => {
+    return pgsql.query("UPDATE chats SET type = $1 WHERE id = $2", [type, chatId])
+}
+const createReport = (params) => {
+    let {userId, chatId, title, summary, media, location, agency, recommendedSteps, urgency, confidence} = params
+    return pgsql.query(`SELECT * FROM reports WHERE chat_id = $1`, [chatId]).then((res) => {
+        if (res.length == 0) {
+            return pgsql.query(`
+                INSERT INTO reports 
+                (user_id, chat_id, title, description, media_url, incident_location, agency, recommended_steps, urgency, report_confidence)
+                VALUES (
+                    $1, $2, $3, $4, $5, 
+                    CASE
+                        WHEN $6::double precision IS NOT NULL AND $7::double precision IS NOT NULL
+                        THEN ST_SetSRID(ST_MakePoint($6, $7), 4326)
+                        ELSE NULL
+                    END,
+                    $8, $9, $10, $11
+                )
+            `, [
+                userId,
+                chatId,
+                title,
+                summary,
+                media??[],
+                location.latitude,
+                location.longitude,
+                agency,
+                recommendedSteps, 
+                urgency,
+                confidence
+            ])
+        } else {
+            return pgsql.query(`
+                UPDATE reports 
+                SET description = $1, media_url = $2, agency = $3, recommended_steps = $4, urgency = $5, report_confidence = $6
+                WHERE chat_id = $7
+            `, [
+                summary,
+                media??[],
+                agency,
+                recommendedSteps,
+                urgency,
+                confidence,
+                chatId
+            ])
+        }
+    })
+    
+    
+}
 
 const getConfidence = (score) => {
     // TOOD: Confirm boundaries
@@ -107,6 +158,14 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
         return parsedRes
     }
 
+    if (userprompt == "") {
+        // MEDIA ONLY
+        return {
+            response:{
+                caption:"joe"
+            }
+        }
+    }
     if (chat.type == 'unknown') {
         systemprompt = systempromptTemplates.getTypeDecisionTemplate(userprompt)
         response = await queryLLM(systemprompt, responseParsers.typeDecisionParser, 'NEVER')
@@ -116,6 +175,7 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
             response = await queryLLM(systemprompt, responseParsers.noParser, 'ALWAYS')
         } else if (getConfidence(response.confidence) == 'HIGH') {
             chat.type = response.type
+            updateChatType(chatId, response.type)
         }
     }
 
@@ -129,7 +189,19 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
         } else if (getConfidence(response.confidence) == 'MED') {
             systemprompt = systempromptTemplates.clarifyReportTemplateMed(userprompt)
             response = await queryLLM(systemprompt, responseParsers.noParser, 'ALWAYS')
-        } 
+        } else if (getConfidence(response.confidence) == 'HIGH') {
+            createReport({
+                userId,
+                chatId,
+                title:chat.title,
+                summary: response.summary,
+                location,
+                agency: response.agency,
+                recommendedSteps: response.recommendedSteps,
+                urgency: response.urgency,
+                confidence: response.confidence
+            })
+        }
         // ELSE when HIGH - already report - no further action required
     }
 
@@ -156,51 +228,51 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
 }
 
 exports.submitQuery = async (req, res) => {
-  try {
-    const { prompt, latitude, longitude, chatId } = req.body;
-    const userId = req.user?.id || null;
-    // const uploadedFiles = req.files || [];
+    try {
+        const { latitude, longitude, chatId } = req.body;
+        const prompt = req.body.prompt??""
+        const userId = req.user?.id || null;
+        const uploadedFile = req.file;
 
-      console.log("Received prompt:", prompt);
-      console.log("Location:", latitude, longitude);
-      console.log("User ID:", userId);
-    //   console.log("Uploaded file:", uploadedFile);
+        console.log("Received prompt:", prompt);
+        console.log("Location:", latitude, longitude);
+        console.log("User ID:", userId);
+        console.log("Uploaded file:", uploadedFile);
 
-    if (!prompt) {
-      return res.status(400).json({ error: "Prompt is required" });
-    }
+        if ((!prompt) && (!uploadedFile)) {
+            return res.status(400).json({ error: "Prompt is required" });
+        }
 
-    const chat = await getChat(chatId).then((r) => {
-        if (r.id !== chatId) res.status(500).json({ error: "Invalid Chat ID" })
-        else if (r.user_id !== userId) res.status(401).json({ error: "User does not have access to this chat ID" })
-        else return r
+        const chat = await getChat(chatId).then((r) => {
+            if (r.id !== chatId) res.status(500).json({ error: "Invalid Chat ID" })
+            else if (r.user_id !== userId) res.status(401).json({ error: "User does not have access to this chat ID" })
+            else return r
 
-        return {}
-    })
+            return {}
+        })
 
-    // Process and store uploaded files (mock URLs for now)
-    // const savedMedia = uploadedFiles.map(file => {
-    //   const ext = path.extname(file.originalname);
-    //   const id = uuidv4();
-    //   const filename = `${id}${ext}`;
-    //   const mockUrl = `/uploads/${filename}`;
-    //   return {
-    //     originalName: file.originalname,
-    //     mimeType: file.mimetype,
-    //     url: mockUrl,
-    //   };
-    // });
+        // Process and store uploaded files (mock URLs for now)
+        // const savedMedia = uploadedFiles.map(file => {
+        //   const ext = path.extname(file.originalname);
+        //   const id = uuidv4();
+        //   const filename = `${id}${ext}`;
+        //   const mockUrl = `/uploads/${filename}`;
+        //   return {
+        //     originalName: file.originalname,
+        //     mimeType: file.mimetype,
+        //     url: mockUrl,
+        //   };
+        // });
 
-    // const queryType = 'query'; // or 'report' — set based on context or user input
-    // const imagePath = uploadedFiles.length > 0 ? uploadedFiles[0].path : null;
+        // const queryType = 'query'; // or 'report' — set based on context or user input
+        // const imagePath = uploadedFiles.length > 0 ? uploadedFiles[0].path : null;
 
-    if (chat.id) userquery(prompt, userId, chatId, chat, {longitude, latitude}).then((r) => {
-        res.json(r.response)
-    }).catch((err) => {
-        console.error("Error handling user query", err);
-        return res.status(500).json({ error: "Failed to generate a response." });
-    })
-
+        if (chat.id) userquery(prompt, userId, chatId, chat, {longitude, latitude}).then((r) => {
+            res.json(r.response)
+        }).catch((err) => {
+            console.error("Error handling user query", err);
+            return res.status(500).json({ error: "Failed to generate a response." });
+        })
     } catch (error) {
         console.error("Submit query error:", error);
         res.status(500).json({ error: error.message });
