@@ -6,4 +6,4 @@ model.safetensors
 embeddings.npy
 government_chunks_hnsw.index
 chatbot/chatbotmodels/clip_lora_merged/model.safetensors
-
+server/uploads/*
