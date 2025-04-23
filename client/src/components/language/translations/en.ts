@@ -3,6 +3,7 @@ export default {
    welcome: "Welcome, ",
    profile: "Profile",
    chatbot: "Chatbot",
+   about: "About",
    language: "Language",
 
    login: "Log In",
@@ -21,6 +22,7 @@ export default {
    invalidEmail: "Invalid email",
    psdsMustMatch: "Passwords Must Match",
 
+   loadingChat: "Loading your chat...",
    newChat: "New Chat",
    newChatTop: "Hi! I'm CivLeo, your friendly neighbourhood assistant.",
    newChatBottom: "How can I help you today?",

@@ -33,7 +33,7 @@ function chatReducer(state: Chat[], action: Action): Chat[] {
          );
 
       case "ADD_NEW_CHAT":
-         return [...state, action.payload];
+         return [action.payload, ...state];
 
       case "UPDATE_CHAT_WITH_NEW_QUERY":
          return state.map(chat => 
@@ -90,6 +90,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
    const [imgPreview, setImgPreview] = useState<string | null>(null);
    const [isWaiting, setIsWaiting] = useState<boolean>(false);
    const [isFetchingAChat, setIsFetchingAChat] = useState<boolean>(false);
+   const [error, setError] = useState<string>("");
 
    const navigate = useNavigate();
 
@@ -122,28 +123,48 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
       async function fetchQueriesForThisChat() {
          setIsFetchingAChat(true);
          console.log(`fetching chat ${currChatId}...`);
-         const res = await axios.get(
-            `${SERVER_API_URL}/api/chats/${currChatId}`,
-            { withCredentials: true }
-         );
-         const queries = res.data as {
-            id: string,
-            user_prompt: string,
-            response: string,
-            img: null,
-            created_at: string,
-         }[];
-         const formattedQueries = queries.map<Query>(query => ({
-            id: query.id,
-            question: query.user_prompt,
-            img: null,
-            answer: query.response,
-            status: "finished",
-            timestamp: new Date(query.created_at),
-         }));
-         console.log(`${formattedQueries.length} queries fetched`);
-         chatsDispatch({ type: "UPDATE_ALL_QUERIES_OF_CHAT", payload: { chatId: currChatId!, queries: formattedQueries } });
-         setIsFetchingAChat(false);
+         try {
+            const res = await axios.get(
+               `${SERVER_API_URL}/api/chats/${currChatId}`,
+               { withCredentials: true }
+            );
+            const queries = res.data as {
+               id: string,
+               user_prompt: string,
+               response: string,
+               img: null,
+               created_at: string,
+            }[];
+            const formattedQueries = queries.map<Query>(query => ({
+               id: query.id,
+               question: query.user_prompt,
+               img: null,
+               answer: query.response,
+               status: "finished",
+               timestamp: new Date(query.created_at),
+            }));
+            console.log(`${formattedQueries.length} queries fetched`);
+            chatsDispatch({ type: "UPDATE_ALL_QUERIES_OF_CHAT", payload: { chatId: currChatId!, queries: formattedQueries } });
+
+         } catch (error) {
+            if (axios.isAxiosError(error)) {
+               if (error.response?.status === 404) {
+                  console.log(`No queries found for chat id ${currChatId}: Deleted chat`);
+                  chatsDispatch({ type: "DELETE_CHAT", payload: { chatId: currChatId! } });
+                  toast.error("There was no history found for your chat.");
+                  navigate("/chatbot");
+               } else {
+                  console.log(error);
+                  toast.error(error.response?.data.error);
+               }
+            } else {
+               console.log(error);
+               toast.error("An unknown error occured while fetching your chat history. Please refresh the page to try again.");
+            }
+
+         } finally {
+            setIsFetchingAChat(false);
+         }
       }
 
       if (chats.length === 0) {
