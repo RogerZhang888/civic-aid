@@ -12,4 +12,4 @@ COPY . .
 # Expose the port the app will run on
 EXPOSE 7346
 
-CMD ["gunicorn", "--workers=1", "--threads=1", "--bind=0.0.0.0:1337", "llmserver:app"]
+CMD ["gunicorn", "--workers=1", "--threads=1", "--bind=0.0.0.0:7346", "llmserver:app"]
