@@ -29,6 +29,7 @@ export default {
    textArea: "随意询问",
    disclaimer: "CivicAId 可能出错。 重要事项请以政府官网信息为准。",
    location: "需要获取您的位置数据，以便提供精准服务。",
+   noChatsYet: "尚未对话记录可显示。开始新对话！",
 
    uploadImage: "上传照片",
    maxImage: "最多上传一张照片",

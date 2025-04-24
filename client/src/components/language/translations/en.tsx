@@ -29,6 +29,7 @@ export default {
    textArea: "Ask anything",
    disclaimer: "CivicAId can make mistakes. Check official government websites for important information.",
    location: "This chatbot requires your location data for personalised recommendations.",
+   noChatsYet: "No chats yet. Start chatting!",
 
    uploadImage: "Upload an image",
    maxImage: "Max: 1 image",

@@ -13,7 +13,7 @@ type Action =
    | { type: "ADD_NEW_CHAT"; payload: Chat }
    | { type: "UPDATE_CHAT_WITH_NEW_QUERY"; payload: { newQuery: Query, chatId: string } }
    | { type: "DELETE_QUERY"; payload: { chatId: string, queryId: string } }
-   | { type: "UPDATE_QUERY_WITH_ANSWER"; payload: { answer: string, chatId: string, queryId: string } }
+   | { type: "UPDATE_QUERY_WITH_REPLY_AND_SOURCES_AND_MAYBE_UPDATE_CHAT_TITLE_WHAT_THE_FUCK"; payload: { answer: string, sources?: string[], title?: string, chatId: string, queryId: string } }
    | { type: "DELETE_CHAT"; payload: { chatId: string } }
    | { type: "UPDATE_CHAT_TITLE"; payload: { chatId: string, newTitle: string } };
 
@@ -42,14 +42,15 @@ function chatReducer(state: Chat[], action: Action): Chat[] {
                :  chat
          );
       
-      case "UPDATE_QUERY_WITH_ANSWER":
+      case "UPDATE_QUERY_WITH_REPLY_AND_SOURCES_AND_MAYBE_UPDATE_CHAT_TITLE_WHAT_THE_FUCK":
          return state.map(chat => 
             chat.id === action.payload.chatId
                ?  {
                   ...chat,
+                  ...(action.payload.title ? { title: action.payload.title } : {}),
                   queries: chat.queries.map(query => 
                      query.id === action.payload.queryId
-                        ?  { ...query, answer: action.payload.answer, status: "finished" }
+                        ?  { ...query, answer: action.payload.answer, status: "finished", sources: action.payload.sources || [] }
                         :  query
                   )
                }
@@ -90,7 +91,6 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
    const [imgPreview, setImgPreview] = useState<string | null>(null);
    const [isWaiting, setIsWaiting] = useState<boolean>(false);
    const [isFetchingAChat, setIsFetchingAChat] = useState<boolean>(false);
-   const [error, setError] = useState<string>("");
 
    const navigate = useNavigate();
 
@@ -134,6 +134,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
                response: string,
                img: null,
                created_at: string,
+               sources: string[]
             }[];
             const formattedQueries = queries.map<Query>(query => ({
                id: query.id,
@@ -142,6 +143,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
                answer: query.response,
                status: "finished",
                timestamp: new Date(query.created_at),
+               sources: query.sources
             }));
             console.log(`${formattedQueries.length} queries fetched`);
             chatsDispatch({ type: "UPDATE_ALL_QUERIES_OF_CHAT", payload: { chatId: currChatId!, queries: formattedQueries } });
@@ -175,7 +177,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          fetchQueriesForThisChat()
       }
 
-   }, [currChatId, chats])
+   }, [currChatId, chats, navigate])
 
    // get user's coordinates
    // browser will ask for permission
@@ -285,6 +287,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          answer: "",
          status: "pending",
          timestamp: new Date(),
+         sources: []
       };
 
       chatsDispatch({ type: "UPDATE_CHAT_WITH_NEW_QUERY", payload: { newQuery, chatId: chatIdToAddQueryTo }});
@@ -300,7 +303,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          fd.append('latitude', coords.latitude.toString());
          fd.append('longitude', coords.longitude.toString());
       }
-      fd.append('chat_id', chatIdToAddQueryTo);
+      fd.append('chatid', chatIdToAddQueryTo);
 
       /**
        *  fd will contain the following:
@@ -308,7 +311,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
        * - image: the image file uploaded by the user (if available)
        * - latitude: the user's latitude (if available)
        * - longitude: the user's longitude (if available)
-       * - chat_id: the chat ID
+       * - chatid: the chat ID
        */
 
       console.log("FormData to be sent to server:");
@@ -327,11 +330,11 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
             }
          )
 
-         const { answer } = res.data as { answer: string };
+         const { answer, sources, title } = res.data as { answer: string, sources?: string[], title?: string };
 
          console.log(`Server replied with "${answer}"`);
 
-         chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer, chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
+         chatsDispatch({ type: "UPDATE_QUERY_WITH_REPLY_AND_SOURCES_AND_MAYBE_UPDATE_CHAT_TITLE_WHAT_THE_FUCK", payload: { answer, sources, chatId: chatIdToAddQueryTo, queryId: newQueryUUID, title } });
 
          navigate(`/chatbot/${chatIdToAddQueryTo}`);
 
