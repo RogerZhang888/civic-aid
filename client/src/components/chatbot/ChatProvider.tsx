@@ -303,7 +303,9 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          fd.append('latitude', coords.latitude.toString());
          fd.append('longitude', coords.longitude.toString());
       }
+     
       fd.append('chatid', chatIdToAddQueryTo);
+
 
       /**
        *  fd will contain the following:

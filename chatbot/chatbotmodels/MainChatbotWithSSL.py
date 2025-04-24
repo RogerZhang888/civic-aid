@@ -364,7 +364,7 @@ def call_model(text_query, prompt, image_path=None):
     #     for src in result["sources"]:
     #         print(f"- {src['source_text']}\n  {src['url']}")
     
-    #return result
+    return result["answer"]
 
 prompt = "INSTRUCTIONS \
 You are a Singapore Government chatbot, built to answer citizen queries and assist in writing incident reports. Identify if the query below is a question or a report, and output how confident you are on a scale of 0 to 1, with a higher score representing higher confidence. \

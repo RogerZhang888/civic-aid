@@ -20,12 +20,14 @@ export const responseParsers = {
 
         if (
             !(parsed.type === "report" || parsed.type === "question") || 
-            !(typeof parsed.confidence === "number")
+            !(typeof parsed.confidence === "number") || 
+            !(typeof parsed.title === "string")
         ) r.valid = false
         else {
             r = {
                 type: parsed.type,
                 confidence: parsed.confidence,
+                title: parsed.title,
                 valid: true
             }
         }
@@ -81,6 +83,6 @@ export const responseParsers = {
         return r
     },
     noParser: (res) => {
-        return {answer:res, valid:true};
+        return res?{answer:res, valid:true}:{valid:false};
     }
 }
