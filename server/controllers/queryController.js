@@ -42,7 +42,7 @@ const updateQueriesDB = (params)  => {
 
 const getChatHistory = async (chatId) => {
     let chatHistory = await pgsql.query("SELECT * FROM queries WHERE chat_id = $1", [chatId]);
-    console.log("Extracting chat history", chatHistory)
+    // console.log("Extracting chat history", chatHistory)
     return chatHistory
 }
 const getChat = async (chatId) => {
@@ -51,8 +51,8 @@ const getChat = async (chatId) => {
     if (chat.length === 0) return {id:null}
     return chat[0]
 }
-const updateChatType = async (chatId, type) => {
-    return pgsql.query("UPDATE chats SET type = $1 WHERE id = $2", [type, chatId])
+const updateChatType = async (chatId, type, title) => {
+    return pgsql.query("UPDATE chats SET type = $1, title = $2 WHERE id = $3", [type, title, chatId])
 }
 const createReport = (params) => {
     let {userId, chatId, title, summary, media, location, agency, recommendedSteps, urgency, confidence} = params
@@ -114,6 +114,8 @@ const getConfidence = (score) => {
 const userquery = async (userprompt, userId, chatId, chat, location) => {
     const chatHistory = await getChatHistory(chatId)
     let queriesTracker = []
+    let response = {}
+    let title = undefined
 
     async function queryLLM({query, prompt}, parseResponse=responseParsers.defaultParser, reply='NEVER') {
         // reply enum: NEVER, ALWAYS, HIGH: 
@@ -149,12 +151,13 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
                 return parsed
             }).catch((err) => {
                 console.log('Error calling model', err)
-                return {valid:false}
+                return parsedRes = {valid:false}
             })
         }
         // TOOD: better way to reprompt for invalid output format?
 
         console.log(`Result for query ${query}`, parsedRes)
+        if (!parsedRes.valid) throw new Error("Invalid LLM output")
         return parsedRes
     }
 
@@ -175,7 +178,8 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
             response = await queryLLM({query:userprompt, prompt: systemprompt}, responseParsers.noParser, 'ALWAYS')
         } else if (getConfidence(response.confidence) == 'HIGH') {
             chat.type = response.type
-            updateChatType(chatId, response.type)
+            updateChatType(chatId, response.type, response.title)
+            title = response.title
         }
     }
 
@@ -222,6 +226,7 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
         queries: queriesTracker,
         response: {
             ...response,
+            title,
             confidence: undefined
         },
     }
