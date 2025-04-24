@@ -1,5 +1,6 @@
 const { exec } = require('child_process');
 const path = require('path');
+const debug = true
 
 /**
  * Calls the Python model using CLI and returns the output.
@@ -62,9 +63,9 @@ exports.callModel = async ({ query, prompt, imagePath = null }) => {
     ]
     // const temporaryResponse = `{\"type\":\"question\", \"confidence\":\"${Math.random()}\", \"answer\":\"This is my very good answer\", \"sources\":[\"loremipsumdolorsitamet\"]}`
     // TEMPORARY CODE FOR TESTING
-    // return new Promise((res, rej) => {
-    //     res(responseByCode[query[0]])
-    // })
+    if (debug) return new Promise((res, rej) => {
+        res(responseByCode[prompt[0]])
+    })
 
     return fetch(`${process.env.MODELURL}/api/callmodel`, {
         method:"POST",
