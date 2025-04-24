@@ -11,13 +11,15 @@ exports.callModel = async ({ query, prompt, imagePath = null }) => {
         typeDecision:`\`\`\`json
 {
     "type": "report",
-    "confidence": 0.9
+    "confidence": 0.9,
+    "title": "Sample Title"
 }
 \`\`\``,
         typeDecisionlowconf:`\`\`\`json
 {
     "type": "report",
-    "confidence": 0.7
+    "confidence": 0.7,
+    "title": "Sample Title"
 }
 \`\`\``,
         clarifytype:"Could you clarify if you're reporting a fire hydrant flooding incident or asking a question about it? This will help me assist you better.",

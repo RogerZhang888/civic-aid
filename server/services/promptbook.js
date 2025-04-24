@@ -25,19 +25,22 @@ ${ending}`:
 export const systempromptTemplates = {
     getTypeDecisionTemplate: (userprompt) => {
         return debug?"0":template(
-            preface+genericpreface+"Identify if the query below is a question or a report, and output how confident you are on a scale of 0 to 1, with a higher score representing higher confidence.",
-`Format your response as a JSON object with the fields 'type' and 'confidence'. \
+            preface+genericpreface+"Identify if the query below is a question or a report, and output how confident you are on a scale of 0 to 1, with a higher score representing higher confidence. Come up with a short title of 10 words or less to summarise the query. ",
+`Format your response as a JSON object with the fields 'type', 'confidence' and 'title'. \
 Type should be reported as either 'report' or 'question'. \
-Confidence should be a decimal between 0 and 1 exclusive. 
+Confidence should be a decimal between 0 and 1 exclusive. \
+Title should be a string of 10 words or less. 
 For example:
 {
     'type': 'report',
-    'confidence': 0.2
+    'confidence': 0.2,
+    'title':'Burst fire hydrant at Lim Chu Kang road'
 }
 
 {
     'type': 'question',
-    'confidence': 0.9
+    'confidence': 0.9,
+    'title':'MRT breakdown inquiry'
 }`,
             userprompt
         )
