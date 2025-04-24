@@ -5,7 +5,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 app.use(cors({
-   origin: `http://${process.env.HOSTNAME}:5173`, // Explicitly allow your frontend origin
+   origin: `http://${process.env.CLIENT_HOSTNAME}:${process.env.CLIENT_PORT}`, // Explicitly allow your frontend origin
    credentials: true, // Allow credentials
    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Allowed methods
    allowedHeaders: ['Content-Type', 'Authorization'] // Allowed headers
