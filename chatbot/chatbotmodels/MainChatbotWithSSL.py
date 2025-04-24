@@ -49,7 +49,7 @@ clip_model = CLIPModel.from_pretrained(MODEL_PATH, local_files_only=True).to(dev
 
 # DeepSeek API configuration
 DEEPSEEK_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEEPSEEK_API_KEY = "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"
+DEEPSEEK_API_KEY = "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"
 
 class HybridRetriever:
     def __init__(self, database):
@@ -366,16 +366,20 @@ def call_model(text_query, prompt, image_path=None):
     
     #return result
 
-prompt = "You are a Singapore government chatbot that handles incident reports. With the help of the context provided, assist the government to summarise the incident as below. Your output is sent to the reviewing team, not the citizen reporting. Also output how urgent the issue is, and how confident you are on a scale of 0 to 1. Also indicate which sources you used, both from the context provided and otherwise. Format output: \
-{\
-    'Incident Summary': <your answer here>, \
-    'Agency responsible': <your answer here>, \
-    'Recommended steps for the agency': <your answer here>, \
-    'Location (if any)': <your answer here>,\
-    'Urgency': '0.6', \
-    'Confidence': '0.6', \
-    'Source 1' : <url here>, \
-    'Source 2' : <url here>, \
-     ... \
-}"
-call_model("There is a broken streetlamp at 570270", prompt)
+prompt = "INSTRUCTIONS \
+You are a Singapore Government chatbot, built to answer citizen queries and assist in writing incident reports. Identify if the query below is a question or a report, and output how confident you are on a scale of 0 to 1, with a higher score representing higher confidence. \
+\
+OUTPUT \
+Format your response as a JSON object with the fields 'type' and 'confidence'. Type should be reported as either 'report' or 'query'. Confidence should be a decimal between 0 and 1 exclusive. \
+For example: \
+{ \
+    'type': 'report', \
+    'confidence': 0.2 \
+} \
+\
+{ \
+    'type': 'question', \
+    'confidence': 0.9 \
+}"   
+
+call_model("dun understand", prompt)
