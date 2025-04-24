@@ -1,22 +1,25 @@
 const { exec } = require('child_process');
 const path = require('path');
+const debug = true
 
 /**
  * Calls the Python model using CLI and returns the output.
  * Assumes the Python script exposes a callable entrypoint like: use_model(query, query_type, image_path)
  */
-exports.callModel = async ({ query, queryType, imagePath = null }) => {
+exports.callModel = async ({ query, prompt, imagePath = null }) => {
     const temporaryResponse = {
         typeDecision:`\`\`\`json
 {
     "type": "report",
-    "confidence": 0.9
+    "confidence": 0.9,
+    "title": "Sample Title"
 }
 \`\`\``,
         typeDecisionlowconf:`\`\`\`json
 {
     "type": "report",
-    "confidence": 0.7
+    "confidence": 0.7,
+    "title": "Sample Title"
 }
 \`\`\``,
         clarifytype:"Could you clarify if you're reporting a fire hydrant flooding incident or asking a question about it? This will help me assist you better.",
@@ -62,31 +65,12 @@ exports.callModel = async ({ query, queryType, imagePath = null }) => {
     ]
     // const temporaryResponse = `{\"type\":\"question\", \"confidence\":\"${Math.random()}\", \"answer\":\"This is my very good answer\", \"sources\":[\"loremipsumdolorsitamet\"]}`
     // TEMPORARY CODE FOR TESTING
-    return new Promise((res, rej) => {
-        res(responseByCode[query[0]])
+    if (debug) return new Promise((res, rej) => {
+        res(responseByCode[prompt[0]])
     })
 
-  return new Promise((resolve, reject) => {
-    const scriptPath = path.join(__dirname, '../../chatbot/chatbotmodels/MainChatbotWithSSL.py'); // adjust this
-    const command = imagePath
-      ? `py "${scriptPath}" --query "${query}" --type "${queryType}" --image "${imagePath}"`
-      : `py "${scriptPath}" --query "${query}" --type "${queryType}"`;
-
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        console.error("Model execution error:", stderr);
-        return reject(error);
-      }
-
-      try {
-        const startIndex = stdout.indexOf('{');
-        const jsonStr = stdout.slice(startIndex); // assumes the result is JSON-printed at the end
-        const result = JSON.parse(jsonStr);
-        resolve(result);
-      } catch (parseErr) {
-        console.error("Failed to parse model output:", stdout);
-        reject(parseErr);
-      }
-    });
-  });
+    return fetch(`${process.env.MODELURL}/api/callmodel`, {
+        method:"POST",
+        body:JSON.stringify({query, prompt})
+    })
 };
