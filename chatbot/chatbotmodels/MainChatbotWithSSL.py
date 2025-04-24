@@ -25,6 +25,7 @@ def setup_nltk_once():
 
 setup_nltk_once()
 
+# index_file_directory = os.path.join(os.path.expanduser("~"), "naisc", "civic-aid", "chatbot","chatbotmodels")
 INDEX_FILES = {
     'hnsw_index': 'government_chunks_hnsw.index',
     'database_metadata': 'database_metadata.json',
@@ -49,7 +50,7 @@ clip_model = CLIPModel.from_pretrained(MODEL_PATH, local_files_only=True).to(dev
 
 # DeepSeek API configuration
 DEEPSEEK_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEEPSEEK_API_KEY = "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"
+DEEPSEEK_API_KEY = "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"
 
 class HybridRetriever:
     def __init__(self, database):
@@ -105,7 +106,7 @@ def expand_query(query: str) -> str:
 def check_existing_index():
     """Check if all index files exist and are valid"""
     for file in INDEX_FILES.values():
-        if not os.path.exists(file):
+        if not os.path.exists(os.path.join(os.path.expanduser("~"), "naisc", "civic-aid", "chatbot","chatbotmodels",file)):
             return False
     try:
         index = hnswlib.Index(space='cosine', dim=512)
@@ -356,7 +357,7 @@ def call_model(text_query, prompt, image_path=None):
         result = rag_search(query, database, index, retriever, prompter=prompt)
     
     # print(f"\nQuery: {query}")
-    print("\nAnswer:")
+    print("\nLLM Answer:")
     print(result["answer"])
     # print(result["used_rag"])
     # if result["sources"]:
@@ -364,7 +365,7 @@ def call_model(text_query, prompt, image_path=None):
     #     for src in result["sources"]:
     #         print(f"- {src['source_text']}\n  {src['url']}")
     
-    return result["answer"]
+    return result
 
 prompt = "INSTRUCTIONS \
 You are a Singapore Government chatbot, built to answer citizen queries and assist in writing incident reports. Identify if the query below is a question or a report, and output how confident you are on a scale of 0 to 1, with a higher score representing higher confidence. \

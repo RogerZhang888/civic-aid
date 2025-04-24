@@ -7,13 +7,15 @@ app = Flask(__name__)
 @app.route('/api/callmodel', methods=['POST'])
 def callmodel():
     temp_params = request.get_json()
-    query = temp_params['params']['query']
-    prompt = temp_params['params']['prompt']
+    query = temp_params['query']
+    prompt = temp_params['prompt']
     
     if query is None:
         return jsonify({"status": "error", "output": "Missing question_id in request"}), 400
-    
-    return call_model(query, prompt)
+   
+    modelanswer = call_model(query, prompt)
+    print(f"Received response as {modelanswer}")
+    return jsonify(modelanswer), 200
 
 # Health check endpoint 
 @app.route('/health', methods=['GET'])
