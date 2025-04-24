@@ -7,7 +7,7 @@ export type Query = {
    answer: string;
    timestamp: Date;
    status: QueryStatusTypes;
-   sources?: string[];
+   sources: string[];
 }
 
 export type ChatTypes = "unknown" | "question" | "report";

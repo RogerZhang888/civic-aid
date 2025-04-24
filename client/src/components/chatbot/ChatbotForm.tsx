@@ -36,7 +36,7 @@ export default function ChatbotForm() {
             handleAddQuery();
             if (textAreaRef.current) textAreaRef.current.style.height = 'auto';
          }}
-         className="bg-gray-200 rounded-xl p-4 mt-2 w-4/5 md:w-2/3 mx-auto
+         className="bg-gray-200 rounded-xl p-4
          flex flex-col relative shadow-lg"
       >  
          {imgPreview && 
@@ -63,7 +63,7 @@ export default function ChatbotForm() {
          }
 
          <textarea
-            placeholder={t('textArea')}
+            placeholder={t('textArea') as string}
             ref={textAreaRef}
             value={formState.text}
             rows={1}
