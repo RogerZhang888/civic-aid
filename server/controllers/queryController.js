@@ -115,7 +115,7 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
     const chatHistory = await getChatHistory(chatId)
     let queriesTracker = []
 
-    async function queryLLM(query, parseResponse=responseParsers.defaultParser, reply='NEVER') {
+    async function queryLLM({query, prompt}, parseResponse=responseParsers.defaultParser, reply='NEVER') {
         // reply enum: NEVER, ALWAYS, HIGH: 
         // NEVER means this output is never used as a reply, 
         // ALWAYS means this output will always be used as a reply, 
@@ -128,7 +128,7 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
         // Provisional limit for 1 reprompt only for testing
         while (!parsedRes?.valid && promptcount < 1) {
             promptcount++
-            parsedRes = await callModel({query}).then((res) => {
+            parsedRes = await callModel({query, prompt}).then((res) => {
                 console.log(`${promptcount}: Received raw LLM response`, res)
                 parsed = parseResponse(res)
                 queryParams = {
@@ -168,11 +168,11 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
     }
     if (chat.type == 'unknown') {
         systemprompt = systempromptTemplates.getTypeDecisionTemplate(userprompt)
-        response = await queryLLM(systemprompt, responseParsers.typeDecisionParser, 'NEVER')
+        response = await queryLLM({query:userprompt, prompt: systemprompt}, responseParsers.typeDecisionParser, 'NEVER')
         
         if (getConfidence(response.confidence) == 'LOW' || getConfidence(response.confidence) == 'MED') {
             systemprompt = systempromptTemplates.clarifyTypeDecisionTemplate(userprompt)
-            response = await queryLLM(systemprompt, responseParsers.noParser, 'ALWAYS')
+            response = await queryLLM({query:userprompt, prompt: systemprompt}, responseParsers.noParser, 'ALWAYS')
         } else if (getConfidence(response.confidence) == 'HIGH') {
             chat.type = response.type
             updateChatType(chatId, response.type)
@@ -181,14 +181,14 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
 
     if (chat.type == 'report') {
         let systemprompt = systempromptTemplates.getReportTemplate(userprompt)
-        response = await queryLLM(systemprompt, responseParsers.reportParser, 'HIGH')
+        response = await queryLLM({query:userprompt, prompt: systemprompt}, responseParsers.reportParser, 'HIGH')
 
         if (getConfidence(response.confidence) == 'LOW') {
             systemprompt = systempromptTemplates.clarifyReportTemplateLow(userprompt)
-            response = await queryLLM(systemprompt, responseParsers.noParser, 'ALWAYS')
+            response = await queryLLM({query:userprompt, prompt: systemprompt}, responseParsers.noParser, 'ALWAYS')
         } else if (getConfidence(response.confidence) == 'MED') {
             systemprompt = systempromptTemplates.clarifyReportTemplateMed(userprompt)
-            response = await queryLLM(systemprompt, responseParsers.noParser, 'ALWAYS')
+            response = await queryLLM({query:userprompt, prompt: systemprompt}, responseParsers.noParser, 'ALWAYS')
         } else if (getConfidence(response.confidence) == 'HIGH') {
             createReport({
                 userId,
@@ -207,14 +207,14 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
 
     if (chat.type == 'question') {
         let systemprompt = systempromptTemplates.getQuestionTemplate(userprompt)
-        response = await queryLLM(systemprompt, responseParsers.defaultParser, 'HIGH')
+        response = await queryLLM({query:userprompt, prompt: systemprompt}, responseParsers.defaultParser, 'HIGH')
 
         if (getConfidence(response.confidence) == 'LOW') {
             systemprompt = systempromptTemplates.clarifyQuestionTemplateLow(userprompt)
-            response = await queryLLM(systemprompt, responseParsers.noParser, 'ALWAYS')
+            response = await queryLLM({query:userprompt, prompt: systemprompt}, responseParsers.noParser, 'ALWAYS')
         } else if (getConfidence(response.confidence) == 'MED') {
             systemprompt = systempromptTemplates.clarifyQuestionTemplateMed(userprompt)
-            response = await queryLLM(systemprompt, responseParsers.noParser, 'ALWAYS')
+            response = await queryLLM({query:userprompt, prompt: systemprompt}, responseParsers.noParser, 'ALWAYS')
         }
     }
     
