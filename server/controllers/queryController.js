@@ -113,7 +113,7 @@ const getConfidence = (score) => {
 
 // TOOD: media support
 const userquery = async (userprompt, userId, chatId, chat, location, media) => {
-    const chatHistory = await getChatHistory(chatId)
+    let chatHistory = await getChatHistory(chatId)
     let queriesTracker = []
     let response = {}
     let title = undefined
@@ -131,7 +131,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         const repromptLimit = 3
         while (!parsedRes?.valid && promptcount < repromptLimit) {
             promptcount++
-            parsedRes = await callModel({query, prompt, model}).then((res) => {
+            parsedRes = await callModel({query, prompt, model, imagePath: media, chatHistory}).then((res) => {
                 console.log(`${promptcount}: Received raw LLM response`, res)
                 parsed = parseResponse(res)
                 queryParams = {
@@ -148,6 +148,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
                 }
                 updateQueriesDB(queryParams) // For long term record in DB
                 queriesTracker.push(queryParams) // For temporary tracking
+                chatHistory.push(queryParams)
 
                 return parsed
             }).catch((err) => {
@@ -167,7 +168,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         // MEDIA ONLY
         return {
             response:{
-                caption:"joe"
+                caption:queryLLM({query:"", prompt:"", model:"captioner"})
             }
         }
     }

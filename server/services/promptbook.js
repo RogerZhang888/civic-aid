@@ -9,16 +9,19 @@ Your task is to analyse the user's question and answer within the context of Sin
 const reportpreface = `built to write and process incident reports. \
 Your task is to analyse the prompt and produce a short report which can be escalated to the relevant agencies for action. `
 
-const template = (instructions, output, userprompt, ending = null) => {
+const template = (instructions, output, userprompt, chatHistory) => {
+    let processedChatHistory = chatHistory.map((q) => {
+        return `Prompt: ${q.systemprompt + '\n' + q.userprompt}\nResponse: ${q.response}\n`
+    }).join("---\n")
+
     return `INSTRUCTIONS 
 ${instructions}
 ---
 OUTPUT
 ${output}   
-${ending?
-    `---
-${ending}`:
-    ""
+---
+CHAT HISTORY
+${processedChatHistory}
 }`
 }
 
