@@ -22,7 +22,7 @@ def callmodel():
 
     modelanswer = {"answer":"Default model answer - this response likely indicates an invalid model name supplied. "} 
     try:
-        if model == 'main' or model == 'basic':
+        if model == 'main':
             modelanswer = callMainModel(query, prompt, filepath)
         elif model == 'basic':
             modelanswer = {
