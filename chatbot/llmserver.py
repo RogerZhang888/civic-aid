@@ -19,11 +19,14 @@ def callmodel():
     if prompt is None:
         return jsonify({"status": "error", "output": "Missing model in request"}), 400
    
+    modelanswer = {"answer":"Default model answer - this response likely indicates an invalid model name supplied. "} 
     try:
         if model == 'main':
             modelanswer = callMainModel(query, prompt)
         elif model == 'basic':
-            modelanswer = callBasicModel(f"{prompt}\n---\nUSER QUERY:\n{query}")
+            modelanswer = {
+                "answer": callBasicModel(f"{prompt}\n---\nUSER QUERY:\n{query}")
+            }
         print(f"Received response as {modelanswer}")
         return jsonify(modelanswer), 200
     except:
