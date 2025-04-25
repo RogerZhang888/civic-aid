@@ -1,6 +1,7 @@
 import requests
 DEEPSEEK_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEEPSEEK_API_KEY = "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"
+with open("dskey.txt", 'r') as file:
+    DEEPSEEK_API_KEY = file.read().strip()
 
 def call_deepseek_api(prompt: str, max_tokens: int = 400) -> str:
     headers = {
