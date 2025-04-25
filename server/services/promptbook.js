@@ -26,7 +26,7 @@ ${processedChatHistory}
 }
 
 export const systempromptTemplates = {
-    getTypeDecisionTemplate: (userprompt) => {
+    getTypeDecisionTemplate: (userprompt, chatHistory) => {
         return debug?"0":template(
             preface+genericpreface+"Identify if the query below is a question or a report, and output how confident you are on a scale of 0 to 1, with a higher score representing higher confidence. Come up with a short title of 10 words or less to summarise the query. ",
 `Format your response as a JSON object with the fields 'type', 'confidence' and 'title'. \
@@ -45,19 +45,21 @@ For example:
     'confidence': 0.9,
     'title':'MRT breakdown inquiry'
 }`,
-            userprompt
+            userprompt,
+            chatHistory
         )
     },
-    clarifyTypeDecisionTemplate: (userprompt) => {
+    clarifyTypeDecisionTemplate: (userprompt, chatHistory) => {
         // TODO: Formalise a length limit rather than just 'short'?
         return debug?"1":template(
             preface+genericpreface+"You were previously unable to confidently identify if the the user's query was a question or a report. Provide a short follow-up response to seek clarification from the user to decide if the user's query is a question or report. "
             ,
             "A single short plaintext paragraph.",
-            userprompt
+            userprompt,
+            chatHistory
         )
     },
-    getReportTemplate: (userprompt) => {
+    getReportTemplate: (userprompt, chatHistory) => {
         return debug?"2":template(
             preface+reportpreface+`With the help of the context provided, assist the government to summarise the incident as below. \
 Your output is sent to the reviewing team, not the citizen reporting. \
@@ -81,19 +83,21 @@ For example:
         ...
     ]
 }`,
-            userprompt
+            userprompt,
+            chatHistory
         )
     },
-    clarifyReportTemplateLow: (userprompt) => {
+    clarifyReportTemplateLow: (userprompt, chatHistory) => {
         return debug?"3":template(
             preface+reportpreface+"Earlier, the citizen submitted a report, \
 however, your confidence on your understanding was low. Provide a short follow-up response to seek clarification \
 from the user on the infomation required to be more confident of the report. ",
             "A single short plaintext paragraph.",
-            userprompt
+            userprompt,
+            chatHistory
         )
     },
-    clarifyReportTemplateMed: (userprompt) => {
+    clarifyReportTemplateMed: (userprompt, chatHistory) => {
         return debug?"4":template(
             preface+reportpreface+"Earlier, the citizen submitted a report, \
 however, your confidence on your understanding was low. Provide a short follow-up response to summarise what you already know, and seek clarification \
@@ -101,10 +105,11 @@ from the user on the infomation required to be more confident of the report. ",
             "A single short plaintext paragraph. For example:\
 Thank you for the information, this is what I have gathered so far: <summary>. \
 However I can provide a better report with some additional information. <Follow up questions>\n\nYou are not expected to follow this format strictly.",
-            userprompt
+            userprompt,
+            chatHistory
         )
     },
-    getQuestionTemplate: (userprompt) => {
+    getQuestionTemplate: (userprompt, chatHistory) => {
         return debug?"5":template(
             preface+questionpreface+"With the help of the context provided, answer the question, giving actionable answers as much as possible. \
 Output how confident you are that you have a complete understanding of the user's question on a scale of 0 to 1, with a higher score representing greater understanding. \
@@ -122,19 +127,21 @@ For example:
         ...
     ]
 }`,
-            userprompt
+            userprompt,
+            chatHistory
         )
     },
-    clarifyQuestionTemplateLow: (userprompt) => {
+    clarifyQuestionTemplateLow: (userprompt, chatHistory) => {
         return debug?"6":template(
             preface+questionpreface+"Earlier, the citizen submitted a question, \
 however, your confidence on the answer was low. Provide a short follow-up response to seek clarification \
 from the user on the infomation required to be more confident of your answer. ",
             "A single short plaintext paragraph.",
-            userprompt
+            userprompt,
+            chatHistory
         )
     },
-    clarifyQuestionTemplateMed: (userprompt) => {
+    clarifyQuestionTemplateMed: (userprompt, chatHistory) => {
         return debug?"7":template(
             preface+reportpreface+"Earlier, the citizen submitted a question, \
 however, your confidence on the answer was low. Provide a short follow-up response to summarise your current answer, and seek clarification \
@@ -142,7 +149,8 @@ from the user on the infomation required to be more confident of your answer. ",
             "A single short plaintext paragraph.\n\nFor example:\
 Thank you for the information, this is what I have gathered so far: <summary of answer>. \
 However I can provide a better answer with some additional information. <Follow up questions>\n\nYou are not expected to follow this format strictly.",
-            userprompt
+            userprompt,
+            chatHistory
         )
     },
 }
