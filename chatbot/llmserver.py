@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from chatbotmodels.MainChatbotWithSSL import call_model as callMainModel
 from chatbotmodels.BasicDSKoller import call_deepseek_api as callBasicModel
+from chatbotmodels.AuxModelCaptioner import generate_caption as callCaptionerModel
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -16,19 +17,25 @@ def callmodel():
     print(f"Calling model {model}")
     
     if filepath is not None:
-        filepath += '../server/uploads/' + filepath
-   
+        filepath = '../server/uploads/' + filepath
+    print(f"IMAGE FILEPATH {filepath}") 
+
     modelanswer = {"answer":"Default model answer - this response likely indicates an invalid model name supplied. "} 
     try:
-        if model == 'main':
-            modelanswer = callMainModel(query, prompt)
+        if model == 'main' or model == 'basic':
+            modelanswer = callMainModel(query, prompt, filepath)
         elif model == 'basic':
             modelanswer = {
                 "answer": callBasicModel(f"{prompt}\n---\nUSER QUERY:\n{query}")
             }
+        elif model == 'captioner':
+            modelanswer = {
+                "answer": callCaptionerModel(filepath)
+            }
         print(f"Received response as {modelanswer}")
         return jsonify(modelanswer), 200
-    except:
+    except Exception as e:
+        print("Failed to call model", e)
         return jsonify({"status": "error", "output": "Failed to call model"}), 500
 
 # Health check endpoint 

@@ -4,6 +4,8 @@ with open("dskey.txt", 'r') as file:
     DEEPSEEK_API_KEY = file.read().strip()
 
 def call_deepseek_api(prompt: str, max_tokens: int = 400) -> str:
+    print("BASIC KOLLER", prompt)
+
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
         "Content-Type": "application/json"
