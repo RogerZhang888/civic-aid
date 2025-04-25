@@ -21,8 +21,7 @@ OUTPUT
 ${output}   
 ---
 CHAT HISTORY
-${processedChatHistory}
-}`
+${processedChatHistory}`
 }
 
 export const systempromptTemplates = {

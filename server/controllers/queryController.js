@@ -159,7 +159,6 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         // TOOD: better way to reprompt for invalid output format?
 
         console.log(`Result for query ${query}`, parsedRes)
-        if (!parsedRes.valid) throw new Error("Invalid LLM output")
         return parsedRes
     }
 
@@ -168,7 +167,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         // MEDIA ONLY
         return {
             response:{
-                caption:queryLLM({query:"", prompt:"", model:"captioner"})
+                caption:queryLLM({query:"", prompt:"", model:"captioner"}, responseParsers.noParser, reply='ALWAYS')
             }
         }
     }
