@@ -23,7 +23,7 @@ const updateQueriesDB = (params)  => {
             userId,
             chatId,
             userprompt,
-            media ?? [],
+            media? [media] : [],
             location.latitude,
             location.longitude,
             systemprompt,
@@ -143,7 +143,8 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
                     toReply: reply=='ALWAYS' || (reply=='HIGH'&&getConfidence(parsed.confidence)=='HIGH'), 
                     confidence:parsed.confidence,
                     sources:parsed.sources,
-                    location
+                    location,
+                    media,
                 }
                 updateQueriesDB(queryParams) // For long term record in DB
                 queriesTracker.push(queryParams) // For temporary tracking
