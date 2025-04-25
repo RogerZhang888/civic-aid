@@ -13,7 +13,7 @@ type Action =
    | { type: "ADD_NEW_CHAT"; payload: Chat }
    | { type: "UPDATE_CHAT_WITH_NEW_QUERY"; payload: { newQuery: Query, chatId: string } }
    | { type: "DELETE_QUERY"; payload: { chatId: string, queryId: string } }
-   | { type: "UPDATE_QUERY_WITH_REPLY_AND_SOURCES_AND_MAYBE_UPDATE_CHAT_TITLE_WHAT_THE_FUCK"; payload: { answer: string, sources?: string[], title?: string, chatId: string, queryId: string } }
+   | { type: "UPDATE_QUERY_WITH_ANS_TITLE_SOURCES"; payload: { answer: string | React.ReactNode, sources?: string[], title: string, chatId: string, queryId: string } }
    | { type: "DELETE_CHAT"; payload: { chatId: string } }
    | { type: "UPDATE_CHAT_TITLE"; payload: { chatId: string, newTitle: string } };
 
@@ -42,12 +42,12 @@ function chatReducer(state: Chat[], action: Action): Chat[] {
                :  chat
          );
       
-      case "UPDATE_QUERY_WITH_REPLY_AND_SOURCES_AND_MAYBE_UPDATE_CHAT_TITLE_WHAT_THE_FUCK":
+      case "UPDATE_QUERY_WITH_ANS_TITLE_SOURCES":
          return state.map(chat => 
             chat.id === action.payload.chatId
                ?  {
                   ...chat,
-                  ...(action.payload.title ? { title: action.payload.title } : {}),
+                  title: action.payload.title,
                   queries: chat.queries.map(query => 
                      query.id === action.payload.queryId
                         ?  { ...query, answer: action.payload.answer, status: "finished", sources: action.payload.sources || [] }
@@ -250,8 +250,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
 
       const newChat: Chat = {
          id: newChatUUID,
-         title: "TITLE " + newChatUUID,
-         type: "unknown",
+         title: "New Chat",
          createdAt: new Date(),
          queries: [],
       };
@@ -332,11 +331,49 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
             }
          )
 
-         const { answer, sources, title } = res.data as { answer: string, sources?: string[], title?: string };
+         if (res.data.summary) {
 
-         console.log(`Server replied with "${answer}"`);
+            const {
+               summary,
+               urgency,
+               recommendedSteps,
+               agency,
+               title,
+               sources,
+               valid
+            } = res.data as { 
+               summary: string, 
+               urgency: number, 
+               recommendedSteps: string, 
+               agency: string,
+               title: string,
+               sources?: string[],
+               valid: boolean
+            }
 
-         chatsDispatch({ type: "UPDATE_QUERY_WITH_REPLY_AND_SOURCES_AND_MAYBE_UPDATE_CHAT_TITLE_WHAT_THE_FUCK", payload: { answer, sources, chatId: chatIdToAddQueryTo, queryId: newQueryUUID, title } });
+            console.log(`Server successfully created a report: "${summary}"`);
+
+            const reportAnswerComponent = (
+               <div id="answer-for-report-chat" className="space-y-2">
+                  <div className="text-xl font-semibold">Your Report Has Been Created!</div>
+                  <div>Title: {title}</div>
+                  <div>Summary: {summary}</div>
+               </div>
+            )
+   
+            chatsDispatch({ type: "UPDATE_QUERY_WITH_ANS_TITLE_SOURCES", payload: { answer: reportAnswerComponent, sources, chatId: chatIdToAddQueryTo, queryId: newQueryUUID, title } });
+
+         } else {
+
+            const { answer, sources, title } = res.data as { answer: string, sources?: string[], title: string };
+   
+            console.log(`Server replied with "${answer}"`);
+   
+            chatsDispatch({ type: "UPDATE_QUERY_WITH_ANS_TITLE_SOURCES", payload: { answer, sources, chatId: chatIdToAddQueryTo, queryId: newQueryUUID, title } });
+   
+            navigate(`/chatbot/${chatIdToAddQueryTo}`);
+
+         }
 
          navigate(`/chatbot/${chatIdToAddQueryTo}`);
 

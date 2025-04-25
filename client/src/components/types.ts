@@ -4,18 +4,18 @@ export type Query = {
    id: string;
    question: string;
    img: File | null;
-   answer: string;
+   answer: string | React.ReactNode;
    timestamp: Date;
    status: QueryStatusTypes;
    sources: string[];
 }
 
-export type ChatTypes = "unknown" | "question" | "report";
+// export type ChatTypes = "unknown" | "question" | "report";
 
 export type Chat = {
    id: string;
    title: string;
-   type: ChatTypes;
+   // type: ChatTypes;
    createdAt: Date;
    queries: Query[];
 }

@@ -27,7 +27,7 @@ export default function Chatbot() {
                      {currChat.title}
                   </div>
 
-                  <div className="flex-1 overflow-y-auto max-w-5xl">
+                  <div className="flex-1 overflow-y-auto w-4/5">
                      <MessagesDisplay messages={currChat.queries} />
                   </div>
                </>
