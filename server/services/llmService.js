@@ -1,6 +1,6 @@
 const { exec } = require('child_process');
 const path = require('path');
-const debug = true
+const debug = false
 
 /**
  * Calls the Python model using CLI and returns the output.
