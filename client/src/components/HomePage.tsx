@@ -15,7 +15,7 @@ export default function HomePage() {
    }, [user, isLoading, navigate]);
 
    return (
-      <section className="w-full h-full flex justify-center items-center">
+      <section className="w-full h-[calc(100vh-4rem)] flex justify-center items-center">
          <div className="flex flex-col items-center space-y-4">
             <img src="/mascot.png" alt="logo" className="w-50" />
             <div className="text-primary text-3xl">{t('homePg')}</div>

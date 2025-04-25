@@ -4,8 +4,9 @@ import zh from "./translations/zh";
 import ms from "./translations/ms";
 import ta from "./translations/ta";
 import { SiteLanguages } from "../types";
+import React from "react";
 
-const translations: Record<SiteLanguages, Record<string, string>> = {
+const translations: Record<SiteLanguages, Record<string, string | React.ReactNode>> = {
    en,
    zh,
    ms,
@@ -15,7 +16,7 @@ const translations: Record<SiteLanguages, Record<string, string>> = {
 export default function useTranslation() {
    const { language }: { language: keyof typeof translations } = useLanguageContext();
 
-   function t(key: string) {
+   function t(key: string): string | React.ReactNode {
       return translations[language]?.[key] || key;
    };
 

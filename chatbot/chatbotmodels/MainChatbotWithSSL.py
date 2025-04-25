@@ -106,7 +106,9 @@ def expand_query(query: str) -> str:
 def check_existing_index():
     """Check if all index files exist and are valid"""
     for file in INDEX_FILES.values():
-        if not os.path.exists(os.path.join(os.path.expanduser("~"), "naisc", "civic-aid", "chatbot","chatbotmodels",file)):
+        SCRIPT_DIR1 = os.path.dirname(os.path.abspath(__file__))
+        MODEL_PATH1 = os.path.join(SCRIPT_DIR1, file)
+        if not os.path.exists(MODEL_PATH1):
             return False
     try:
         index = hnswlib.Index(space='cosine', dim=512)

@@ -34,6 +34,21 @@ function MessageBubble({
                   : <div>{message.answer}</div>
                }
             </div>
+            {message.sources && message.sources.length !== 0 &&
+               <div className="chat-footer flex flex-row items-center mt-1 space-x-1">
+                  <span>Sources:</span> 
+                  {message.sources.map(source => 
+                     <a 
+                        className="link link-hover" 
+                        href={source}
+                        rel="noopener noreferrer" 
+                        target="_blank"
+                     >
+                        {source}
+                     </a>
+                  )}
+               </div>
+            }
          </div>
 
       </React.Fragment>

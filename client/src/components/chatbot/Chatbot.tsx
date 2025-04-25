@@ -18,47 +18,29 @@ export default function Chatbot() {
       </section>
    )
 
-   if (!currChat) {
-      return (
-         <div className="h-full flex flex-1 flex-col">
-            <div className="flex-1 flex flex-col items-center justify-center space-y-3">
-               <img src="/mascot.png" alt="logo" className="w-50" />
-                  <div className="flex flex-row items-center space-x-3">
-                     <div className="text-2xl">
-                        {t('newChatTop')}
-                     </div>
-                  </div>
-                  <div>{t('newChatBottom')}</div>
-                  <ChatbotForm/>
-               </div>
-               <div className="sticky bottom-0">
-                  <div className="text-xs m-2 text-center text-gray-500">
-                     {!coords && 
-                        <div className="font-semibold flex flex-row items-center justify-center gap-1">
-                           <Info size={15} strokeWidth="3"/>{t('location')}
-                        </div>
-                     }
-                  <div>{t("disclaimer")}</div>
-               </div>
-            </div>
-         </div>
-      )
-   }
-
    return (
-      <div className="h-full flex flex-1 flex-col">
+      <div className="h-full flex flex-1 flex-col items-center mx-4 relative">
 
-         <div className="text-center text-lg font-semibold p-2">
-            {currChat.title}
-         </div>
+         {currChat
+            ?  <>
+                  <div className="text-lg font-semibold p-2">
+                     {currChat.title}
+                  </div>
 
-         <div className="flex-1 overflow-y-auto px-4 pt-1">
-            <MessagesDisplay messages={currChat.queries} />
-         </div>
+                  <div className="flex-1 overflow-y-auto max-w-5xl">
+                     <MessagesDisplay messages={currChat.queries} />
+                  </div>
+               </>
+            :  <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full">
+                  <img src="/mascot.png" alt="logo" className="w-50 mx-auto" />
+                  <div className="text-2xl">{t('newChatTop')}</div>
+                  <div>{t('newChatBottom')}</div>
+               </div>
+         }
 
-         <div className="sticky bottom-0">
+         <div className="mt-auto w-full max-w-2xl pt-3">
             <ChatbotForm/>
-            <div className="text-xs m-2 text-center text-gray-500">
+            <div className="text-xs text-center m-2 text-gray-500">
                {!coords && 
                   <div className="font-semibold flex flex-row items-center justify-center gap-1">
                      <Info size={15} strokeWidth="3"/>{t('location')}
