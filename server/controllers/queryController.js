@@ -138,7 +138,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
                     userId, 
                     chatId, 
                     userprompt, 
-                    systemprompt:query, 
+                    systemprompt:prompt, 
                     response:res, 
                     isValid: parsed.valid, 
                     toReply: reply=='ALWAYS' || (reply=='HIGH'&&getConfidence(parsed.confidence)=='HIGH'), 
