@@ -69,8 +69,16 @@ exports.callModel = async ({ query, prompt, model, imagePath = null }) => {
         res(responseByCode[prompt[0]])
     })
 
+    console.log(`CALLING MODEL [${model}] WITH API for query ${query}`)
     return fetch(`${process.env.MODELURL}/api/callmodel`, {
         method:"POST",
-        body:JSON.stringify({query, prompt, model})
+        body:JSON.stringify({query, prompt, model}),
+        headers:{
+            'Content-Type': 'application/json'
+        }
+    }).then((res) => {
+        return res.json()
+    }).then((res) => {
+        return res.answer
     })
 };

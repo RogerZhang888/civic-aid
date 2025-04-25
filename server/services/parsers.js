@@ -1,6 +1,12 @@
 const extractJson = (raw) => {
     const jsonRegex = /\{\s*("[^"]+"\s*:\s*[^{}]+)(\s*,\s*"[^"]+"\s*:\s*[^{}]+)*\s*\}/
-    let jsonSection = raw.match(jsonRegex)[0]
+    let jsonSection = ""
+    try {
+        jsonSection = raw.match(jsonRegex)[0]
+    } catch {
+        console.log("JSON search failed", jsonSection)
+        return {invalid:true}
+    }
     let obj = {}
     try {
         obj = JSON.parse(jsonSection)
