@@ -11,13 +11,17 @@ def callmodel():
     query = params['query']
     prompt = params['prompt']
     model = params['model'] # Main, Basic, Captioner(WIP)
+    filepath = params['filepath']
     
-    if query is None:
-        return jsonify({"status": "error", "output": "Missing query in request"}), 400
+    print(f"Calling model {model}")
+    if query is None and filepath is None:
+        return jsonify({"status": "error", "output": "Missing query or filepath in request"}), 400
     if prompt is None:
         return jsonify({"status": "error", "output": "Missing prompt in request"}), 400
     if prompt is None:
         return jsonify({"status": "error", "output": "Missing model in request"}), 400
+    
+    filepath = '../server/uploads/' + filepath
    
     modelanswer = {"answer":"Default model answer - this response likely indicates an invalid model name supplied. "} 
     try:

@@ -55,6 +55,7 @@ const updateChatType = async (chatId, type, title) => {
     return pgsql.query("UPDATE chats SET type = $1, title = $2 WHERE id = $3", [type, title, chatId])
 }
 const createReport = (params) => {
+    console.log("CREATING REPORT", params)
     let {userId, chatId, title, summary, media, location, agency, recommendedSteps, urgency, confidence} = params
     return pgsql.query(`SELECT * FROM reports WHERE chat_id = $1`, [chatId]).then((res) => {
         if (res.length == 0) {
@@ -105,8 +106,8 @@ const createReport = (params) => {
 
 const getConfidence = (score) => {
     // TOOD: Confirm boundaries
-    if (score > 0.8) return 'HIGH'
-    else if (score > 0.4) return 'MED'
+    if (score > 0.7) return 'HIGH'
+    else if (score > 0.3) return 'MED'
     else return 'LOW'
 }
 
@@ -127,8 +128,8 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         // TODO: Actually calling the model
         let parsedRes
         let promptcount = 0
-        // Provisional limit for 1 reprompt only for testing
-        while (!parsedRes?.valid && promptcount < 1) {
+        const repromptLimit = 3
+        while (!parsedRes?.valid && promptcount < repromptLimit) {
             promptcount++
             parsedRes = await callModel({query, prompt, model}).then((res) => {
                 console.log(`${promptcount}: Received raw LLM response`, res)
@@ -179,6 +180,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
             response = await queryLLM({query:userprompt, prompt: systemprompt, model: 'basic'}, responseParsers.noParser, 'ALWAYS')
         } else if (getConfidence(response.confidence) == 'HIGH') {
             chat.type = response.type
+            chat.title = response.title
             updateChatType(chatId, response.type, response.title)
             title = response.title
         }
@@ -273,7 +275,7 @@ exports.submitQuery = async (req, res) => {
         // const queryType = 'query'; // or 'report' — set based on context or user input
         // const imagePath = uploadedFiles.length > 0 ? uploadedFiles[0].path : null;
 
-        if (chat.id) userquery(prompt, userId, chatId, chat, {longitude, latitude}, uploadedFile?.path).then((r) => {
+        if (chat.id) userquery(prompt, userId, chatId, chat, {longitude, latitude}, uploadedFile?.filename).then((r) => {
             res.json(r.response)
         }).catch((err) => {
             console.error("Error handling user query", err);
