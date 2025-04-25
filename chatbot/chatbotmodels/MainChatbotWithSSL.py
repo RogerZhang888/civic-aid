@@ -50,7 +50,8 @@ clip_model = CLIPModel.from_pretrained(MODEL_PATH, local_files_only=True).to(dev
 
 # DeepSeek API configuration
 DEEPSEEK_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEEPSEEK_API_KEY = "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"
+with open("dskey.txt", 'r') as file:
+    DEEPSEEK_API_KEY = file.read().strip()
 
 class HybridRetriever:
     def __init__(self, database):
