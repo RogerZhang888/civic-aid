@@ -1,21 +1,33 @@
 from flask import Flask, request, jsonify
-from chatbotmodels.MainChatbotWithSSL import call_model
+from chatbotmodels.MainChatbotWithSSL import call_model as callMainModel
+from chatbotmodels.BasicDSKoller import call_deepseek_api as callBasicModel
 
 # Initialize Flask app
 app = Flask(__name__)
 
 @app.route('/api/callmodel', methods=['POST'])
 def callmodel():
-    temp_params = request.get_json()
-    query = temp_params['query']
-    prompt = temp_params['prompt']
+    params = request.get_json()
+    query = params['query']
+    prompt = params['prompt']
+    model = params['model'] # Main, Basic, Captioner(WIP)
     
     if query is None:
-        return jsonify({"status": "error", "output": "Missing question_id in request"}), 400
+        return jsonify({"status": "error", "output": "Missing query in request"}), 400
+    if prompt is None:
+        return jsonify({"status": "error", "output": "Missing prompt in request"}), 400
+    if prompt is None:
+        return jsonify({"status": "error", "output": "Missing model in request"}), 400
    
-    modelanswer = call_model(query, prompt)
-    print(f"Received response as {modelanswer}")
-    return jsonify(modelanswer), 200
+    try:
+        if model == 'main':
+            modelanswer = callMainModel(query, prompt)
+        elif model == 'basic':
+            modelanswer = callBasicModel(f"{prompt}\n---\nUSER QUERY:\n{query}")
+        print(f"Received response as {modelanswer}")
+        return jsonify(modelanswer), 200
+    except:
+        return jsonify({"status": "error", "output": "Failed to call model"}), 500
 
 # Health check endpoint 
 @app.route('/health', methods=['GET'])

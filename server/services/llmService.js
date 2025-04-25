@@ -6,7 +6,7 @@ const debug = true
  * Calls the Python model using CLI and returns the output.
  * Assumes the Python script exposes a callable entrypoint like: use_model(query, query_type, image_path)
  */
-exports.callModel = async ({ query, prompt, imagePath = null }) => {
+exports.callModel = async ({ query, prompt, model, imagePath = null }) => {
     const temporaryResponse = {
         typeDecision:`\`\`\`json
 {
@@ -71,6 +71,6 @@ exports.callModel = async ({ query, prompt, imagePath = null }) => {
 
     return fetch(`${process.env.MODELURL}/api/callmodel`, {
         method:"POST",
-        body:JSON.stringify({query, prompt})
+        body:JSON.stringify({query, prompt, model})
     })
 };
