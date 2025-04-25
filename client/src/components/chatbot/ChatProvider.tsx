@@ -297,7 +297,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
       setImgPreview(null);
 
       const fd = new FormData();
-      fd.append('prompt', text || "NO TEXT PROVIDED");
+      fd.append('prompt', text || "");
       if (img) fd.append('image', img);
       if (coords) {
          fd.append('latitude', coords.latitude.toString());
@@ -309,7 +309,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
 
       /**
        *  fd will contain the following:
-       * - prompt: the TEXT input from the user, if it was empty, it will be "NO TEXT PROVIDED"
+       * - prompt: the TEXT input from the user, if it was empty, it will be "" (empty string)
        * - image: the image file uploaded by the user (if available)
        * - latitude: the user's latitude (if available)
        * - longitude: the user's longitude (if available)

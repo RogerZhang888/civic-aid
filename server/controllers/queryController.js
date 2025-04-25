@@ -111,7 +111,7 @@ const getConfidence = (score) => {
 }
 
 // TOOD: media support
-const userquery = async (userprompt, userId, chatId, chat, location) => {
+const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     const chatHistory = await getChatHistory(chatId)
     let queriesTracker = []
     let response = {}
@@ -162,6 +162,7 @@ const userquery = async (userprompt, userId, chatId, chat, location) => {
     }
 
     if (userprompt == "") {
+        if (media == "") throw new Error("Invalid prompt")
         // MEDIA ONLY
         return {
             response:{
@@ -272,7 +273,7 @@ exports.submitQuery = async (req, res) => {
         // const queryType = 'query'; // or 'report' — set based on context or user input
         // const imagePath = uploadedFiles.length > 0 ? uploadedFiles[0].path : null;
 
-        if (chat.id) userquery(prompt, userId, chatId, chat, {longitude, latitude}).then((r) => {
+        if (chat.id) userquery(prompt, userId, chatId, chat, {longitude, latitude}, uploadedFile?.path).then((r) => {
             res.json(r.response)
         }).catch((err) => {
             console.error("Error handling user query", err);
