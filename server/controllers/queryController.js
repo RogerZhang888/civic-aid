@@ -116,7 +116,6 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     let chatHistory = await getChatHistory(chatId)
     let queriesTracker = []
     let response = {}
-    let title = undefined
 
     async function queryLLM({query, prompt, model}, parseResponse=responseParsers.defaultParser, reply='NEVER') {
         // reply enum: NEVER, ALWAYS, HIGH: 
@@ -180,7 +179,6 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
             chat.type = response.type
             chat.title = response.title
             updateChatType(chatId, response.type, response.title)
-            title = response.title
         }
     }
 
@@ -227,7 +225,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         queries: queriesTracker,
         response: {
             ...response,
-            title,
+            title: chat.title,
             confidence: undefined
         },
     }
