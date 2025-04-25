@@ -370,20 +370,20 @@ def call_model(text_query, prompt, image_path=None):
     
     return result
 
-prompt = "INSTRUCTIONS \
-You are a Singapore Government chatbot, built to answer citizen queries and assist in writing incident reports. Identify if the query below is a question or a report, and output how confident you are on a scale of 0 to 1, with a higher score representing higher confidence. \
-\
-OUTPUT \
-Format your response as a JSON object with the fields 'type' and 'confidence'. Type should be reported as either 'report' or 'query'. Confidence should be a decimal between 0 and 1 exclusive. \
-For example: \
-{ \
-    'type': 'report', \
-    'confidence': 0.2 \
-} \
-\
-{ \
-    'type': 'question', \
-    'confidence': 0.9 \
-}"   
+# prompt = "INSTRUCTIONS \
+# You are a Singapore Government chatbot, built to answer citizen queries and assist in writing incident reports. Identify if the query below is a question or a report, and output how confident you are on a scale of 0 to 1, with a higher score representing higher confidence. \
+# \
+# OUTPUT \
+# Format your response as a JSON object with the fields 'type' and 'confidence'. Type should be reported as either 'report' or 'query'. Confidence should be a decimal between 0 and 1 exclusive. \
+# For example: \
+# { \
+#     'type': 'report', \
+#     'confidence': 0.2 \
+# } \
+# \
+# { \
+#     'type': 'question', \
+#     'confidence': 0.9 \
+# }"   
 
-call_model("dun understand", prompt)
+# call_model("dun understand", prompt)

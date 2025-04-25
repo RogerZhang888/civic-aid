@@ -29,6 +29,6 @@ def call_deepseek_api(prompt: str, max_tokens: int = 400) -> str:
         print(f"API request failed: {e}")
         return "Sorry, I couldn't process your request at this time."
     
-call_deepseek_api("Are these two describing the same event? Output YES or NO, and how confident you are from a scale of 0 to 1." \
-    "1. The lamppost is broken" \
-    "2. There is no lighting at the street.")
+# call_deepseek_api("Are these two describing the same event? Output YES or NO, and how confident you are from a scale of 0 to 1." \
+#     "1. The lamppost is broken" \
+#     "2. There is no lighting at the street.")
