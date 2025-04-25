@@ -264,6 +264,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          )
 
          chatsDispatch({ type: "ADD_NEW_CHAT", payload: newChat });
+         navigate(`/chatbot/${newChatUUID}`);
 
          console.log(`New chat ${newChatUUID} created successfully `);
 
@@ -337,8 +338,6 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          console.log(`Server replied with "${answer}"`);
 
          chatsDispatch({ type: "UPDATE_QUERY_WITH_REPLY_AND_SOURCES_AND_MAYBE_UPDATE_CHAT_TITLE_WHAT_THE_FUCK", payload: { answer, sources, chatId: chatIdToAddQueryTo, queryId: newQueryUUID, title } });
-
-         navigate(`/chatbot/${chatIdToAddQueryTo}`);
 
       } catch (error) {
 
