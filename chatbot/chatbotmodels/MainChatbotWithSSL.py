@@ -25,6 +25,7 @@ def setup_nltk_once():
 
 setup_nltk_once()
 
+# index_file_directory = os.path.join(os.path.expanduser("~"), "naisc", "civic-aid", "chatbot","chatbotmodels")
 INDEX_FILES = {
     'hnsw_index': 'government_chunks_hnsw.index',
     'database_metadata': 'database_metadata.json',
@@ -49,7 +50,7 @@ clip_model = CLIPModel.from_pretrained(MODEL_PATH, local_files_only=True).to(dev
 
 # DeepSeek API configuration
 DEEPSEEK_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEEPSEEK_API_KEY = "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"
+DEEPSEEK_API_KEY = "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"
 
 class HybridRetriever:
     def __init__(self, database):
@@ -105,7 +106,9 @@ def expand_query(query: str) -> str:
 def check_existing_index():
     """Check if all index files exist and are valid"""
     for file in INDEX_FILES.values():
-        if not os.path.exists(file):
+        SCRIPT_DIR1 = os.path.dirname(os.path.abspath(__file__))
+        MODEL_PATH1 = os.path.join(SCRIPT_DIR1, file)
+        if not os.path.exists(MODEL_PATH1):
             return False
     try:
         index = hnswlib.Index(space='cosine', dim=512)
