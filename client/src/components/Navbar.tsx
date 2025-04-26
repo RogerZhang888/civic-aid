@@ -95,7 +95,7 @@ export default function Navbar() {
                            to="/about"
                            className={`hover:text-white transition ${pathname === "/about" ? "text-primary-content" : ""}`}
                         >
-                           About
+                           {t('about')}
                         </Link>
                      </li>
 
