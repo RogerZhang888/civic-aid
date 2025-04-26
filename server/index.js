@@ -22,6 +22,8 @@ app.get('/health', async (req, res) => {
   }
 });
 
+app.use('/api/files', express.static('uploads'))
+
 // Mount routers
 const queryRoutes = require('./routes/queryRoutes');
 const authRoutes = require('./routes/authRoutes');
