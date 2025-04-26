@@ -68,19 +68,8 @@ exports.getSpecificChatHistory = async (req, res) => {
         const userId = req.user.id; // from auth middleware
         const chatId = req.params.chatId; // from request parameters
 
-      const queriesRes = await pgsql.query(
-         `SELECT * FROM queries WHERE user_id = $1 AND chat_id = $2 AND to_reply = true ORDER BY created_at ASC`,
-         [userId, chatId]
-      );
-
-      if (queriesRes.length > 0) {
-         console.log(queriesRes)
-         res.status(200).json(queriesRes);
-      } else {
-         // no queries associated with this chat: delete it
-         await pgsql.query(
-            `DELETE FROM chats WHERE user_id = $1 AND id = $2`,
-
+        const queriesRes = await pgsql.query(
+            `SELECT * FROM queries WHERE user_id = $1 AND chat_id = $2 AND to_reply = true ORDER BY created_at ASC`,
             [userId, chatId]
         );
 
