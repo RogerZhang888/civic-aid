@@ -227,8 +227,9 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         response: {
             ...response,
             title: chat.title,
-            confidence: undefined
-        },
+            confidence: undefined,
+            media
+        }
     }
 }
 
