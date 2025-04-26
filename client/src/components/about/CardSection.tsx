@@ -1,18 +1,17 @@
-import mascot from "/mascot.png";
-
 export default function CardSection({
    children,
+   imageSrc,
    imageAlt,
    reverse = false,
 }: {
    children: React.ReactNode;
+   imageSrc: string;
    imageAlt: string;
    reverse?: boolean;
 }) {
- 
    return (
       <div className={`flex items-center justify-center mx-auto ${reverse ? "flex-row-reverse" : ""}`}>
-         <img src={mascot} alt={imageAlt} className="w-60 h-auto mx-4" />
+         <img src={imageSrc} alt={imageAlt} className="w-auto h-60 mx-4" />
          <div className="bg-white p-6 rounded-xl shadow-md text-xl leading-relaxed max-w-lg">
             {children}
          </div>

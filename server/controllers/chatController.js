@@ -11,7 +11,7 @@ exports.startNewChat = async (req, res) => {
         pgsql
             .query(
                 `INSERT INTO chats (id, user_id, type, created_at, title) VALUES ($1, $2, $3, $4, $5)`,
-                [chatId, userId, type, createdAt, title]
+                [chatId, userId, type??"unknown", createdAt, title]
             )
             .then(() => {
                 console.log("CREATED NEW CHAT", chatId);
@@ -42,23 +42,25 @@ exports.updateChatName = async (req, res) => {
 };
 
 exports.getChatHistory = async (req, res) => {
-   console.log("GETTING ALL CHAT HISTORY FOR USER");
 
-   try {
-       const userId = req.user.id; // from auth middleware
+    console.log("GETTING ALL CHAT HISTORY FOR USER");
 
-       const chatRes = await pgsql.query(
-           `SELECT * FROM chats WHERE user_id = $1 ORDER BY created_at DESC`,
-           [userId]
-       );
+    try {
+        const userId = req.user.id; // from auth middleware
 
-       console.log(chatRes);
+        const chatRes = await pgsql.query(
+            `SELECT * FROM chats WHERE user_id = $1 ORDER BY created_at DESC`,
+            [userId]
+        );
 
-       res.status(200).json(chatRes);
-   } catch (err) {
-       console.error("Failed to fetch chat history:", err);
-       res.status(500).json({ error: "Failed to fetch user's chat history" });
-   }
+        console.log(chatRes);
+
+        res.status(200).json(chatRes);
+    } catch (err) {
+        console.error("Failed to fetch chat history:", err);
+        res.status(500).json({ error: "Failed to fetch user's chat history" });
+    }
+
 };
 
 exports.getSpecificChatHistory = async (req, res) => {
