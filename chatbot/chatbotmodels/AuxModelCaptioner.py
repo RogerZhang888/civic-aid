@@ -60,14 +60,13 @@ class SingaporeImageCaptioner:
 
 
 # Example usage
-if __name__ == "__main__":
+def generate_caption(filepath):
     captioner = SingaporeImageCaptioner()
     
-    # Example with local image
-    local_image_path = ".."
-    caption = captioner.generate_caption(local_image_path)
+    caption = captioner.generate_caption(filepath)
     print(f"Generated caption: {caption}")
     
+    return caption
     # Example with URL and custom prompt
     # url = "https://example.com/mrt_station.jpg"
     # caption = captioner.generate_caption(url, "a photo of a train station")

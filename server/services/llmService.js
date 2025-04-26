@@ -1,12 +1,12 @@
 const { exec } = require('child_process');
 const path = require('path');
-const debug = true
+const debug = false
 
 /**
  * Calls the Python model using CLI and returns the output.
  * Assumes the Python script exposes a callable entrypoint like: use_model(query, query_type, image_path)
  */
-exports.callModel = async ({ query, prompt, imagePath = null }) => {
+exports.callModel = async ({ query, prompt, model, imagePath = null }) => {
     const temporaryResponse = {
         typeDecision:`\`\`\`json
 {
@@ -69,8 +69,16 @@ exports.callModel = async ({ query, prompt, imagePath = null }) => {
         res(responseByCode[prompt[0]])
     })
 
+    console.log(`CALLING MODEL [${model}] WITH API for query ${query}`)
     return fetch(`${process.env.MODELURL}/api/callmodel`, {
         method:"POST",
-        body:JSON.stringify({query, prompt})
+        body:JSON.stringify({query, prompt, model, filepath: imagePath}),
+        headers:{
+            'Content-Type': 'application/json'
+        }
+    }).then((res) => {
+        return res.json()
+    }).then((res) => {
+        return res.answer
     })
 };

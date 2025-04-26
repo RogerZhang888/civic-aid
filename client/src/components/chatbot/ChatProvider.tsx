@@ -263,6 +263,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          )
 
          chatsDispatch({ type: "ADD_NEW_CHAT", payload: newChat });
+         navigate(`/chatbot/${newChatUUID}`);
 
          console.log(`New chat ${newChatUUID} created successfully `);
 
@@ -296,19 +297,19 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
       setImgPreview(null);
 
       const fd = new FormData();
-      fd.append('prompt', text || "NO TEXT PROVIDED");
+      fd.append('prompt', text || "");
       if (img) fd.append('image', img);
       if (coords) {
          fd.append('latitude', coords.latitude.toString());
          fd.append('longitude', coords.longitude.toString());
       }
      
-      fd.append('chatid', chatIdToAddQueryTo);
+      fd.append('chatId', chatIdToAddQueryTo);
 
 
       /**
        *  fd will contain the following:
-       * - prompt: the TEXT input from the user, if it was empty, it will be "NO TEXT PROVIDED"
+       * - prompt: the TEXT input from the user, if it was empty, it will be "" (empty string)
        * - image: the image file uploaded by the user (if available)
        * - latitude: the user's latitude (if available)
        * - longitude: the user's longitude (if available)
@@ -374,8 +375,6 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
             navigate(`/chatbot/${chatIdToAddQueryTo}`);
 
          }
-
-         navigate(`/chatbot/${chatIdToAddQueryTo}`);
 
       } catch (error) {
 

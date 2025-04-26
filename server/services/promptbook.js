@@ -1,4 +1,4 @@
-const debug = true
+const debug = false
 
 const preface = "You are a Singapore Government chatbot, "
 // TODO: consider adding meta prompts here for customised personality. 
@@ -9,21 +9,23 @@ Your task is to analyse the user's question and answer within the context of Sin
 const reportpreface = `built to write and process incident reports. \
 Your task is to analyse the prompt and produce a short report which can be escalated to the relevant agencies for action. `
 
-const template = (instructions, output, userprompt, ending = null) => {
+const template = (instructions, output, userprompt, chatHistory) => {
+    let processedChatHistory = chatHistory.map((q) => {
+        return `Prompt: ${(q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
+    }).join("---\n")
+
     return `INSTRUCTIONS 
 ${instructions}
 ---
 OUTPUT
 ${output}   
-${ending?
-    `---
-${ending}`:
-    ""
-}`
+---
+CHAT HISTORY
+${processedChatHistory}`
 }
 
 export const systempromptTemplates = {
-    getTypeDecisionTemplate: (userprompt) => {
+    getTypeDecisionTemplate: (userprompt, chatHistory) => {
         return debug?"0":template(
             preface+genericpreface+"Identify if the query below is a question or a report, and output how confident you are on a scale of 0 to 1, with a higher score representing higher confidence. Come up with a short title of 10 words or less to summarise the query. ",
 `Format your response as a JSON object with the fields 'type', 'confidence' and 'title'. \
@@ -33,28 +35,30 @@ Title should be a string of 10 words or less.
 For example:
 {
     'type': 'report',
-    'confidence': 0.2,
+    'confidence': 0.22,
     'title':'Burst fire hydrant at Lim Chu Kang road'
 }
 
 {
     'type': 'question',
-    'confidence': 0.9,
+    'confidence': 0.87,
     'title':'MRT breakdown inquiry'
 }`,
-            userprompt
+            userprompt,
+            chatHistory
         )
     },
-    clarifyTypeDecisionTemplate: (userprompt) => {
+    clarifyTypeDecisionTemplate: (userprompt, chatHistory) => {
         // TODO: Formalise a length limit rather than just 'short'?
         return debug?"1":template(
             preface+genericpreface+"You were previously unable to confidently identify if the the user's query was a question or a report. Provide a short follow-up response to seek clarification from the user to decide if the user's query is a question or report. "
             ,
-            "A single short plaintext paragraph.",
-            userprompt
+            "A single short paragraph of plaintext only. Do not use any markdown syntax. Do not preface the response with headers such as 'RESPONSE'. ",
+            userprompt,
+            chatHistory
         )
     },
-    getReportTemplate: (userprompt) => {
+    getReportTemplate: (userprompt, chatHistory) => {
         return debug?"2":template(
             preface+reportpreface+`With the help of the context provided, assist the government to summarise the incident as below. \
 Your output is sent to the reviewing team, not the citizen reporting. \
@@ -68,8 +72,8 @@ Sources should be an array of URL links.
 For example:
 {
     'summary': 'The user reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas.',
-    'confidence': 0.6,
-    'urgency': 0.9,
+    'confidence': 0.63,
+    'urgency': 0.94,
     'recommendedSteps': 'Inspect and repair the burst fire hydrant at the reported location.',
     'agency': 'Public Utilities Board',
     'sources':[
@@ -78,30 +82,33 @@ For example:
         ...
     ]
 }`,
-            userprompt
+            userprompt,
+            chatHistory
         )
     },
-    clarifyReportTemplateLow: (userprompt) => {
+    clarifyReportTemplateLow: (userprompt, chatHistory) => {
         return debug?"3":template(
             preface+reportpreface+"Earlier, the citizen submitted a report, \
 however, your confidence on your understanding was low. Provide a short follow-up response to seek clarification \
 from the user on the infomation required to be more confident of the report. ",
-            "A single short plaintext paragraph.",
-            userprompt
+            "A single short paragraph of plaintext only. Do not use any markdown syntax. Do not preface the response with headers such as 'RESPONSE'. ",
+            userprompt,
+            chatHistory
         )
     },
-    clarifyReportTemplateMed: (userprompt) => {
+    clarifyReportTemplateMed: (userprompt, chatHistory) => {
         return debug?"4":template(
             preface+reportpreface+"Earlier, the citizen submitted a report, \
 however, your confidence on your understanding was low. Provide a short follow-up response to summarise what you already know, and seek clarification \
 from the user on the infomation required to be more confident of the report. ",
-            "A single short plaintext paragraph. For example:\
+            "A single short paragraph of plaintext only. Do not use any markdown syntax. Do not preface the response with headers such as 'RESPONSE'.\n\nFor example:\
 Thank you for the information, this is what I have gathered so far: <summary>. \
 However I can provide a better report with some additional information. <Follow up questions>\n\nYou are not expected to follow this format strictly.",
-            userprompt
+            userprompt,
+            chatHistory
         )
     },
-    getQuestionTemplate: (userprompt) => {
+    getQuestionTemplate: (userprompt, chatHistory) => {
         return debug?"5":template(
             preface+questionpreface+"With the help of the context provided, answer the question, giving actionable answers as much as possible. \
 Output how confident you are that you have a complete understanding of the user's question on a scale of 0 to 1, with a higher score representing greater understanding. \
@@ -112,34 +119,37 @@ Sources should be an array of URL links.
 For example:
 {
     'answer': <your answer>,
-    'confidence': 0.6,
+    'confidence': 0.63,
     'sources':[
         <url 1>,
         <url 2>,
         ...
     ]
 }`,
-            userprompt
+            userprompt,
+            chatHistory
         )
     },
-    clarifyQuestionTemplateLow: (userprompt) => {
+    clarifyQuestionTemplateLow: (userprompt, chatHistory) => {
         return debug?"6":template(
             preface+questionpreface+"Earlier, the citizen submitted a question, \
 however, your confidence on the answer was low. Provide a short follow-up response to seek clarification \
 from the user on the infomation required to be more confident of your answer. ",
-            "A single short plaintext paragraph.",
-            userprompt
+            "A single short paragraph of plaintext only. Do not use any markdown syntax. Do not preface the response with headers such as 'RESPONSE'. ",
+            userprompt,
+            chatHistory
         )
     },
-    clarifyQuestionTemplateMed: (userprompt) => {
+    clarifyQuestionTemplateMed: (userprompt, chatHistory) => {
         return debug?"7":template(
             preface+reportpreface+"Earlier, the citizen submitted a question, \
 however, your confidence on the answer was low. Provide a short follow-up response to summarise your current answer, and seek clarification \
 from the user on the infomation required to be more confident of your answer. ",
-            "A single short plaintext paragraph.\n\nFor example:\
+            "A single short paragraph of plaintext only. Do not use any markdown syntax. Do not preface the response with headers such as 'RESPONSE'.\n\nFor example:\
 Thank you for the information, this is what I have gathered so far: <summary of answer>. \
 However I can provide a better answer with some additional information. <Follow up questions>\n\nYou are not expected to follow this format strictly.",
-            userprompt
+            userprompt,
+            chatHistory
         )
     },
 }
