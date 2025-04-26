@@ -11,7 +11,7 @@ exports.startNewChat = async (req, res) => {
         pgsql
             .query(
                 `INSERT INTO chats (id, user_id, type, created_at, title) VALUES ($1, $2, $3, $4, $5)`,
-                [chatId, userId, type, createdAt, title]
+                [chatId, userId, type??"unknown", createdAt, title]
             )
             .then(() => {
                 console.log("CREATED NEW CHAT", chatId);
