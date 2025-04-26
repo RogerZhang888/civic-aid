@@ -53,7 +53,7 @@ For example:
         return debug?"1":template(
             preface+genericpreface+"You were previously unable to confidently identify if the the user's query was a question or a report. Provide a short follow-up response to seek clarification from the user to decide if the user's query is a question or report. "
             ,
-            "A single short paragraph of plaintext only.",
+            "A single short paragraph of plaintext only. Do not use any markdown syntax. Do not preface the response with headers such as 'RESPONSE'. ",
             userprompt,
             chatHistory
         )
@@ -91,7 +91,7 @@ For example:
             preface+reportpreface+"Earlier, the citizen submitted a report, \
 however, your confidence on your understanding was low. Provide a short follow-up response to seek clarification \
 from the user on the infomation required to be more confident of the report. ",
-            "A single short paragraph of plaintext only.",
+            "A single short paragraph of plaintext only. Do not use any markdown syntax. Do not preface the response with headers such as 'RESPONSE'. ",
             userprompt,
             chatHistory
         )
@@ -101,7 +101,7 @@ from the user on the infomation required to be more confident of the report. ",
             preface+reportpreface+"Earlier, the citizen submitted a report, \
 however, your confidence on your understanding was low. Provide a short follow-up response to summarise what you already know, and seek clarification \
 from the user on the infomation required to be more confident of the report. ",
-            "A single short paragraph of plaintext only. For example:\
+            "A single short paragraph of plaintext only. Do not use any markdown syntax. Do not preface the response with headers such as 'RESPONSE'.\n\nFor example:\
 Thank you for the information, this is what I have gathered so far: <summary>. \
 However I can provide a better report with some additional information. <Follow up questions>\n\nYou are not expected to follow this format strictly.",
             userprompt,
@@ -135,7 +135,7 @@ For example:
             preface+questionpreface+"Earlier, the citizen submitted a question, \
 however, your confidence on the answer was low. Provide a short follow-up response to seek clarification \
 from the user on the infomation required to be more confident of your answer. ",
-            "A single short paragraph of plaintext only.",
+            "A single short paragraph of plaintext only. Do not use any markdown syntax. Do not preface the response with headers such as 'RESPONSE'. ",
             userprompt,
             chatHistory
         )
@@ -145,7 +145,7 @@ from the user on the infomation required to be more confident of your answer. ",
             preface+reportpreface+"Earlier, the citizen submitted a question, \
 however, your confidence on the answer was low. Provide a short follow-up response to summarise your current answer, and seek clarification \
 from the user on the infomation required to be more confident of your answer. ",
-            "A single short paragraph of plaintext only.\n\nFor example:\
+            "A single short paragraph of plaintext only. Do not use any markdown syntax. Do not preface the response with headers such as 'RESPONSE'.\n\nFor example:\
 Thank you for the information, this is what I have gathered so far: <summary of answer>. \
 However I can provide a better answer with some additional information. <Follow up questions>\n\nYou are not expected to follow this format strictly.",
             userprompt,
