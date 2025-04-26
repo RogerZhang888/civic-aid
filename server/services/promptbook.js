@@ -11,7 +11,7 @@ Your task is to analyse the prompt and produce a short report which can be escal
 
 const template = (instructions, output, userprompt, chatHistory) => {
     let processedChatHistory = chatHistory.map((q) => {
-        return `Prompt: ${(q.system_prompt??q.systemprompt) + '\n' + (q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
+        return `Prompt: ${(q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
     }).join("---\n")
 
     return `INSTRUCTIONS 
