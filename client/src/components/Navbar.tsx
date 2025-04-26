@@ -52,7 +52,7 @@ export default function Navbar() {
                            <Link
                               to="/chatbot"
                            >
-                              Chatbot
+                              {t('chatbot')}
                            </Link>
                         </li>
                      </>

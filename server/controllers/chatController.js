@@ -42,6 +42,7 @@ exports.updateChatName = async (req, res) => {
 };
 
 exports.getChatHistory = async (req, res) => {
+
     console.log("GETTING ALL CHAT HISTORY FOR USER");
 
     try {
@@ -59,6 +60,7 @@ exports.getChatHistory = async (req, res) => {
         console.error("Failed to fetch chat history:", err);
         res.status(500).json({ error: "Failed to fetch user's chat history" });
     }
+
 };
 
 exports.getSpecificChatHistory = async (req, res) => {

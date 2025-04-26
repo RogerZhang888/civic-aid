@@ -25,8 +25,8 @@ export default function Login() {
    } = useForm<LoginFields>({
       resolver: zodResolver(
          z.object({
-            username: z.string().nonempty({ message: t('required') }),
-            password: z.string().nonempty({ message: t('required') }),
+            username: z.string().nonempty({ message: t('required') as string }),
+            password: z.string().nonempty({ message: t('required') as string }),
          })
       ),
       defaultValues: { username: "", password: "" },
@@ -35,8 +35,6 @@ export default function Login() {
    const queryClient = useQueryClient();
 
    async function loginHandler(data: LoginFields) {
-
-      console.log(data);
 
       const { username, password } = data;
 

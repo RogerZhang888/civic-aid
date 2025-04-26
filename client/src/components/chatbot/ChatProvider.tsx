@@ -13,7 +13,7 @@ type Action =
    | { type: "ADD_NEW_CHAT"; payload: Chat }
    | { type: "UPDATE_CHAT_WITH_NEW_QUERY"; payload: { newQuery: Query, chatId: string } }
    | { type: "DELETE_QUERY"; payload: { chatId: string, queryId: string } }
-   | { type: "UPDATE_QUERY_WITH_REPLY_AND_SOURCES_AND_MAYBE_UPDATE_CHAT_TITLE_WHAT_THE_FUCK"; payload: { answer: string, sources?: string[], title?: string, chatId: string, queryId: string } }
+   | { type: "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL"; payload: { answer: string | React.ReactNode, sources?: string[], media?: string, title: string, chatId: string, queryId: string } }
    | { type: "DELETE_CHAT"; payload: { chatId: string } }
    | { type: "UPDATE_CHAT_TITLE"; payload: { chatId: string, newTitle: string } };
 
@@ -42,15 +42,21 @@ function chatReducer(state: Chat[], action: Action): Chat[] {
                :  chat
          );
       
-      case "UPDATE_QUERY_WITH_REPLY_AND_SOURCES_AND_MAYBE_UPDATE_CHAT_TITLE_WHAT_THE_FUCK":
+      case "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL":
          return state.map(chat => 
             chat.id === action.payload.chatId
                ?  {
                   ...chat,
-                  ...(action.payload.title ? { title: action.payload.title } : {}),
+                  title: action.payload.title,
                   queries: chat.queries.map(query => 
                      query.id === action.payload.queryId
-                        ?  { ...query, answer: action.payload.answer, status: "finished", sources: action.payload.sources || [] }
+                        ?  { 
+                              ...query,
+                              answer: action.payload.answer,
+                              status: "finished",
+                              sources: action.payload.sources || [],
+                              imgUrl: action.payload.media || null
+                           }
                         :  query
                   )
                }
@@ -132,14 +138,14 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
                id: string,
                user_prompt: string,
                response: string,
-               img: null,
+               media_url: string[],
                created_at: string,
                sources: string[]
             }[];
             const formattedQueries = queries.map<Query>(query => ({
                id: query.id,
                question: query.user_prompt,
-               img: null,
+               imgUrl: query.media_url.length > 0 ? query.media_url[0]: null,
                answer: query.response,
                status: "finished",
                timestamp: new Date(query.created_at),
@@ -250,7 +256,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
 
       const newChat: Chat = {
          id: newChatUUID,
-         title: "TITLE " + newChatUUID,
+         title: "New Chat",
          type: "unknown",
          createdAt: new Date(),
          queries: [],
@@ -284,7 +290,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
       const newQuery: Query = {
          id: newQueryUUID,
          question: text,
-         img,
+         imgUrl: img ? "pending actual image url..." : null,
          answer: "",
          status: "pending",
          timestamp: new Date(),
@@ -333,11 +339,78 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
             }
          )
 
-         const { answer, sources, title } = res.data as { answer: string, sources?: string[], title?: string };
+         console.log(res)
 
-         console.log(`Server replied with "${answer}"`);
+         if (res.data.summary) {
 
-         chatsDispatch({ type: "UPDATE_QUERY_WITH_REPLY_AND_SOURCES_AND_MAYBE_UPDATE_CHAT_TITLE_WHAT_THE_FUCK", payload: { answer, sources, chatId: chatIdToAddQueryTo, queryId: newQueryUUID, title } });
+            // case: report created
+
+            const {
+               summary,
+               urgency,
+               recommendedSteps,
+               agency,
+               title,
+               sources,
+               media: newMediaUrl
+            } = res.data as { 
+               summary: string, 
+               urgency: number, 
+               recommendedSteps: string, 
+               agency: string,
+               title: string,
+               sources?: string[],
+               valid: boolean,
+               media?: string
+            }
+
+            console.log(`Server successfully created a report: "${summary}"`);
+
+            const allImgUrls = chats.find(chat => chat.id === chatIdToAddQueryTo)!
+               .queries
+               .map(q => q.imgUrl)
+               .filter(url => url !== null)
+
+            if (newMediaUrl) allImgUrls.push(newMediaUrl);
+
+            const imgs = await fetchAllImgs(allImgUrls);
+
+            const reportAnswerComponent = (
+               <div id="answer-for-report-chat" className="space-y-2">
+                  <div className="text-xl font-semibold">Your Report Has Been Created!</div>
+                  <div>Title: {title}</div>
+                  <div>Summary: {summary}</div>
+                  <div>Recommended steps: {recommendedSteps}</div>
+                  <div>Urgency: {urgency} / 1</div>
+                  <div>Agency contacted: {agency}</div>
+                  <div>
+                     {imgs.map((img, idx) =>
+                        <img
+                           key={idx}
+                           alt={`Uploaded image ${idx+1}`}
+                           className="max-h-20"
+                           src={img}
+                        />
+                     )}
+                  </div>
+               </div>
+            )
+   
+            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID, answer: reportAnswerComponent, sources, title, media: newMediaUrl } });
+
+         } else {
+
+            // case: normal response
+
+            const { answer, sources, title, media } = res.data as { answer: string, sources?: string[], title: string, media?: string };
+   
+            console.log(`Server replied with "${answer}"`);
+   
+            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID, answer, sources, title, media } });
+   
+            navigate(`/chatbot/${chatIdToAddQueryTo}`);
+
+         }
 
       } catch (error) {
 
@@ -360,6 +433,16 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          }
 
       }
+   }
+
+   async function fetchAllImgs(imgUrls: string[]) {
+
+      const promises = imgUrls.map(url => axios.get(`${SERVER_API_URL}/api/images/${url}`, { withCredentials: true }));
+
+      const resArr = await Promise.all(promises);
+
+      return resArr.map(res => res.data) as string[];
+
    }
 
    async function deleteChat(chatIdToDelete: string) {

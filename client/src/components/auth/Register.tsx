@@ -23,21 +23,21 @@ export default function Register() {
       resolver: zodResolver(
          z.object({
             username: z.string()
-               .nonempty({ message: t('required') })
-               .refine(s => !s.includes(' '), { message: t('usernameNoSpace') })
-               .refine(s => 3 <= s.length && s.length <= 50, { message: t('usernameChar') }),
+               .nonempty({ message: t('required') as string })
+               .refine(s => !s.includes(' '), { message: t('usernameNoSpace') as string })
+               .refine(s => 3 <= s.length && s.length <= 50, { message: t('usernameChar') as string }),
          
             email: z.string()
-               .nonempty({ message: t('required') })
-               .email({ message: t('invalidEmail') }),
+               .nonempty({ message: t('required') as string })
+               .email({ message: t('invalidEmail') as string }),
          
             password: z.string()
-               .nonempty({ message: t('required') }),
+               .nonempty({ message: t('required') as string }),
             //   .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, { message: "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number" }),
          
             confirmPassword: z.string()
          
-         }).refine(data => data.password === data.confirmPassword, { message: t('psdsMustMatch'), path: ["confirmPassword"] })
+         }).refine(data => data.password === data.confirmPassword, { message: t('psdsMustMatch') as string, path: ["confirmPassword"] })
       ),
       defaultValues: { username: "", email: "", password: "", confirmPassword: "" },
    });

@@ -1,10 +1,10 @@
-export type QueryStatusTypes = "pending" | "finished" | "error";
+export type QueryStatusTypes = "pending" | "finished";
 
 export type Query = {
    id: string;
    question: string;
-   img: File | null;
-   answer: string;
+   imgUrl: string | null;
+   answer: string | React.ReactNode;
    timestamp: Date;
    status: QueryStatusTypes;
    sources: string[];

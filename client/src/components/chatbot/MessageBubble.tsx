@@ -14,7 +14,7 @@ function MessageBubble({
          <div className="chat chat-end tracking-wide mt-3">
             <div className="chat-bubble space-y-1">
                {message.question && <div>{message.question}</div>}
-               {message.img &&
+               {message.imgUrl &&
                   <div className="text-xs flex items-center space-x-1">
                      <Image size={16} />
                      <span>Image attached</span>
