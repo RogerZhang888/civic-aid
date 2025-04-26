@@ -14,14 +14,16 @@ const template = (instructions, output, userprompt, chatHistory) => {
         return `Prompt: ${(q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
     }).join("---\n")
 
-    return `INSTRUCTIONS 
+    return `CHAT HISTORY (for context only)
+${processedChatHistory}
+---
+    
+INSTRUCTIONS 
 ${instructions}
 ---
 OUTPUT
 ${output}   
----
-CHAT HISTORY
-${processedChatHistory}`
+`
 }
 
 export const systempromptTemplates = {
