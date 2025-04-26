@@ -35,13 +35,13 @@ Title should be a string of 10 words or less.
 For example:
 {
     'type': 'report',
-    'confidence': 0.2,
+    'confidence': 0.22,
     'title':'Burst fire hydrant at Lim Chu Kang road'
 }
 
 {
     'type': 'question',
-    'confidence': 0.9,
+    'confidence': 0.87,
     'title':'MRT breakdown inquiry'
 }`,
             userprompt,
@@ -53,7 +53,7 @@ For example:
         return debug?"1":template(
             preface+genericpreface+"You were previously unable to confidently identify if the the user's query was a question or a report. Provide a short follow-up response to seek clarification from the user to decide if the user's query is a question or report. "
             ,
-            "A single short plaintext paragraph.",
+            "A single short paragraph of plaintext only.",
             userprompt,
             chatHistory
         )
@@ -72,8 +72,8 @@ Sources should be an array of URL links.
 For example:
 {
     'summary': 'The user reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas.',
-    'confidence': 0.6,
-    'urgency': 0.9,
+    'confidence': 0.63,
+    'urgency': 0.94,
     'recommendedSteps': 'Inspect and repair the burst fire hydrant at the reported location.',
     'agency': 'Public Utilities Board',
     'sources':[
@@ -91,7 +91,7 @@ For example:
             preface+reportpreface+"Earlier, the citizen submitted a report, \
 however, your confidence on your understanding was low. Provide a short follow-up response to seek clarification \
 from the user on the infomation required to be more confident of the report. ",
-            "A single short plaintext paragraph.",
+            "A single short paragraph of plaintext only.",
             userprompt,
             chatHistory
         )
@@ -101,7 +101,7 @@ from the user on the infomation required to be more confident of the report. ",
             preface+reportpreface+"Earlier, the citizen submitted a report, \
 however, your confidence on your understanding was low. Provide a short follow-up response to summarise what you already know, and seek clarification \
 from the user on the infomation required to be more confident of the report. ",
-            "A single short plaintext paragraph. For example:\
+            "A single short paragraph of plaintext only. For example:\
 Thank you for the information, this is what I have gathered so far: <summary>. \
 However I can provide a better report with some additional information. <Follow up questions>\n\nYou are not expected to follow this format strictly.",
             userprompt,
@@ -119,7 +119,7 @@ Sources should be an array of URL links.
 For example:
 {
     'answer': <your answer>,
-    'confidence': 0.6,
+    'confidence': 0.63,
     'sources':[
         <url 1>,
         <url 2>,
@@ -135,7 +135,7 @@ For example:
             preface+questionpreface+"Earlier, the citizen submitted a question, \
 however, your confidence on the answer was low. Provide a short follow-up response to seek clarification \
 from the user on the infomation required to be more confident of your answer. ",
-            "A single short plaintext paragraph.",
+            "A single short paragraph of plaintext only.",
             userprompt,
             chatHistory
         )
@@ -145,7 +145,7 @@ from the user on the infomation required to be more confident of your answer. ",
             preface+reportpreface+"Earlier, the citizen submitted a question, \
 however, your confidence on the answer was low. Provide a short follow-up response to summarise your current answer, and seek clarification \
 from the user on the infomation required to be more confident of your answer. ",
-            "A single short plaintext paragraph.\n\nFor example:\
+            "A single short paragraph of plaintext only.\n\nFor example:\
 Thank you for the information, this is what I have gathered so far: <summary of answer>. \
 However I can provide a better answer with some additional information. <Follow up questions>\n\nYou are not expected to follow this format strictly.",
             userprompt,
