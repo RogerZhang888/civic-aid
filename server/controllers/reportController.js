@@ -210,16 +210,18 @@ export async function getReportSummaries(req, res) {
         }
         await curParquetWriter.close();
 
-        fetch(`${process.env.MODELURL}/api/callsummariser`, {
-            method:"POST",
-            body:JSON.stringify({parquet_path: path}),
-            headers:{
-                'Content-Type': 'application/json'
-            }
-        }).then((r) => {
-            return r.json()
-        }).then((r) => {
-            res.json(r);
-        })
+        summaries.push(
+            fetch(`${process.env.MODELURL}/api/callsummariser`, {
+                method:"POST",
+                body:JSON.stringify({parquet_path: path}),
+                headers:{
+                    'Content-Type': 'application/json'
+                }
+            }).then((r) => {
+                return r.json()
+            })
+        )
     }
+
+    res.json(Promise.all(summaries))
 }
