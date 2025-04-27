@@ -30,8 +30,8 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     df = load_data(parquet_path)
     
     # 2. Initialize models safely
-    embedder = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
-    cross_encoder = CrossEncoder("cross-encoder/stsb-roberta-base", device="cpu")
+    embedder = SentenceTransformer("all-MiniLM-L6-v2", device="cpu", device_map="cpu")
+    cross_encoder = CrossEncoder("cross-encoder/stsb-roberta-base", device="cpu", device_map="cpu")
 
     
     # 3. Generate embeddings safely
