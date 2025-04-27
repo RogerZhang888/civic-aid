@@ -51,7 +51,7 @@ clip_model = CLIPModel.from_pretrained(MODEL_PATH, local_files_only=True).to(dev
 # DeepSeek API configuration
 DEEPSEEK_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 DEEPSEEK_API_KEYS = []
-for i in range(5):
+for i in range(6):
     filename = str(i + 1)
     filename = "dskey" + filename + ".txt" 
     with open(filename, 'r') as file:
@@ -264,7 +264,7 @@ def call_deepseek_api(prompt: str, max_tokens: int = 400) -> str:
         "max_tokens": max_tokens,
         "top_p": 0.9
     }
-    for z in range(5):
+    for z in range(len(DEEPSEEK_API_KEYS)):
         try:
             headers = {
             "Authorization": f"Bearer {DEEPSEEK_API_KEYS[z]}",
