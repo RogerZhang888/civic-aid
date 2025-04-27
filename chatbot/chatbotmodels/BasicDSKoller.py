@@ -9,11 +9,6 @@ for i in range(6):
 
 def call_deepseek_api(prompt: str, max_tokens: int = 400) -> str:
     print("BASIC KOLLER", prompt)
-
-    headers = {
-        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
-        "Content-Type": "application/json"
-    }
     
     payload = {
         "model": "deepseek/deepseek-chat-v3-0324:free",
