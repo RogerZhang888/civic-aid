@@ -1,7 +1,7 @@
 import { useGeolocated } from "react-geolocated";
 import { ChatContext } from "./ChatContext";
 import { useEffect, useReducer, useState } from "react";
-import { Chat, FormState, Query } from "../types";
+import { Chat, FormState, GetQueriesForChatRes, Query } from "../types";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -12,8 +12,8 @@ type Action =
    | { type: "UPDATE_ALL_QUERIES_OF_CHAT"; payload: { chatId: string, queries: Query[] } }
    | { type: "ADD_NEW_CHAT"; payload: Chat }
    | { type: "UPDATE_CHAT_WITH_NEW_QUERY"; payload: { newQuery: Query, chatId: string } }
-   | { type: "DELETE_QUERY"; payload: { chatId: string, queryId: string } }
-   | { type: "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL"; payload: { answer: string | React.ReactNode, sources?: string[], media?: string, title: string, chatId: string, queryId: string } }
+   | { type: "DELETE_QUERY"; payload: { chatId: string } }
+   | { type: "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA"; payload: { answer: string | React.ReactNode, sources?: string[], media?: string, title: string, chatId: string } }
    | { type: "DELETE_CHAT"; payload: { chatId: string } }
    | { type: "UPDATE_CHAT_TITLE"; payload: { chatId: string, newTitle: string } };
 
@@ -42,20 +42,20 @@ function chatReducer(state: Chat[], action: Action): Chat[] {
                :  chat
          );
       
-      case "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL":
+      case "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA":
          return state.map(chat => 
             chat.id === action.payload.chatId
                ?  {
                   ...chat,
                   title: action.payload.title,
-                  queries: chat.queries.map(query => 
-                     query.id === action.payload.queryId
+                  queries: chat.queries.map((query, idx) => 
+                     idx === chat.queries.length - 1
                         ?  { 
                               ...query,
                               answer: action.payload.answer,
                               status: "finished",
                               sources: action.payload.sources || [],
-                              imgUrl: action.payload.media || null
+                              media: action.payload.media || null
                            }
                         :  query
                   )
@@ -68,7 +68,7 @@ function chatReducer(state: Chat[], action: Action): Chat[] {
             chat.id === action.payload.chatId
                ?  {
                   ...chat,
-                  queries: chat.queries.filter(q => q.id !== action.payload.queryId)
+                  queries: chat.queries.slice(0, chat.queries.length - 1)
                }
                :  chat
          );
@@ -131,27 +131,36 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          setIsFetchingAChat(true);
          console.log(`fetching chat ${currChatId}...`);
          try {
+
             const res = await axios.get(
                `${SERVER_API_URL}/api/chats/${currChatId}`,
                { withCredentials: true }
             );
-            const queries = res.data as {
-               id: string,
-               user_prompt: string,
-               response: string,
-               media_url: string[],
-               created_at: string,
-               sources: string[]
-            }[];
-            const formattedQueries = queries.map<Query>(query => ({
-               id: query.id,
-               question: query.user_prompt,
-               imgUrl: query.media_url.length > 0 ? query.media_url[0]: null,
-               answer: query.response,
-               status: "finished",
-               timestamp: new Date(query.created_at),
-               sources: query.sources
-            }));
+
+            const queriesRes = res.data as GetQueriesForChatRes[];
+
+            const formattedQueries = queriesRes.map<Query>(qr => {
+               if ('summary' in qr) {
+                  return {
+                     question: qr.prompt,
+                     media: qr.media || null,
+                     answer: <div>TODO</div>,
+                     timestamp: new Date(qr.timestamp),
+                     status: "finished",
+                     sources: qr.sources
+                  };
+               } else {
+                  return {
+                     question: qr.prompt,
+                     media: qr.media || null,
+                     answer: qr.answer,
+                     timestamp: new Date(qr.timestamp),
+                     status: "finished",
+                     sources: qr.sources
+                  }
+               }
+            });
+
             console.log(`${formattedQueries.length} queries fetched for chat ${currChatId}`);
             chatsDispatch({ type: "UPDATE_ALL_QUERIES_OF_CHAT", payload: { chatId: currChatId!, queries: formattedQueries } });
 
@@ -286,13 +295,11 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
    
    async function handleAddQueryToExistingChat(chatIdToAddQueryTo: string) {
 
-      const newQueryUUID = uuidv4();
       const { text, img } = formState;
 
       const newQuery: Query = {
-         id: newQueryUUID,
          question: text,
-         imgUrl: img ? "pending actual image url..." : null,
+         media: img ? "pending actual image url..." : null,
          answer: "",
          status: "pending",
          timestamp: new Date(),
@@ -374,7 +381,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
                </div>
             )
    
-            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID, answer: reportAnswerComponent, sources, title, media: newMediaUrl } });
+            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA", payload: { chatId: chatIdToAddQueryTo, answer: reportAnswerComponent, sources, title, media: newMediaUrl } });
 
          } else {
 
@@ -384,7 +391,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
    
             console.log(`Server replied with "${answer}"`);
    
-            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID, answer, sources, title, media } });
+            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA", payload: { chatId: chatIdToAddQueryTo, answer, sources, title, media } });
    
          }
 
@@ -398,13 +405,13 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
 
             toast.error(error.message);
 
-            chatsDispatch({ type: "DELETE_QUERY", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
+            chatsDispatch({ type: "DELETE_QUERY", payload: { chatId: chatIdToAddQueryTo } });
 
          } else {
 
             toast.error("Sorry, a reply could not be generated. Please try again.")
 
-            chatsDispatch({ type: "DELETE_QUERY", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
+            chatsDispatch({ type: "DELETE_QUERY", payload: { chatId: chatIdToAddQueryTo } });
    
          }
 
