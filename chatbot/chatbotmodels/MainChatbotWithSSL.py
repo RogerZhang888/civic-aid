@@ -385,7 +385,7 @@ def call_model(text_query, prompt, image_path=None):
         result = rag_search(query, database, index, retriever, prompter=prompt)
     
     # print(f"\nQuery: {query}")
-    print("\nAnswer:")
+    print("\nLLM Answer:")
     print(result["answer"])
     # print(result["used_rag"])
     # if result["sources"]:
@@ -393,7 +393,8 @@ def call_model(text_query, prompt, image_path=None):
     #     for src in result["sources"]:
     #         print(f"- {src['source_text']}\n  {src['url']}")
     
-    #return result
+    return result
+
 
 prompt = "INSTRUCTIONS \
 You are a Singapore Government chatbot, built to answer citizen queries. Your task is to analyse the user's question and answer within the context of Singapore government services. With the help of the context provided, answer the question, giving actionable answers as much as possible. Output how confident you are that you have a complete understanding of the user's question on a scale of 0 to 1, with a higher score representing greater understanding. Also indicate which sources you used, both from the context provided and otherwise. \
@@ -413,3 +414,4 @@ For example: \
 
 
 call_model("today i am free. no under saf.", prompt)
+

@@ -6,4 +6,11 @@ model.safetensors
 embeddings.npy
 government_chunks_hnsw.index
 chatbot/chatbotmodels/clip_lora_merged/model.safetensors
-
+server/uploads/*
+chatbot/__pycache__/
+chatbot/chatbotmodels/SealionChatbot.py
+chatbot/chatbotmodels/__pycache__/
+chatbot/database_metadata.json
+chatbot/env/
+chatbot/tfidf_matrix.npz
+chatbot/tfidf_vectorizer.pkl

@@ -21,14 +21,14 @@ router.post("/register", async (req, res) => {
 
    try {
 
-      const { name, email, password } = req.body;
+      const { username, email, password } = req.body;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
       await pgsql.query(
          "INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *",
-         [name, email, hashedPassword]
+         [username, email, hashedPassword]
       );
 
-      console.log(`User ${name} (${email}) was registered successfully`);
+      console.log(`User ${username} (${email}) was registered successfully`);
 
       // don't return any user data
       res.status(201).json({ success: true });
@@ -61,34 +61,34 @@ router.post("/login", async (req, res) => {
 
    try {
 
-      const { userName: reqUserName, password } = req.body;
-      const pgsqlLoginRes = await pgsql.query("SELECT * FROM users WHERE name = $1", [reqUserName]);
+      const { username: reqUsername, password } = req.body;
+      const pgsqlLoginRes = await pgsql.query("SELECT * FROM users WHERE name = $1", [reqUsername]);
 
       if (pgsqlLoginRes.length === 0 || !(await bcrypt.compare(password, pgsqlLoginRes[0].password))) {
          console.log("invalid credentials");
          return res.status(401).json({ error: "invalid credentials" });
       }
 
-      const { id, name: resUserName, email: resEmail } = pgsqlLoginRes[0];
+      const { id, name: resUsername, email: resEmail } = pgsqlLoginRes[0];
 
       const token = jwt.sign(
          { 
             id,
-            userName: resUserName,
+            username: resUsername,
             email: resEmail
          },
          process.env.JWT_SECRET,
          { expiresIn: 60 * 60 }
       );
 
-      console.log(`User ${resUserName} logged in successfully`);
+      console.log(`User ${resUsername} logged in successfully`);
 
       res.cookie("token", token, { 
          httpOnly: true,
          secure: process.env.NODE_ENV === "production",
          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
       });
-      res.json({ id, userName: resUserName, email: resEmail });
+      res.json({ id, username: resUsername, email: resEmail });
 
    } catch (error) {
       console.log(error);

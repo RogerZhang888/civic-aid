@@ -2,61 +2,51 @@ import { Info } from "lucide-react";
 import ChatbotForm from "./ChatbotForm";
 import MessagesDisplay from "./MessagesDisplay";
 import { useChatContext } from "./ChatContext";
+import useTranslation from "../language/useTranslation";
 
 export default function Chatbot() {
 
-   const { chats, currChatId, coords } = useChatContext();
+   const { chats, currChatId, coords, isFetchingAChat } = useChatContext();
+   const { t } = useTranslation();
 
    const currChat = chats.find(chat => chat.id === currChatId);
 
-   if (!currChat) {
-      return (
-         <div className="h-full flex flex-1 flex-col">
-            <div className="flex-1 flex flex-col items-center justify-center space-y-3">
-            <img src="/mascot.png" alt="logo" className="w-50" />
-               <div className="flex flex-row items-center space-x-3">
-                  
-                  <div className="text-2xl">
-                     Hi! I'm CivLeo, your friendly neighbourhood assistant.
-                  </div>
-               </div>
-               <div>How can I help you today?</div>
-               <ChatbotForm/>
-            </div>
-            <div className="sticky bottom-0">
-               <div className="text-xs m-2 text-center text-gray-500">
-                  {!coords && 
-                     <div className="font-bold flex flex-row items-center justify-center gap-1">
-                        <Info size={15} strokeWidth="3"/>This chatbot requires your location data for personalised recommendations.
-                     </div>
-                  }
-                  <div >CivicAId can make mistakes. Check official government websites for important information.</div>
-               </div>
-            </div>
-         </div>
-      )
-   }
+   if (isFetchingAChat) return (
+      <section className="h-full flex flex-1 flex-col justify-center items-center space-y-2">
+         <span className="loading loading-spinner loading-xl"/>
+         <div className="text-xl">{t('loadingChat')}</div>
+      </section>
+   )
 
    return (
-      <div className="h-full flex flex-1 flex-col">
+      <div className="h-full flex flex-1 flex-col items-center mx-4 relative">
 
-         <div className="text-center text-lg font-bold p-2">
-            {currChat.title}
-         </div>
+         {currChat
+            ?  <>
+                  <div className="text-lg font-semibold p-2">
+                     {currChat.title}
+                  </div>
 
-         <div className="flex-1 overflow-y-auto px-4 pt-1">
-            <MessagesDisplay messages={currChat.queries} />
-         </div>
+                  <div className="flex-1 overflow-y-auto w-full max-w-3xl">
+                     <MessagesDisplay messages={currChat.queries} />
+                  </div>
+               </>
+            :  <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full">
+                  <img src="/mascot.png" alt="logo" className="w-50 mx-auto" />
+                  <div className="text-2xl">{t('newChatTop')}</div>
+                  <div>{t('newChatBottom')}</div>
+               </div>
+         }
 
-         <div className="sticky bottom-0">
+         <div className="mt-auto w-full max-w-2xl pt-3">
             <ChatbotForm/>
-            <div className="text-xs m-2 text-center text-gray-500">
+            <div className="text-xs text-center m-2 text-gray-500">
                {!coords && 
-                  <div className="font-bold flex flex-row items-center justify-center gap-1">
-                     <Info size={15} strokeWidth="3"/>This chatbot requires your location data for personalised recommendations.
+                  <div className="font-semibold flex flex-row items-center justify-center gap-1">
+                     <Info size={15} strokeWidth="3"/>{t('location')}
                   </div>
                }
-               <div>CivicAId can make mistakes. Check official government websites for important information.</div>
+               <div>{t("disclaimer")}</div>
             </div>
          </div>
       </div>

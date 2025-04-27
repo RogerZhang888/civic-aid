@@ -14,7 +14,7 @@ function MessageBubble({
          <div className="chat chat-end tracking-wide mt-3">
             <div className="chat-bubble space-y-1">
                {message.question && <div>{message.question}</div>}
-               {message.img &&
+               {message.imgUrl &&
                   <div className="text-xs flex items-center space-x-1">
                      <Image size={16} />
                      <span>Image attached</span>
@@ -34,6 +34,21 @@ function MessageBubble({
                   : <div>{message.answer}</div>
                }
             </div>
+            {message.sources && message.sources.length !== 0 &&
+               <div className="chat-footer flex flex-row items-center mt-1 space-x-1">
+                  <span>Sources:</span> 
+                  {message.sources.map(source => 
+                     <a 
+                        className="link link-hover" 
+                        href={source}
+                        rel="noopener noreferrer" 
+                        target="_blank"
+                     >
+                        {source}
+                     </a>
+                  )}
+               </div>
+            }
          </div>
 
       </React.Fragment>

@@ -5,7 +5,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 app.use(cors({
-   origin: 'http://localhost:5173', // Explicitly allow your frontend origin
+   origin: `http://${process.env.CLIENT_HOSTNAME}:${process.env.CLIENT_PORT}`, // Explicitly allow your frontend origin
    credentials: true, // Allow credentials
    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Allowed methods
    allowedHeaders: ['Content-Type', 'Authorization'] // Allowed headers
@@ -21,6 +21,8 @@ app.get('/health', async (req, res) => {
     res.status(500).json({ error: 'Backend connection failed' });
   }
 });
+
+app.use('/api/files', express.static('uploads'))
 
 // Mount routers
 const queryRoutes = require('./routes/queryRoutes');

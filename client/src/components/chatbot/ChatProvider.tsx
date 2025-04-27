@@ -12,7 +12,8 @@ type Action =
    | { type: "UPDATE_ALL_QUERIES_OF_CHAT"; payload: { chatId: string, queries: Query[] } }
    | { type: "ADD_NEW_CHAT"; payload: Chat }
    | { type: "UPDATE_CHAT_WITH_NEW_QUERY"; payload: { newQuery: Query, chatId: string } }
-   | { type: "UPDATE_QUERY_WITH_ANSWER"; payload: { answer: string, chatId: string, queryId: string } }
+   | { type: "DELETE_QUERY"; payload: { chatId: string, queryId: string } }
+   | { type: "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL"; payload: { answer: string | React.ReactNode, sources?: string[], media?: string, title: string, chatId: string, queryId: string } }
    | { type: "DELETE_CHAT"; payload: { chatId: string } }
    | { type: "UPDATE_CHAT_TITLE"; payload: { chatId: string, newTitle: string } };
 
@@ -32,7 +33,7 @@ function chatReducer(state: Chat[], action: Action): Chat[] {
          );
 
       case "ADD_NEW_CHAT":
-         return [...state, action.payload];
+         return [action.payload, ...state];
 
       case "UPDATE_CHAT_WITH_NEW_QUERY":
          return state.map(chat => 
@@ -41,16 +42,33 @@ function chatReducer(state: Chat[], action: Action): Chat[] {
                :  chat
          );
       
-      case "UPDATE_QUERY_WITH_ANSWER":
+      case "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL":
          return state.map(chat => 
             chat.id === action.payload.chatId
                ?  {
                   ...chat,
+                  title: action.payload.title,
                   queries: chat.queries.map(query => 
                      query.id === action.payload.queryId
-                        ?  { ...query, answer: action.payload.answer, status: "finished" }
+                        ?  { 
+                              ...query,
+                              answer: action.payload.answer,
+                              status: "finished",
+                              sources: action.payload.sources || [],
+                              imgUrl: action.payload.media || null
+                           }
                         :  query
                   )
+               }
+               :  chat
+         );
+      
+      case "DELETE_QUERY":
+         return state.map(chat => 
+            chat.id === action.payload.chatId
+               ?  {
+                  ...chat,
+                  queries: chat.queries.filter(q => q.id !== action.payload.queryId)
                }
                :  chat
          );
@@ -73,16 +91,19 @@ function chatReducer(state: Chat[], action: Action): Chat[] {
 
 export default function ChatProvider({ children, currChatId, }: { children: React.ReactNode; currChatId: string | undefined; }) {
 
+   const [chats, chatsDispatch] = useReducer(chatReducer, []);
+
    const [formState, setFormState] = useState<FormState>({ text: "", img: null });
    const [imgPreview, setImgPreview] = useState<string | null>(null);
    const [isWaiting, setIsWaiting] = useState<boolean>(false);
-   const initChats: Chat[] = [];
-   const [chats, chatsDispatch] = useReducer(chatReducer, initChats);
+   const [isFetchingAChat, setIsFetchingAChat] = useState<boolean>(false);
+
    const navigate = useNavigate();
 
    useEffect(() => {
 
       async function fetchAllChats() {
+         console.log("fetching all of user's chats...");
          const res = await axios.get(
             `${SERVER_API_URL}/api/chats`,
             { withCredentials: true }
@@ -100,43 +121,69 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
             createdAt: new Date(chat.created_at),
             queries: [],
          }));
+         console.log(`${formattedChats.length} chats fetched`);
          chatsDispatch({ type: "GET_ALL_CHATS", payload: formattedChats });
+         return formattedChats;
       }
-
-      fetchAllChats()
-
-   }, []);
-
-   useEffect(() => {
-
-      if (!currChatId) return;
 
       async function fetchQueriesForThisChat() {
-         const res = await axios.get(
-            `${SERVER_API_URL}/api/chats/${currChatId}`,
-            { withCredentials: true }
-         );
-         const queries = res.data as {
-            id: string,
-            user_prompt: string,
-            response: string,
-            img: null,
-            created_at: string,
-         }[];
-         const formattedQueries = queries.map<Query>(query => ({
-            id: query.id,
-            question: query.user_prompt,
-            img: null,
-            answer: query.response,
-            status: "finished",
-            timestamp: new Date(query.created_at),
-         }));
-         chatsDispatch({ type: "UPDATE_ALL_QUERIES_OF_CHAT", payload: { chatId: currChatId!, queries: formattedQueries } });
+         setIsFetchingAChat(true);
+         console.log(`fetching chat ${currChatId}...`);
+         try {
+            const res = await axios.get(
+               `${SERVER_API_URL}/api/chats/${currChatId}`,
+               { withCredentials: true }
+            );
+            const queries = res.data as {
+               id: string,
+               user_prompt: string,
+               response: string,
+               media_url: string[],
+               created_at: string,
+               sources: string[]
+            }[];
+            const formattedQueries = queries.map<Query>(query => ({
+               id: query.id,
+               question: query.user_prompt,
+               imgUrl: query.media_url.length > 0 ? query.media_url[0]: null,
+               answer: query.response,
+               status: "finished",
+               timestamp: new Date(query.created_at),
+               sources: query.sources
+            }));
+            console.log(`${formattedQueries.length} queries fetched`);
+            chatsDispatch({ type: "UPDATE_ALL_QUERIES_OF_CHAT", payload: { chatId: currChatId!, queries: formattedQueries } });
+
+         } catch (error) {
+            if (axios.isAxiosError(error)) {
+               if (error.response?.status === 404) {
+                  console.log(`No queries found for chat id ${currChatId}: Deleted chat`);
+                  chatsDispatch({ type: "DELETE_CHAT", payload: { chatId: currChatId! } });
+                  toast.error("There was no history found for your chat.");
+                  navigate("/chatbot");
+               } else {
+                  console.log(error);
+                  toast.error(error.response?.data.error);
+               }
+            } else {
+               console.log(error);
+               toast.error("An unknown error occured while fetching your chat history. Please refresh the page to try again.");
+            }
+
+         } finally {
+            setIsFetchingAChat(false);
+         }
       }
 
-      fetchQueriesForThisChat()
+      if (chats.length === 0) {
+         fetchAllChats().then(() => {
+            if (currChatId) fetchQueriesForThisChat();
+         })
+      } else if (currChatId && chats.find(chat => chat.id === currChatId)?.queries.length === 0) {
+         fetchQueriesForThisChat()
+      }
 
-   }, [currChatId])
+   }, [currChatId, chats, navigate])
 
    // get user's coordinates
    // browser will ask for permission
@@ -192,20 +239,13 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
    async function handleAddQuery() {
       setIsWaiting(true);
    
-      try {
+      const chatId = currChatId || await handleCreateNewChat();
 
-         const chatId = currChatId || await handleCreateNewChat();
-   
-         if (!chatId) throw new Error("Failed to create chat");
-   
-         await handleAddQueryToExistingChat(chatId);
-   
-      } catch (error) { 
-         console.error("Failed to send query:", error);
-         toast.error("Something went wrong while sending your message");
-      } finally {
-         setIsWaiting(false);
-      }
+      if (!chatId) throw new Error("Failed to create chat");
+
+      await handleAddQueryToExistingChat(chatId);
+
+      setIsWaiting(false);
    }
    
    async function handleCreateNewChat() {
@@ -216,7 +256,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
 
       const newChat: Chat = {
          id: newChatUUID,
-         title: "TITLE " + newChatUUID,
+         title: "New Chat",
          type: "unknown",
          createdAt: new Date(),
          queries: [],
@@ -230,6 +270,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          )
 
          chatsDispatch({ type: "ADD_NEW_CHAT", payload: newChat });
+         navigate(`/chatbot/${newChatUUID}`);
 
          console.log(`New chat ${newChatUUID} created successfully `);
 
@@ -249,10 +290,11 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
       const newQuery: Query = {
          id: newQueryUUID,
          question: text,
-         img,
+         imgUrl: img ? "pending actual image url..." : null,
          answer: "",
          status: "pending",
          timestamp: new Date(),
+         sources: []
       };
 
       chatsDispatch({ type: "UPDATE_CHAT_WITH_NEW_QUERY", payload: { newQuery, chatId: chatIdToAddQueryTo }});
@@ -262,21 +304,23 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
       setImgPreview(null);
 
       const fd = new FormData();
-      fd.append('prompt', text || "NO TEXT PROVIDED");
+      fd.append('prompt', text || "");
       if (img) fd.append('image', img);
       if (coords) {
          fd.append('latitude', coords.latitude.toString());
          fd.append('longitude', coords.longitude.toString());
       }
-      fd.append('chat_id', chatIdToAddQueryTo);
+     
+      fd.append('chatId', chatIdToAddQueryTo);
+
 
       /**
        *  fd will contain the following:
-       * - prompt: the TEXT input from the user, if it was empty, it will be "NO TEXT PROVIDED"
+       * - prompt: the TEXT input from the user, if it was empty, it will be "" (empty string)
        * - image: the image file uploaded by the user (if available)
        * - latitude: the user's latitude (if available)
        * - longitude: the user's longitude (if available)
-       * - chat_id: the chat ID
+       * - chatid: the chat ID
        */
 
       console.log("FormData to be sent to server:");
@@ -295,29 +339,110 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
             }
          )
 
-         const { answer } = res.data as { answer: string };
+         console.log(res)
 
-         console.log(`Server replied with "${answer}"`);
+         if (res.data.summary) {
 
-         chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer, chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
+            // case: report created
 
-         navigate(`/chatbot/${chatIdToAddQueryTo}`);
+            const {
+               summary,
+               urgency,
+               recommendedSteps,
+               agency,
+               title,
+               sources,
+               media: newMediaUrl
+            } = res.data as { 
+               summary: string, 
+               urgency: number, 
+               recommendedSteps: string, 
+               agency: string,
+               title: string,
+               sources?: string[],
+               valid: boolean,
+               media?: string
+            }
+
+            console.log(`Server successfully created a report: "${summary}"`);
+
+            const allImgUrls = chats.find(chat => chat.id === chatIdToAddQueryTo)!
+               .queries
+               .map(q => q.imgUrl)
+               .filter(url => url !== null)
+
+            if (newMediaUrl) allImgUrls.push(newMediaUrl);
+
+            const imgs = await fetchAllImgs(allImgUrls);
+
+            const reportAnswerComponent = (
+               <div id="answer-for-report-chat" className="space-y-2">
+                  <div className="text-xl font-semibold">Your Report Has Been Created!</div>
+                  <div>Title: {title}</div>
+                  <div>Summary: {summary}</div>
+                  <div>Recommended steps: {recommendedSteps}</div>
+                  <div>Urgency: {urgency} / 1</div>
+                  <div>Agency contacted: {agency}</div>
+                  <div>
+                     {imgs.map((img, idx) =>
+                        <img
+                           key={idx}
+                           alt={`Uploaded image ${idx+1}`}
+                           className="max-h-20"
+                           src={img}
+                        />
+                     )}
+                  </div>
+               </div>
+            )
+   
+            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID, answer: reportAnswerComponent, sources, title, media: newMediaUrl } });
+
+         } else {
+
+            // case: normal response
+
+            const { answer, sources, title, media } = res.data as { answer: string, sources?: string[], title: string, media?: string };
+   
+            console.log(`Server replied with "${answer}"`);
+   
+            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID, answer, sources, title, media } });
+   
+            navigate(`/chatbot/${chatIdToAddQueryTo}`);
+
+         }
 
       } catch (error) {
+
+         setFormState({ text, img });
 
          console.log(`Server replied with an error: \n${error}`);
 
          if (axios.isAxiosError(error)) {
 
-            chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer: error.message, chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
+            toast.error(error.message);
+
+            chatsDispatch({ type: "DELETE_QUERY", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
 
          } else {
 
-            chatsDispatch({ type: "UPDATE_QUERY_WITH_ANSWER", payload: { answer: "An unknown error occurred", chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
+            toast.error("Sorry, a reply could not be generated. Please try again.")
+
+            chatsDispatch({ type: "DELETE_QUERY", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
    
          }
 
       }
+   }
+
+   async function fetchAllImgs(imgUrls: string[]) {
+
+      const promises = imgUrls.map(url => axios.get(`${SERVER_API_URL}/api/images/${url}`, { withCredentials: true }));
+
+      const resArr = await Promise.all(promises);
+
+      return resArr.map(res => res.data) as string[];
+
    }
 
    async function deleteChat(chatIdToDelete: string) {
@@ -362,7 +487,8 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          imgPreview,
          currChatId,
          coords,
-         isWaiting
+         isWaiting,
+         isFetchingAChat
       }}>
          {children}
       </ChatContext.Provider>
