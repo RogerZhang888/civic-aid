@@ -101,7 +101,7 @@ exports.getSpecificChatHistory = async (req, res) => {
                                     ...parsedRes,
                                     confidence: undefined,
                                     reportId: reports? reports[0].id : undefined,
-                                    timestamp: q.created_at
+                                    timestamp: q.timestamp
                                 }
                             }
                             return {
@@ -109,6 +109,7 @@ exports.getSpecificChatHistory = async (req, res) => {
                                 media: q.media,
                                 ...parsedRes,
                                 confidence: undefined,
+                                timestamp: q.timestamp
                             }
                         }
                     }
