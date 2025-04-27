@@ -212,7 +212,7 @@ export async function getReportSummaries(req, res) {
 
         fetch(`${process.env.MODELURL}/api/callsummariser`, {
             method:"POST",
-            body:JSON.stringify({reports, path}),
+            body:JSON.stringify({parquet_path: path}),
             headers:{
                 'Content-Type': 'application/json'
             }
