@@ -50,12 +50,12 @@ clip_model = CLIPModel.from_pretrained(MODEL_PATH, local_files_only=True).to(dev
 
 # DeepSeek API configuration
 DEEPSEEK_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-with open("dskey.txt", 'r') as file:
-    DEEPSEEK_API_KEY = file.read().strip()
-with open("dskey2.txt", 'r') as file:
-    DEEPSEEK_API_KEY2 = file.read().strip()
-with open("dskey3.txt", 'r') as file:
-    DEEPSEEK_API_KEY3 = file.read().strip()
+DEEPSEEK_API_KEYS = []
+for i in range(5):
+    filename = str(i + 1)
+    filename = "dskey" + filename + ".txt" 
+    with open(filename, 'r') as file:
+        DEEPSEEK_API_KEYS.append(file.read().strip())
 
 class HybridRetriever:
     def __init__(self, database):
@@ -252,10 +252,7 @@ def get_query_embedding(query: str = None, image=None):
 
 # 5. RAG Search with DeepSeek API - Updated for cosine similarity
 def call_deepseek_api(prompt: str, max_tokens: int = 400) -> str:
-    headers = {
-        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
-        "Content-Type": "application/json"
-    }
+
     
     payload = {
         "model": "deepseek/deepseek-chat-v3-0324:free",
@@ -267,32 +264,19 @@ def call_deepseek_api(prompt: str, max_tokens: int = 400) -> str:
         "max_tokens": max_tokens,
         "top_p": 0.9
     }
-    
-    try:
-        response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
-        response.raise_for_status()
-        # print(response.text)
-        # print(response.text[2:7])
-        return response.json()["choices"][0]["message"]["content"]
-    except:
+    for z in range(5):
         try:
-            print("test")
             headers = {
-                "Authorization": f"Bearer {DEEPSEEK_API_KEY2}",
-                "Content-Type": "application/json"
+            "Authorization": f"Bearer {DEEPSEEK_API_KEYS[z]}",
+            "Content-Type": "application/json"
             }
             response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
             response.raise_for_status()
             return response.json()["choices"][0]["message"]["content"]
         except:
-            headers = {
-                "Authorization": f"Bearer {DEEPSEEK_API_KEY3}",
-                "Content-Type": "application/json"
-            }
-            response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
-            response.raise_for_status()
-            return response.json()["choices"][0]["message"]["content"]
-
+            pass
+    return "Sorry, I couldn't process your request at this time."
+    
     # except requests.exceptions.RequestException as e:
     #     print(f"API request failed: {e}")
     #     return "Sorry, I couldn't process your request at this time."
@@ -385,7 +369,7 @@ def call_model(text_query, prompt, image_path=None):
         result = rag_search(query, database, index, retriever, prompter=prompt)
     
     # print(f"\nQuery: {query}")
-    print("\nLLM Answer:")
+    print("\nAnswer:")
     print(result["answer"])
     # print(result["used_rag"])
     # if result["sources"]:
@@ -393,8 +377,7 @@ def call_model(text_query, prompt, image_path=None):
     #     for src in result["sources"]:
     #         print(f"- {src['source_text']}\n  {src['url']}")
     
-    return result
-
+    #return result
 
 prompt = "INSTRUCTIONS \
 You are a Singapore Government chatbot, built to answer citizen queries. Your task is to analyse the user's question and answer within the context of Singapore government services. With the help of the context provided, answer the question, giving actionable answers as much as possible. Output how confident you are that you have a complete understanding of the user's question on a scale of 0 to 1, with a higher score representing greater understanding. Also indicate which sources you used, both from the context provided and otherwise. \
@@ -414,4 +397,3 @@ For example: \
 
 
 call_model("today i am free. no under saf.", prompt)
-
