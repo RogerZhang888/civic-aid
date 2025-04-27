@@ -13,7 +13,7 @@ type Action =
    | { type: "ADD_NEW_CHAT"; payload: Chat }
    | { type: "UPDATE_CHAT_WITH_NEW_QUERY"; payload: { newQuery: Query, chatId: string } }
    | { type: "DELETE_QUERY"; payload: { chatId: string } }
-   | { type: "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA"; payload: { answer: string | React.ReactNode, sources?: string[], media?: string, title: string, chatId: string } }
+   | { type: "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA"; payload: { answer: string | React.ReactNode, sources: string[], media?: string, title: string, chatId: string } }
    | { type: "DELETE_CHAT"; payload: { chatId: string } }
    | { type: "UPDATE_CHAT_TITLE"; payload: { chatId: string, newTitle: string } };
 
@@ -144,7 +144,11 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
                   return {
                      question: qr.prompt,
                      media: qr.media || null,
-                     answer: <div>TODO</div>,
+                     answer: (
+                        <div id="answer-for-report-chat" className="space-y-2">
+                           <div className="text-xl font-semibold">Your Report Was Created. View it <Link to={`/profile/${qr.reportId}`}>here!</Link></div>
+                        </div>
+                     ),
                      timestamp: new Date(qr.timestamp),
                      status: "finished",
                      sources: qr.sources
@@ -358,15 +362,13 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
                summary,
                title,
                sources,
-               media: newMediaUrl
+               reportId,
+               media
             } = res.data as { 
                summary: string, 
-               urgency: number, 
-               recommendedSteps: string, 
-               agency: string,
                title: string,
-               sources?: string[],
-               valid: boolean,
+               sources: string[],
+               reportId: string,
                media?: string
             }
 
@@ -377,17 +379,17 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
                   <div className="text-xl font-semibold">Your Report Has Been Created!</div>
                   <div>Title: {title}</div>
                   <div>Summary: {summary}</div>
-                  <div>View more details <Link to={`/profile/${"TODO"}`}></Link></div>
+                  <div>View more details <Link to={`/profile/${reportId}`}>here!</Link></div>
                </div>
             )
    
-            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA", payload: { chatId: chatIdToAddQueryTo, answer: reportAnswerComponent, sources, title, media: newMediaUrl } });
+            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA", payload: { chatId: chatIdToAddQueryTo, answer: reportAnswerComponent, sources, title, media } });
 
          } else {
 
             // case: normal response
 
-            const { answer, sources, title, media } = res.data as { answer: string, sources?: string[], title: string, media?: string };
+            const { answer, sources, title, media } = res.data as { answer: string, sources: string[], title: string, media?: string };
    
             console.log(`Server replied with "${answer}"`);
    
