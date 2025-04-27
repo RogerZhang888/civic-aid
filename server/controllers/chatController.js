@@ -86,11 +86,21 @@ exports.getSpecificChatHistory = async (req, res) => {
                     media: q.media_url.length == 0? undefined:q.media_url[0],
                     response: q.response
                 }
-            }).map((q) => {
+            }).map(async (q) => {
                 // Parsing check
                 for (let parser in responseParsers) {
                     let parsedRes = responseParsers[parser](q.response)
                     if (parsedRes.valid) {
+                        if (parser === "reportParser") {
+                            reports = await pgsql.query("SELECT * FROM reports WHERE chat_id = $1", [chatId])
+                            return {
+                                prompt: q.prompt,
+                                media: q.media,
+                                ...parsedRes,
+                                confidence: undefined,
+                                reportId: reports? reports[0].id : undefined
+                            }
+                        }
                         return {
                             prompt: q.prompt,
                             media: q.media,
