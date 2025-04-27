@@ -79,37 +79,39 @@ exports.getSpecificChatHistory = async (req, res) => {
         if (queriesRes.length > 0) {
             console.log(`${queriesRes.length} queries fetched for chatid ${chatId}`);
 
-            let queries = queriesRes.map((q) => {
-                // Extracts required information from DB only
-                return {
-                    prompt: q.user_prompt,
-                    media: q.media_url.length == 0? undefined:q.media_url[0],
-                    response: q.response
-                }
-            }).map(async (q) => {
-                // Parsing check
-                for (let parser in responseParsers) {
-                    let parsedRes = responseParsers[parser](q.response)
-                    if (parsedRes.valid) {
-                        if (parser === "reportParser") {
-                            reports = await pgsql.query("SELECT * FROM reports WHERE chat_id = $1", [chatId])
+            let queries = await Promise.all(
+                queriesRes.map((q) => {
+                    // Extracts required information from DB only
+                    return {
+                        prompt: q.user_prompt,
+                        media: q.media_url.length == 0? undefined:q.media_url[0],
+                        response: q.response
+                    }
+                }).map(async (q) => {
+                    // Parsing check
+                    for (let parser in responseParsers) {
+                        let parsedRes = responseParsers[parser](q.response)
+                        if (parsedRes.valid) {
+                            if (parser === "reportParser") {
+                                reports = await pgsql.query("SELECT * FROM reports WHERE chat_id = $1", [chatId])
+                                return {
+                                    prompt: q.prompt,
+                                    media: q.media,
+                                    ...parsedRes,
+                                    confidence: undefined,
+                                    reportId: reports? reports[0].id : undefined
+                                }
+                            }
                             return {
                                 prompt: q.prompt,
                                 media: q.media,
                                 ...parsedRes,
                                 confidence: undefined,
-                                reportId: reports? reports[0].id : undefined
                             }
                         }
-                        return {
-                            prompt: q.prompt,
-                            media: q.media,
-                            ...parsedRes,
-                            confidence: undefined,
-                        }
                     }
-                }
-            })
+                })
+            )
 
             res.status(200).json(queries);
         } else {
