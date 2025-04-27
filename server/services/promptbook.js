@@ -1,4 +1,4 @@
-const debug = true
+const debug = false
 
 const preface = "You are a Singapore Government chatbot, "
 // TODO: consider adding meta prompts here for customised personality. 
