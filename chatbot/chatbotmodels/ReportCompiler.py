@@ -12,7 +12,10 @@ def preprocess_text(text):
     return re.sub(r"\s+", " ", text)
 
 def load_data(path):
-    df = pd.read_parquet(path)
+    if ".parquet" in path:     
+        df = pd.read_parquet(path)
+    else:
+        df = pd.read_csv(path)
     df["cleaned_text"] = df["report_text"].apply(preprocess_text)
     return df[df["cleaned_text"].str.len() > 0]
 
