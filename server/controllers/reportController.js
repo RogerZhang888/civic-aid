@@ -200,7 +200,7 @@ export async function getReportSummaries(req, res) {
         let path = `${reportGroup.agency}-${Date.now()}.parquet`;
         let curParquetWriter = await parquet.ParquetWriter.openFile(
             reportParquetSchema,
-            `./parquest/${path}`
+            `./parquets/${path}`
         );
         for (let report of reportGroup.reports) {
             await curParquetWriter.appendRow({
