@@ -6,6 +6,7 @@ from sentence_transformers import SentenceTransformer, CrossEncoder
 import hdbscan
 import os
 import torch
+from sklearn.metrics.pairwise import cosine_distances
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 torch.set_default_device("cpu")
@@ -32,14 +33,15 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     embedder = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
 
     embeddings = embedder.encode(df["cleaned_text"].tolist())
+    distance_matrix = cosine_distances(embeddings)
     
     # 3. Cluster
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=2,
-        metric="cosine",
+        metric="precomputed",
         cluster_selection_method="eom"
     )
-    cluster_labels = clusterer.fit_predict(embeddings)
+    cluster_labels = clusterer.fit_predict(distance_matrix)
     
     # 4. Verify pairs within clusters
     cross_encoder = CrossEncoder("cross-encoder/stsb-roberta-base", device="cpu")
