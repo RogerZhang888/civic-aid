@@ -13,7 +13,7 @@ import ProtectedRoutesWrapper from "./components/auth/ProtectedRoutesWrapper";
 import ChatbotWrapper from "./components/chatbot/ChatbotWrapper";
 import LanguageProvider from "./components/language/LanguageProvider";
 import About from "./components/about/About"; 
-
+import ProfileReportPage from "./components/profile/ProfileReportPage";
 
 export default function App() {
    return (
@@ -36,7 +36,13 @@ export default function App() {
 
                         <Route path="/chatbot/:currChatId?" element={<ChatbotWrapper/>}/>
 
-                        <Route path="/profile" element={<ProfilePage/>} />
+                        <Route path="/profile">
+
+                           <Route index element={<ProfilePage/>}/>
+
+                           <Route path=":reportId" element={<ProfileReportPage/>}/>
+                        
+                        </Route>
 
                      </Route>
 

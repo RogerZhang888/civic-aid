@@ -1,4 +1,5 @@
 const pgsql = require("../config/db");
+const { responseParsers } = require("../services/parsers");
 
 exports.startNewChat = async (req, res) => {
     try {
@@ -71,15 +72,54 @@ exports.getSpecificChatHistory = async (req, res) => {
         const chatId = req.params.chatId; // from request parameters
 
         const queriesRes = await pgsql.query(
-            `SELECT * FROM queries WHERE user_id = $1 AND chat_id = $2 AND to_reply = true ORDER BY created_at ASC`,
+            `SELECT * FROM queries WHERE user_id = $1 AND chat_id = $2 AND to_reply = true AND is_valid = true ORDER BY created_at ASC`,
             [userId, chatId]
         );
 
         if (queriesRes.length > 0) {
-            console.log(queriesRes.rows);
-            res.status(200).json(queriesRes);
+            console.log(`${queriesRes.length} queries fetched for chatid ${chatId}`);
+
+            let queries = await Promise.all(
+                queriesRes.map((q) => {
+                    // Extracts required information from DB only
+                    return {
+                        prompt: q.user_prompt,
+                        media: q.media_url.length == 0? undefined:q.media_url[0],
+                        response: q.response,
+                        timestamp: new Date(q.created_at)
+                    }
+                }).map(async (q) => {
+                    // Parsing check
+                    for (let parser in responseParsers) {
+                        let parsedRes = responseParsers[parser](q.response)
+                        if (parsedRes.valid) {
+                            if (parser === "reportParser") {
+                                reports = await pgsql.query("SELECT * FROM reports WHERE chat_id = $1", [chatId])
+                                return {
+                                    prompt: q.prompt,
+                                    media: q.media,
+                                    ...parsedRes,
+                                    confidence: undefined,
+                                    reportId: reports? reports[0].id : undefined,
+                                    timestamp: q.timestamp
+                                }
+                            }
+                            return {
+                                prompt: q.prompt,
+                                media: q.media,
+                                ...parsedRes,
+                                confidence: undefined,
+                                timestamp: q.timestamp
+                            }
+                        }
+                    }
+                })
+            )
+
+            res.status(200).json(queries);
         } else {
             // no queries associated with this chat: delete it
+            console.log(`No queries fetched for chatid ${chatId}: deleting this chat`);
             await pgsql.query(
                 `DELETE FROM chats WHERE user_id = $1 AND id = $2`,
                 [userId, chatId]

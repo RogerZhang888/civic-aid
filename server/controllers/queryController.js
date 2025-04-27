@@ -55,7 +55,6 @@ const updateChatType = async (chatId, type, title) => {
     return pgsql.query("UPDATE chats SET type = $1, title = $2 WHERE id = $3", [type, title, chatId])
 }
 const createReport = (params) => {
-    console.log("CREATING REPORT", params)
     let {userId, chatId, title, summary, media, location, agency, recommendedSteps, urgency, confidence} = params
     return pgsql.query(`SELECT * FROM reports WHERE chat_id = $1`, [chatId]).then((res) => {
         if (res.length == 0) {
@@ -71,6 +70,7 @@ const createReport = (params) => {
                     END,
                     $8, $9, $10, $11
                 )
+                RETURNING id
             `, [
                 userId,
                 chatId,
@@ -89,6 +89,7 @@ const createReport = (params) => {
                 UPDATE reports 
                 SET description = $1, media_url = $2, agency = $3, recommended_steps = $4, urgency = $5, report_confidence = $6
                 WHERE chat_id = $7
+                RETURNING id
             `, [
                 summary,
                 media??[],
@@ -104,10 +105,10 @@ const createReport = (params) => {
     
 }
 
-const getConfidence = (score) => {
+const getConfidence = (score, count) => {
     // TOOD: Confirm boundaries
-    if (score > 0.7) return 'HIGH'
-    else if (score > 0.3) return 'MED'
+    if (score > 0.7 || (score > 0.5 && count > 3) || count > 5) return 'HIGH'
+    else if (score > 0.3 || (score > 0.1 && count > 3)) return 'MED'
     else return 'LOW'
 }
 
@@ -140,7 +141,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
                     systemprompt:prompt, 
                     response:res, 
                     isValid: parsed.valid, 
-                    toReply: reply=='ALWAYS' || (reply=='HIGH'&&getConfidence(parsed.confidence)=='HIGH'), 
+                    toReply: reply=='ALWAYS' || (reply=='HIGH'&&getConfidence(parsed.confidence, chatHistory.length + 1)=='HIGH'), 
                     confidence:parsed.confidence,
                     sources:parsed.sources,
                     location,
@@ -173,28 +174,29 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         systemprompt = systempromptTemplates.getTypeDecisionTemplate(userprompt, chatHistory)
         response = await queryLLM({query:userprompt, prompt: systemprompt, model:'basic'}, responseParsers.typeDecisionParser, 'NEVER')
         
-        if (getConfidence(response.confidence) == 'LOW' || getConfidence(response.confidence) == 'MED') {
+        if (getConfidence(response.confidence, chatHistory.length) == 'LOW' || getConfidence(response.confidence, chatHistory.length) == 'MED') {
             systemprompt = systempromptTemplates.clarifyTypeDecisionTemplate(userprompt, chatHistory)
             response = await queryLLM({query:userprompt, prompt: systemprompt, model: 'basic'}, responseParsers.noParser, 'ALWAYS')
-        } else if (getConfidence(response.confidence) == 'HIGH') {
+        } else if (getConfidence(response.confidence, chatHistory.length) == 'HIGH') {
             chat.type = response.type
             chat.title = response.title
             updateChatType(chatId, response.type, response.title)
         }
     }
 
+    let report
     if (chat.type == 'report') {
         let systemprompt = systempromptTemplates.getReportTemplate(userprompt, chatHistory)
         response = await queryLLM({query:userprompt, prompt: systemprompt, model:'main'}, responseParsers.reportParser, 'HIGH')
 
-        if (getConfidence(response.confidence) == 'LOW') {
+        if (getConfidence(response.confidence, chatHistory.length) == 'LOW') {
             systemprompt = systempromptTemplates.clarifyReportTemplateLow(userprompt, chatHistory)
             response = await queryLLM({query:userprompt, prompt: systemprompt, model:'basic'}, responseParsers.noParser, 'ALWAYS')
-        } else if (getConfidence(response.confidence) == 'MED') {
+        } else if (getConfidence(response.confidence, chatHistory.length) == 'MED') {
             systemprompt = systempromptTemplates.clarifyReportTemplateMed(userprompt, chatHistory)
             response = await queryLLM({query:userprompt, prompt: systemprompt, model:'basic'}, responseParsers.noParser, 'ALWAYS')
-        } else if (getConfidence(response.confidence) == 'HIGH') {
-            createReport({
+        } else if (getConfidence(response.confidence, chatHistory.length) == 'HIGH') {
+            report = await createReport({
                 userId,
                 chatId,
                 title:chat.title,
@@ -213,22 +215,23 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         let systemprompt = systempromptTemplates.getQuestionTemplate(userprompt, chatHistory)
         response = await queryLLM({query:userprompt, prompt: systemprompt, model:'main'}, responseParsers.defaultParser, 'HIGH')
 
-        if (getConfidence(response.confidence) == 'LOW') {
+        if (getConfidence(response.confidence, chatHistory.length) == 'LOW') {
             systemprompt = systempromptTemplates.clarifyQuestionTemplateLow(userprompt, chatHistory)
             response = await queryLLM({query:userprompt, prompt: systemprompt, model:'basic'}, responseParsers.noParser, 'ALWAYS')
-        } else if (getConfidence(response.confidence) == 'MED') {
+        } else if (getConfidence(response.confidence, chatHistory.length) == 'MED') {
             systemprompt = systempromptTemplates.clarifyQuestionTemplateMed(userprompt, chatHistory)
             response = await queryLLM({query:userprompt, prompt: systemprompt, model:'basic'}, responseParsers.noParser, 'ALWAYS')
         }
     }
     
     return {
-        queries: queriesTracker,
         response: {
             ...response,
             title: chat.title,
             confidence: undefined,
-            media
+            media,
+            reportId: report?report[0]?.id:undefined,
+            queries: queriesTracker,
         }
     }
 }

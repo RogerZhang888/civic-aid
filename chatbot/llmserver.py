@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from chatbotmodels.MainChatbotWithSSL import call_model as callMainModel
 from chatbotmodels.BasicDSKoller import call_deepseek_api as callBasicModel
 from chatbotmodels.AuxModelCaptioner import generate_caption as callCaptionerModel
+from chatbotmodels.ReportCompiler import group_identical_issues as callReportCompiler
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -37,6 +38,13 @@ def callmodel():
     except Exception as e:
         print("Failed to call model", e)
         return jsonify({"status": "error", "output": "Failed to call model"}), 500
+
+@app.route('/api/callsummariser', methods=['POST'])
+def callsummariser():
+    params = request.get_json()
+    parquet_path = '../server/parquets/' + params['parquet_path']
+
+    return jsonify(callReportCompiler(parquet_path))
 
 # Health check endpoint 
 @app.route('/health', methods=['GET'])
