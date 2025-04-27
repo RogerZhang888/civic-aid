@@ -6,7 +6,10 @@ model.safetensors
 embeddings.npy
 government_chunks_hnsw.index
 chatbot/chatbotmodels/clip_lora_merged/model.safetensors
-dskey.txt
+dskey1.txt
 dskey2.txt
 dskey3.txt
+dskey4.txt
+dskey5.txt
+dskey6.txt
 
