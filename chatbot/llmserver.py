@@ -42,7 +42,7 @@ def callmodel():
 @app.route('/api/callsummariser', methods=['POST'])
 def callsummariser():
     params = request.get_json()
-    parquet_path = '../server/parquet/' + params['parquet_path']
+    parquet_path = '../server/parquets/' + params['parquet_path']
 
     return jsonify(callReportCompiler(parquet_path))
 
