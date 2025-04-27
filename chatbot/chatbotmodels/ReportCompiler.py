@@ -16,7 +16,7 @@ def load_data(path):
         df = pd.read_parquet(path)
     else:
         df = pd.read_csv(path)
-    df["cleaned_text"] = df["report_text"].apply(preprocess_text)
+    df["cleaned_text"] = df["description"].apply(preprocess_text)
     return df[df["cleaned_text"].str.len() > 0]
 
 def group_identical_issues(parquet_path, similarity_threshold=0.9):
@@ -45,7 +45,7 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
             continue
             
         # Get all report pairs in cluster
-        report_ids = cluster_df["report_id"].values
+        report_ids = cluster_df["id"].values
         text_pairs = list(combinations(cluster_df["cleaned_text"].tolist(), 2))
         id_pairs = list(combinations(range(len(report_ids)), 2))
         
@@ -68,6 +68,6 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     return output_groups
 
 # Usage:
-result = group_identical_issues("reports.parquet")
-print(f"Found {len(result)} issue groups with 2+ reports")
-print("Sample groups:", result[:3])
+# result = group_identical_issues("reports.parquet")
+# print(f"Found {len(result)} issue groups with 2+ reports")
+# print("Sample groups:", result[:3])
