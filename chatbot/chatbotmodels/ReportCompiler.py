@@ -4,7 +4,11 @@ import re
 from itertools import combinations
 from sentence_transformers import SentenceTransformer, CrossEncoder
 import hdbscan
+import os
 import torch
+
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+torch.set_default_device("cpu")
 
 def preprocess_text(text):
     text = str(text).lower().strip()
