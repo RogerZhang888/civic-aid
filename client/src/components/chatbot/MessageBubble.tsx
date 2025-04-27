@@ -47,8 +47,9 @@ function MessageBubble({
             {message.sources && message.sources.length !== 0 &&
                <div className="chat-footer flex flex-row items-center mt-1 space-x-1">
                   <span>Sources:</span> 
-                  {message.sources.map(source => 
+                  {message.sources.map((source, idx) => 
                      <a 
+                        key={idx}
                         className="link link-hover" 
                         href={source}
                         rel="noopener noreferrer" 
