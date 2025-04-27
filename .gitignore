@@ -14,3 +14,4 @@ chatbot/database_metadata.json
 chatbot/env/
 chatbot/tfidf_matrix.npz
 chatbot/tfidf_vectorizer.pkl
+server/parquets/*
