@@ -241,9 +241,11 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
    async function handleAddQuery() {
       setIsWaiting(true);
    
-      if (!currChatId) await handleCreateNewChat();
+      const chatId = currChatId || await handleCreateNewChat();
 
-      await handleAddQueryToExistingChat();
+      if (!chatId) throw new Error("Unable to add query as no chat ID exists")
+
+      await handleAddQueryToExistingChat(chatId);
 
       setIsWaiting(false);
    }
@@ -282,12 +284,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
 
    }
    
-   async function handleAddQueryToExistingChat() {
-
-      if (!currChatId) {
-         toast.error("Unable to add query as no chat ID exists");
-         return;
-      }
+   async function handleAddQueryToExistingChat(chatIdToAddQueryTo: string) {
 
       const newQueryUUID = uuidv4();
       const { text, img } = formState;
@@ -302,7 +299,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          sources: []
       };
 
-      chatsDispatch({ type: "UPDATE_CHAT_WITH_NEW_QUERY", payload: { newQuery, chatId: currChatId }});
+      chatsDispatch({ type: "UPDATE_CHAT_WITH_NEW_QUERY", payload: { newQuery, chatId: chatIdToAddQueryTo }});
 
       // reset formState and image previews
       setFormState({ text: "", img: null });
@@ -316,7 +313,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          fd.append('longitude', coords.longitude.toString());
       }
      
-      fd.append('chatId', currChatId);
+      fd.append('chatId', chatIdToAddQueryTo);
 
 
       /**
@@ -328,7 +325,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
        * - chatid: the chat ID
        */
 
-      console.log(`New query for chat if ${currChatId}:`);
+      console.log(`New query for chat if ${chatIdToAddQueryTo}:`);
       console.log(fd);
 
       try {
@@ -377,7 +374,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
                </div>
             )
    
-            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL", payload: { chatId: currChatId, queryId: newQueryUUID, answer: reportAnswerComponent, sources, title, media: newMediaUrl } });
+            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID, answer: reportAnswerComponent, sources, title, media: newMediaUrl } });
 
          } else {
 
@@ -387,7 +384,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
    
             console.log(`Server replied with "${answer}"`);
    
-            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL", payload: { chatId: currChatId, queryId: newQueryUUID, answer, sources, title, media } });
+            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_IMGURL", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID, answer, sources, title, media } });
    
          }
 
@@ -401,13 +398,13 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
 
             toast.error(error.message);
 
-            chatsDispatch({ type: "DELETE_QUERY", payload: { chatId: currChatId, queryId: newQueryUUID } });
+            chatsDispatch({ type: "DELETE_QUERY", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
 
          } else {
 
             toast.error("Sorry, a reply could not be generated. Please try again.")
 
-            chatsDispatch({ type: "DELETE_QUERY", payload: { chatId: currChatId, queryId: newQueryUUID } });
+            chatsDispatch({ type: "DELETE_QUERY", payload: { chatId: chatIdToAddQueryTo, queryId: newQueryUUID } });
    
          }
 
