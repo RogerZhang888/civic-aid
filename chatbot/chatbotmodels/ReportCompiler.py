@@ -4,7 +4,7 @@ import re
 from itertools import combinations
 from sentence_transformers import SentenceTransformer, CrossEncoder
 import hdbscan
-
+import torch
 
 def preprocess_text(text):
     text = str(text).lower().strip()
@@ -24,7 +24,9 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     df = load_data(parquet_path)
     
     # 2. Generate embeddings
-    embedder = SentenceTransformer("all-MiniLM-L6-v2")
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    embedder = SentenceTransformer("all-MiniLM-L6-v2", device=device)
+
     embeddings = embedder.encode(df["cleaned_text"].tolist())
     
     # 3. Cluster
@@ -36,7 +38,7 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     cluster_labels = clusterer.fit_predict(embeddings)
     
     # 4. Verify pairs within clusters
-    cross_encoder = CrossEncoder("cross-encoder/stsb-roberta-base")
+    cross_encoder = CrossEncoder("cross-encoder/stsb-roberta-base", device=device)
     output_groups = []
     
     for cluster_id in set(cluster_labels) - {-1}:
