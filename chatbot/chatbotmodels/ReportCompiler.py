@@ -7,6 +7,20 @@ import hdbscan
 import os
 import torch
 from sklearn.metrics.pairwise import cosine_distances
+from transformers import AutoTokenizer
+
+# Load the correct tokenizer
+tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
+
+def safe_encode(texts):
+    # Truncate and handle long sequences
+    return tokenizer(
+        texts,
+        padding=True,
+        truncation=True,
+        max_length=512,  # Standard BERT limit
+        return_tensors="pt"
+    )
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 torch.set_default_device("cpu")
@@ -33,8 +47,10 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     embedder = SentenceTransformer("all-MiniLM-L6-v2", device="meta")  # Meta device first
     embedder.to_empty(device='cpu')  # Explicitly allocate on CPU
     embedder.load_state_dict(SentenceTransformer("all-MiniLM-L6-v2").state_dict())
-
-    embeddings = embedder.encode(df["cleaned_text"].tolist())
+    texts = df["cleaned_text"].tolist()
+    encoded = safe_encode(texts)
+    with torch.no_grad():
+        embeddings = embedder(encoded)["sentence_embedding"].numpy()
     distance_matrix = cosine_distances(embeddings)
     
     # 3. Cluster
