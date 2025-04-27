@@ -140,7 +140,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
                     systemprompt:prompt, 
                     response:res, 
                     isValid: parsed.valid, 
-                    toReply: reply=='ALWAYS' || (reply=='HIGH'&&getConfidence(parsed.confidence, queriesTracker.length + 1)=='HIGH'), 
+                    toReply: reply=='ALWAYS' || (reply=='HIGH'&&getConfidence(parsed.confidence, chatHistory.length + 1)=='HIGH'), 
                     confidence:parsed.confidence,
                     sources:parsed.sources,
                     location,
@@ -173,10 +173,10 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         systemprompt = systempromptTemplates.getTypeDecisionTemplate(userprompt, chatHistory)
         response = await queryLLM({query:userprompt, prompt: systemprompt, model:'basic'}, responseParsers.typeDecisionParser, 'NEVER')
         
-        if (getConfidence(response.confidence, queriesTracker.length) == 'LOW' || getConfidence(response.confidence, queriesTracker.length) == 'MED') {
+        if (getConfidence(response.confidence, chatHistory.length) == 'LOW' || getConfidence(response.confidence, chatHistory.length) == 'MED') {
             systemprompt = systempromptTemplates.clarifyTypeDecisionTemplate(userprompt, chatHistory)
             response = await queryLLM({query:userprompt, prompt: systemprompt, model: 'basic'}, responseParsers.noParser, 'ALWAYS')
-        } else if (getConfidence(response.confidence, queriesTracker.length) == 'HIGH') {
+        } else if (getConfidence(response.confidence, chatHistory.length) == 'HIGH') {
             chat.type = response.type
             chat.title = response.title
             updateChatType(chatId, response.type, response.title)
@@ -187,13 +187,13 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         let systemprompt = systempromptTemplates.getReportTemplate(userprompt, chatHistory)
         response = await queryLLM({query:userprompt, prompt: systemprompt, model:'main'}, responseParsers.reportParser, 'HIGH')
 
-        if (getConfidence(response.confidence, queriesTracker.length) == 'LOW') {
+        if (getConfidence(response.confidence, chatHistory.length) == 'LOW') {
             systemprompt = systempromptTemplates.clarifyReportTemplateLow(userprompt, chatHistory)
             response = await queryLLM({query:userprompt, prompt: systemprompt, model:'basic'}, responseParsers.noParser, 'ALWAYS')
-        } else if (getConfidence(response.confidence, queriesTracker.length) == 'MED') {
+        } else if (getConfidence(response.confidence, chatHistory.length) == 'MED') {
             systemprompt = systempromptTemplates.clarifyReportTemplateMed(userprompt, chatHistory)
             response = await queryLLM({query:userprompt, prompt: systemprompt, model:'basic'}, responseParsers.noParser, 'ALWAYS')
-        } else if (getConfidence(response.confidence, queriesTracker.length) == 'HIGH') {
+        } else if (getConfidence(response.confidence, chatHistory.length) == 'HIGH') {
             createReport({
                 userId,
                 chatId,
@@ -213,10 +213,10 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         let systemprompt = systempromptTemplates.getQuestionTemplate(userprompt, chatHistory)
         response = await queryLLM({query:userprompt, prompt: systemprompt, model:'main'}, responseParsers.defaultParser, 'HIGH')
 
-        if (getConfidence(response.confidence, queriesTracker.length) == 'LOW') {
+        if (getConfidence(response.confidence, chatHistory.length) == 'LOW') {
             systemprompt = systempromptTemplates.clarifyQuestionTemplateLow(userprompt, chatHistory)
             response = await queryLLM({query:userprompt, prompt: systemprompt, model:'basic'}, responseParsers.noParser, 'ALWAYS')
-        } else if (getConfidence(response.confidence, queriesTracker.length) == 'MED') {
+        } else if (getConfidence(response.confidence, chatHistory.length) == 'MED') {
             systemprompt = systempromptTemplates.clarifyQuestionTemplateMed(userprompt, chatHistory)
             response = await queryLLM({query:userprompt, prompt: systemprompt, model:'basic'}, responseParsers.noParser, 'ALWAYS')
         }
