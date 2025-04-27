@@ -230,7 +230,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
             title: chat.title,
             confidence: undefined,
             media,
-            reportId: report[0]?.id,
+            reportId: report?report[0]?.id:undefined,
             queries: queriesTracker,
         }
     }
