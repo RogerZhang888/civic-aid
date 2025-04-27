@@ -4,26 +4,13 @@ import re
 from itertools import combinations
 from sentence_transformers import SentenceTransformer, CrossEncoder
 import hdbscan
-import os
 import torch
+import os
 from sklearn.metrics.pairwise import cosine_distances
-from transformers import AutoTokenizer
 
-# Load the correct tokenizer
-tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
-
-def safe_encode(texts):
-    # Truncate and handle long sequences
-    return tokenizer(
-        texts,
-        padding=True,
-        truncation=True,
-        max_length=512,  # Standard BERT limit
-        return_tensors="pt"
-    )
-
+# Configuration
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-torch.set_default_device("cpu")
+torch.set_default_tensor_type(torch.FloatTensor)  # Disable meta tensors completely
 
 def preprocess_text(text):
     text = str(text).lower().strip()
@@ -42,18 +29,21 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     # 1. Load data
     df = load_data(parquet_path)
     
-    # 2. Generate embeddings
-    # device = "cuda" if torch.cuda.is_available() else "cpu"
-    embedder = SentenceTransformer("all-MiniLM-L6-v2", device="meta").eval()  # Meta device first
-    embedder.to_empty(device='cpu')  # Explicitly allocate on CPU
-    embedder.load_state_dict(SentenceTransformer("all-MiniLM-L6-v2").state_dict())
-    texts = df["cleaned_text"].tolist()
-    encoded = safe_encode(texts)
-    with torch.no_grad():
-        embeddings = embedder(encoded)["sentence_embedding"].numpy()
-    distance_matrix = cosine_distances(embeddings)
+    # 2. Initialize models safely
+    embedder = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
+    cross_encoder = CrossEncoder("cross-encoder/stsb-roberta-base", device="cpu")
     
-    # 3. Cluster
+    # 3. Generate embeddings safely
+    texts = df["cleaned_text"].tolist()
+    embeddings = embedder.encode(
+        texts,
+        convert_to_tensor=True,
+        show_progress_bar=False,
+        normalize_embeddings=True
+    ).cpu().numpy()
+    
+    # 4. Cluster using cosine distance
+    distance_matrix = cosine_distances(embeddings)
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=2,
         metric="precomputed",
@@ -61,41 +51,29 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     )
     cluster_labels = clusterer.fit_predict(distance_matrix)
     
-    # 4. Verify pairs within clusters
-    cross_encoder = CrossEncoder("cross-encoder/stsb-roberta-base", device="meta").eval()
-    cross_encoder.to_empty(device='cpu')  # Explicitly allocate on CPU
-    cross_encoder.load_state_dict(CrossEncoder("cross-encoder/stsb-roberta-base").state_dict())
+    # 5. Verify pairs within clusters
     output_groups = []
-    
     for cluster_id in set(cluster_labels) - {-1}:
         cluster_df = df[cluster_labels == cluster_id]
         if len(cluster_df) < 2:
             continue
             
-        # Get all report pairs in cluster
         report_ids = cluster_df["id"].values
         text_pairs = list(combinations(cluster_df["cleaned_text"].tolist(), 2))
         id_pairs = list(combinations(range(len(report_ids)), 2))
         
-        # Build similarity matrix
         sim_matrix = np.eye(len(report_ids))
         scores = cross_encoder.predict(text_pairs)
         for (i,j), score in zip(id_pairs, scores):
             sim_matrix[i,j] = sim_matrix[j,i] = score
         
-        # Group IDs with similarity >= threshold
         visited = set()
         for i in range(len(report_ids)):
             if i not in visited:
                 group = [j for j in range(len(report_ids)) 
                         if sim_matrix[i,j] >= similarity_threshold]
                 visited.update(group)
-                if len(group) > 1:  # Only keep groups with 2+ reports
+                if len(group) > 1:
                     output_groups.append(report_ids[group].tolist())
     
     return output_groups
-
-# Usage:
-# result = group_identical_issues("reports.parquet")
-# print(f"Found {len(result)} issue groups with 2+ reports")
-# print("Sample groups:", result[:3])
