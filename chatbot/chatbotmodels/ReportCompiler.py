@@ -24,8 +24,8 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     df = load_data(parquet_path)
     
     # 2. Generate embeddings
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    embedder = SentenceTransformer("all-MiniLM-L6-v2", device=device)
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
+    embedder = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
 
     embeddings = embedder.encode(df["cleaned_text"].tolist())
     
@@ -38,7 +38,7 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     cluster_labels = clusterer.fit_predict(embeddings)
     
     # 4. Verify pairs within clusters
-    cross_encoder = CrossEncoder("cross-encoder/stsb-roberta-base", device=device)
+    cross_encoder = CrossEncoder("cross-encoder/stsb-roberta-base", device="cpu")
     output_groups = []
     
     for cluster_id in set(cluster_labels) - {-1}:
