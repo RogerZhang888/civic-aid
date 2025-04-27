@@ -2,7 +2,6 @@ import pgsql from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
 import { generate } from "random-words";
 import parquet from "parquetjs";
-import { getSummaries } from "../services/summariser.js";
 
 // manually creates a report based on:
 // 1. user_id (from JWT)
@@ -198,11 +197,10 @@ export async function getReportSummaries(req, res) {
 
     let summaries = []
     for (let reportGroup of groupedReports) {
-        let path = `./parquets/${reportGroup.agency}-${Date.now()}.parquet`;
-        parquetpaths.push(path)
+        let path = `${reportGroup.agency}-${Date.now()}.parquet`;
         let curParquetWriter = await parquet.ParquetWriter.openFile(
             reportParquetSchema,
-            path
+            `./parquest/${path}`
         );
         for (let report of reportGroup.reports) {
             await curParquetWriter.appendRow({
@@ -212,7 +210,16 @@ export async function getReportSummaries(req, res) {
         }
         await curParquetWriter.close();
 
-        let summary = getSummaries(reportGroup.reports, path)
+        fetch(`${process.env.MODELURL}/api/callsummariser`, {
+            method:"POST",
+            body:JSON.stringify({reports, path}),
+            headers:{
+                'Content-Type': 'application/json'
+            }
+        }).then((r) => {
+            return r.json()
+        }).then((r) => {
+            res.json(r);
+        })
     }
-    res.json(groupedReports);
 }
