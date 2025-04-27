@@ -85,7 +85,8 @@ exports.getSpecificChatHistory = async (req, res) => {
                     return {
                         prompt: q.user_prompt,
                         media: q.media_url.length == 0? undefined:q.media_url[0],
-                        response: q.response
+                        response: q.response,
+                        timestamp: q.created_at
                     }
                 }).map(async (q) => {
                     // Parsing check
@@ -99,7 +100,8 @@ exports.getSpecificChatHistory = async (req, res) => {
                                     media: q.media,
                                     ...parsedRes,
                                     confidence: undefined,
-                                    reportId: reports? reports[0].id : undefined
+                                    reportId: reports? reports[0].id : undefined,
+                                    timestamp: q.created_at
                                 }
                             }
                             return {
