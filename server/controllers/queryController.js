@@ -104,18 +104,20 @@ const createReport = (params) => {
     
 }
 
-const getConfidence = (score) => {
-    // TOOD: Confirm boundaries
-    if (score > 0.7) return 'HIGH'
-    else if (score > 0.3) return 'MED'
-    else return 'LOW'
-}
-
 // TOOD: media support
 const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     let chatHistory = await getChatHistory(chatId)
     let queriesTracker = []
     let response = {}
+
+    
+    const getConfidence = (score) => {
+        let count = queriesTracker.length
+        // TOOD: Confirm boundaries
+        if (score > 0.7 || (score > 0.5 && count > 3) || count > 5) return 'HIGH'
+        else if (score > 0.3 || (score > 0.1 && count > 3)) return 'MED'
+        else return 'LOW'
+    }
 
     async function queryLLM({query, prompt, model}, parseResponse=responseParsers.defaultParser, reply='NEVER') {
         // reply enum: NEVER, ALWAYS, HIGH: 
