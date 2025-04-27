@@ -86,7 +86,7 @@ exports.getSpecificChatHistory = async (req, res) => {
                         prompt: q.user_prompt,
                         media: q.media_url.length == 0? undefined:q.media_url[0],
                         response: q.response,
-                        timestamp: q.created_at
+                        timestamp: new Date(q.created_at)
                     }
                 }).map(async (q) => {
                     // Parsing check
