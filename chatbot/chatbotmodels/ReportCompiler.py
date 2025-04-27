@@ -30,8 +30,12 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     df = load_data(parquet_path)
     
     # 2. Initialize models safely
-    embedder = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
-    cross_encoder = CrossEncoder("cross-encoder/stsb-roberta-base", device="cpu")
+    embedder = SentenceTransformer("all-MiniLM-L6-v2", device="meta").eval()  # Meta device first
+    embedder.to_empty(device='cpu')  # Explicitly allocate on CPU
+    embedder.load_state_dict(SentenceTransformer("all-MiniLM-L6-v2").state_dict())
+    cross_encoder = CrossEncoder("cross-encoder/stsb-roberta-base", device="meta").eval()
+    cross_encoder.to_empty(device='cpu')  # Explicitly allocate on CPU
+    cross_encoder.load_state_dict(CrossEncoder("cross-encoder/stsb-roberta-base").state_dict())
     
     # 3. Generate embeddings safely
     texts = df["cleaned_text"].tolist()
