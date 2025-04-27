@@ -373,8 +373,6 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
 
             if (newMediaUrl) allImgUrls.push(newMediaUrl);
 
-            const imgs = await fetchAllImgs(allImgUrls);
-
             const reportAnswerComponent = (
                <div id="answer-for-report-chat" className="space-y-2">
                   <div className="text-xl font-semibold">Your Report Has Been Created!</div>
@@ -384,10 +382,10 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
                   <div>Urgency: {urgency} / 1</div>
                   <div>Agency contacted: {agency}</div>
                   <div>
-                     {imgs.map((img, idx) =>
+                     {allImgUrls.map((img, idx) =>
                         <img
                            key={idx}
-                           alt={`Uploaded image ${idx+1}`}
+                           alt={`Report image ${idx+1}`}
                            className="max-h-20"
                            src={img}
                         />
@@ -435,15 +433,15 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
       }
    }
 
-   async function fetchAllImgs(imgUrls: string[]) {
+   // async function fetchAllImgs(imgUrls: string[]) {
 
-      const promises = imgUrls.map(url => axios.get(`${SERVER_API_URL}/api/images/${url}`, { withCredentials: true }));
+   //    const promises = imgUrls.map(url => axios.get(`${SERVER_API_URL}/api/images/${url}`, { withCredentials: true }));
 
-      const resArr = await Promise.all(promises);
+   //    const resArr = await Promise.all(promises);
 
-      return resArr.map(res => res.data) as string[];
+   //    return resArr.map(res => res.data) as string[];
 
-   }
+   // }
 
    async function deleteChat(chatIdToDelete: string) {
       try {

@@ -9,6 +9,16 @@ function MessageBubble({
    message: Query;
 }) {
 
+   function getDomainFromUrl(url: string) {
+      try {
+         const urlObj = new URL(url);
+         return urlObj.hostname;
+      } catch (e) {
+         console.error("Invalid URL:", e);
+         return null;
+      }
+   }
+
    return (
       <React.Fragment key={message.id}>         
          <div className="chat chat-end tracking-wide mt-3">
@@ -44,7 +54,7 @@ function MessageBubble({
                         rel="noopener noreferrer" 
                         target="_blank"
                      >
-                        {source}
+                        {getDomainFromUrl(source)}
                      </a>
                   )}
                </div>
