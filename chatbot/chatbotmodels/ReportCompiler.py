@@ -1,3 +1,6 @@
+import os
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["DISABLE_METATENSOR"] = "1"  
 import pandas as pd
 import numpy as np
 import re
@@ -5,12 +8,9 @@ from itertools import combinations
 from sentence_transformers import SentenceTransformer, CrossEncoder
 import hdbscan
 import torch
-import os
 from sklearn.metrics.pairwise import cosine_distances
 
 # Configuration
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
-torch.set_default_tensor_type(torch.FloatTensor)  # Disable meta tensors completely
 
 def preprocess_text(text):
     text = str(text).lower().strip()
