@@ -30,7 +30,9 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     
     # 2. Generate embeddings
     # device = "cuda" if torch.cuda.is_available() else "cpu"
-    embedder = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
+    embedder = SentenceTransformer("all-MiniLM-L6-v2", device="meta")  # Meta device first
+    embedder.to_empty(device='cpu')  # Explicitly allocate on CPU
+    embedder.load_state_dict(SentenceTransformer("all-MiniLM-L6-v2").state_dict())
 
     embeddings = embedder.encode(df["cleaned_text"].tolist())
     distance_matrix = cosine_distances(embeddings)
@@ -45,6 +47,8 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     
     # 4. Verify pairs within clusters
     cross_encoder = CrossEncoder("cross-encoder/stsb-roberta-base", device="cpu")
+    cross_encoder.to_empty(device='cpu')  # Explicitly allocate on CPU
+    cross_encoder.load_state_dict(CrossEncoder("cross-encoder/stsb-roberta-base").state_dict())
     output_groups = []
     
     for cluster_id in set(cluster_labels) - {-1}:
