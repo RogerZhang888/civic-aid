@@ -2,6 +2,10 @@ import requests
 DEEPSEEK_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 with open("dskey.txt", 'r') as file:
     DEEPSEEK_API_KEY = file.read().strip()
+with open("dskey2.txt", 'r') as file:
+    DEEPSEEK_API_KEY2 = file.read().strip()
+with open("dskey3.txt", 'r') as file:
+    DEEPSEEK_API_KEY3 = file.read().strip()
 
 def call_deepseek_api(prompt: str, max_tokens: int = 400) -> str:
     print("BASIC KOLLER", prompt)
@@ -25,12 +29,31 @@ def call_deepseek_api(prompt: str, max_tokens: int = 400) -> str:
     try:
         response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
         response.raise_for_status()
-        print(response.json()["choices"][0]["message"]["content"])
+        # print(response.text)
+        # print(response.text[2:7])
         return response.json()["choices"][0]["message"]["content"]
-    except requests.exceptions.RequestException as e:
-        print(f"API request failed: {e}")
-        return "Sorry, I couldn't process your request at this time."
+    except:
+        try:
+            headers = {
+                "Authorization": f"Bearer {DEEPSEEK_API_KEY2}",
+                "Content-Type": "application/json"
+            }
+            response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()["choices"][0]["message"]["content"]
+        except:
+            headers = {
+                "Authorization": f"Bearer {DEEPSEEK_API_KEY3}",
+                "Content-Type": "application/json"
+            }
+            response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()["choices"][0]["message"]["content"]
     
-# call_deepseek_api("Are these two describing the same event? Output YES or NO, and how confident you are from a scale of 0 to 1." \
+
+# x = call_deepseek_api("Are these two describing the same event? Output YES or NO, and how confident you are from a scale of 0 to 1." \
 #     "1. The lamppost is broken" \
 #     "2. There is no lighting at the street.")
+
+# print(x)
+

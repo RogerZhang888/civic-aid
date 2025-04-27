@@ -52,6 +52,10 @@ clip_model = CLIPModel.from_pretrained(MODEL_PATH, local_files_only=True).to(dev
 DEEPSEEK_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 with open("dskey.txt", 'r') as file:
     DEEPSEEK_API_KEY = file.read().strip()
+with open("dskey2.txt", 'r') as file:
+    DEEPSEEK_API_KEY2 = file.read().strip()
+with open("dskey3.txt", 'r') as file:
+    DEEPSEEK_API_KEY3 = file.read().strip()
 
 class HybridRetriever:
     def __init__(self, database):
@@ -267,10 +271,31 @@ def call_deepseek_api(prompt: str, max_tokens: int = 400) -> str:
     try:
         response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
         response.raise_for_status()
+        # print(response.text)
+        # print(response.text[2:7])
         return response.json()["choices"][0]["message"]["content"]
-    except requests.exceptions.RequestException as e:
-        print(f"API request failed: {e}")
-        return "Sorry, I couldn't process your request at this time."
+    except:
+        try:
+            print("test")
+            headers = {
+                "Authorization": f"Bearer {DEEPSEEK_API_KEY2}",
+                "Content-Type": "application/json"
+            }
+            response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()["choices"][0]["message"]["content"]
+        except:
+            headers = {
+                "Authorization": f"Bearer {DEEPSEEK_API_KEY3}",
+                "Content-Type": "application/json"
+            }
+            response = requests.post(DEEPSEEK_API_URL, headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()["choices"][0]["message"]["content"]
+
+    # except requests.exceptions.RequestException as e:
+    #     print(f"API request failed: {e}")
+    #     return "Sorry, I couldn't process your request at this time."
 
 def rag_search(query: str, database: Dict, index, retriever, top_k: int = 3, image=None, prompter: str = "") -> Dict:
     """Hybrid RAG search with confidence scoring"""
@@ -294,7 +319,7 @@ def rag_search(query: str, database: Dict, index, retriever, top_k: int = 3, ima
     avg_score = float(np.mean(scores))
     max_score = float(np.max(scores))
     
-    use_rag = avg_score > 0.1 and max_score > 0.1
+    use_rag = avg_score > 0.8 and max_score > 0.9
     
     if use_rag:
         prompt = f"""### Context:
@@ -370,20 +395,23 @@ def call_model(text_query, prompt, image_path=None):
     
     return result
 
-# prompt = "INSTRUCTIONS \
-# You are a Singapore Government chatbot, built to answer citizen queries and assist in writing incident reports. Identify if the query below is a question or a report, and output how confident you are on a scale of 0 to 1, with a higher score representing higher confidence. \
-# \
-# OUTPUT \
-# Format your response as a JSON object with the fields 'type' and 'confidence'. Type should be reported as either 'report' or 'query'. Confidence should be a decimal between 0 and 1 exclusive. \
-# For example: \
-# { \
-#     'type': 'report', \
-#     'confidence': 0.2 \
-# } \
-# \
-# { \
-#     'type': 'question', \
-#     'confidence': 0.9 \
-# }"   
 
-# call_model("dun understand", prompt)
+prompt = "INSTRUCTIONS \
+You are a Singapore Government chatbot, built to answer citizen queries. Your task is to analyse the user's question and answer within the context of Singapore government services. With the help of the context provided, answer the question, giving actionable answers as much as possible. Output how confident you are that you have a complete understanding of the user's question on a scale of 0 to 1, with a higher score representing greater understanding. Also indicate which sources you used, both from the context provided and otherwise. \
+--- \
+OUTPUT \
+Format your response as a JSON object with the fields 'answer', 'confidence', and 'sources'. Confidence should be a decimal between 0 and 1 exclusive. Sources should be an array of URL links. \
+For example: \
+{ \
+    'answer': <your answer>, \
+    'confidence': 0.6, \
+    'sources':[ \
+        <url 1>, \
+        <url 2>, \
+        ... \
+    ] \
+}"
+
+
+call_model("today i am free. no under saf.", prompt)
+
