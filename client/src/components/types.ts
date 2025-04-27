@@ -38,7 +38,8 @@ export type GetQueriesForChatRes = {
    recommendedSteps: string, 
    agency: string,
    valid: true,
-   timestamp: string
+   timestamp: string,
+   reportId: string
 }
 
 export type AllowedAgencies = "MSO" | "NEA" | "LTA" | "HDB" | "NParks" | "SP Group" | "Town Councils" | "SPF" | "PUB" | "Others";
