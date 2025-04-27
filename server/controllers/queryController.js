@@ -55,7 +55,6 @@ const updateChatType = async (chatId, type, title) => {
     return pgsql.query("UPDATE chats SET type = $1, title = $2 WHERE id = $3", [type, title, chatId])
 }
 const createReport = (params) => {
-    console.log("CREATING REPORT", params)
     let {userId, chatId, title, summary, media, location, agency, recommendedSteps, urgency, confidence} = params
     return pgsql.query(`SELECT * FROM reports WHERE chat_id = $1`, [chatId]).then((res) => {
         if (res.length == 0) {
@@ -71,6 +70,7 @@ const createReport = (params) => {
                     END,
                     $8, $9, $10, $11
                 )
+                RETURNING id
             `, [
                 userId,
                 chatId,
@@ -89,6 +89,7 @@ const createReport = (params) => {
                 UPDATE reports 
                 SET description = $1, media_url = $2, agency = $3, recommended_steps = $4, urgency = $5, report_confidence = $6
                 WHERE chat_id = $7
+                RETURNING id
             `, [
                 summary,
                 media??[],
@@ -183,6 +184,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         }
     }
 
+    let report
     if (chat.type == 'report') {
         let systemprompt = systempromptTemplates.getReportTemplate(userprompt, chatHistory)
         response = await queryLLM({query:userprompt, prompt: systemprompt, model:'main'}, responseParsers.reportParser, 'HIGH')
@@ -194,7 +196,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
             systemprompt = systempromptTemplates.clarifyReportTemplateMed(userprompt, chatHistory)
             response = await queryLLM({query:userprompt, prompt: systemprompt, model:'basic'}, responseParsers.noParser, 'ALWAYS')
         } else if (getConfidence(response.confidence) == 'HIGH') {
-            createReport({
+            report = await createReport({
                 userId,
                 chatId,
                 title:chat.title,
@@ -223,12 +225,13 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     }
     
     return {
-        queries: queriesTracker,
         response: {
             ...response,
             title: chat.title,
             confidence: undefined,
-            media
+            media,
+            reportId: report[0]?.id,
+            queries: queriesTracker,
         }
     }
 }
