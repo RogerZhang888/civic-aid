@@ -43,7 +43,7 @@ print(f"Using device: {device}")
 
 # 1. Load CLIP model with GPU support
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(SCRIPT_DIR, ".", "clip_lora_merged")
+MODEL_PATH = os.path.join(SCRIPT_DIR, "clip_lora_merged")
 MODEL_PATH = os.path.normpath(MODEL_PATH)
 clip_processor = CLIPProcessor.from_pretrained(MODEL_PATH, local_files_only=True)
 clip_model = CLIPModel.from_pretrained(MODEL_PATH, local_files_only=True).to(device)
