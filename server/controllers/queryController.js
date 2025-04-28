@@ -116,6 +116,8 @@ const getConfidence = (score, count) => {
 const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     let chatHistory = await getChatHistory(chatId)
     let chatMedia = []
+    
+    console.log("CHATMEDIA", chatHistory)
     for (let row in chatHistory) {
         let mediaUrlArr = JSON.parse(row.media_url).catch(() => {return []})
         if (Array.isArray(mediaUrlArr) && mediaUrlArr.length != 0) {
@@ -123,7 +125,6 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         }
     }
     if (media) chatMedia.push(media)
-    console.log("CHATMEDIA", chatMedia)
     let queriesTracker = []
     let response = {}
 
