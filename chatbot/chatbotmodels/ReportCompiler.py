@@ -24,7 +24,7 @@ def load_data(path):
     else:
         df = pd.read_csv(path)
     df["cleaned_text"] = df["description"].apply(preprocess_text)
-    print(df[df["cleaned_text"].str.len() > 0].head(5))
+    # print(df[df["cleaned_text"].str.len() > 0].head(5))
     return df[df["cleaned_text"].str.len() > 0]
 
 def onnx_encode_texts(texts, model_name="optimum/all-MiniLM-L6-v2"):
@@ -41,7 +41,7 @@ def onnx_encode_texts(texts, model_name="optimum/all-MiniLM-L6-v2"):
             continue
             
         try:
-            print(text)
+            # print(text)
             inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
             outputs = model(**{k: v.numpy() for k, v in inputs.items()})
             
@@ -83,7 +83,7 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     
     # 5. Cluster with validation
     distance_matrix = cosine_distances(embeddings).astype(np.float64)
-    print("Distance matrix sample:\n", np.round(distance_matrix[:5, :5], 3))
+    #print("Distance matrix sample:\n", np.round(distance_matrix[:5, :5], 3))
     print(f"Distance matrix shape: {distance_matrix.shape}")
     
     # Skip clustering if not enough points
@@ -92,9 +92,11 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     
     try:
         clusterer = hdbscan.HDBSCAN(
-            min_cluster_size=2,
+            min_cluster_size=2,                   # Minimum cluster size
+            min_samples=1,                        # More sensitive to small clusters
+            cluster_selection_epsilon=0.3,        # Lower = tighter clusters
             metric="precomputed",
-            cluster_selection_method="eom"
+        cluster_selection_method="leaf"       # Better for small datasets
         )
         cluster_labels = clusterer.fit_predict(distance_matrix)
     except Exception as e:
@@ -128,4 +130,9 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
             print(f"Error processing cluster {cluster_id}: {str(e)}")
             continue
     
+    print(output_groups)
+    for item in output_groups:
+        print("new")
+        for item2 in item:
+            print(cluster_df[cluster_df["id"] == item2])
     return output_groups
