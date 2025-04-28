@@ -76,7 +76,7 @@ const createReport = (params) => {
                 chatId,
                 title,
                 summary,
-                [media]??[],
+                media?[media]:[],
                 location.latitude,
                 location.longitude,
                 agency,
@@ -92,7 +92,7 @@ const createReport = (params) => {
                 RETURNING id
             `, [
                 summary,
-                [media]??[],
+                media?[media]:[],
                 agency,
                 recommendedSteps,
                 urgency,
@@ -115,6 +115,13 @@ const getConfidence = (score, count) => {
 // TOOD: media support
 const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     let chatHistory = await getChatHistory(chatId)
+    let chatMedia = []
+    for (let row in chatHistory) {
+        if (row.media.length != 0) {
+            for (let m of row.media) chatMedia.push(m)
+        }
+    }
+    if (media) chatMedia.push(media)
     let queriesTracker = []
     let response = {}
 
@@ -206,7 +213,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
                 recommendedSteps: response.recommendedSteps,
                 urgency: response.urgency,
                 confidence: response.confidence,
-                media
+                chatMedia
             })
         }
         // ELSE when HIGH - already report - no further action required
