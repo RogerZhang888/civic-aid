@@ -76,7 +76,7 @@ const createReport = (params) => {
                 chatId,
                 title,
                 summary,
-                media??[],
+                [media]??[],
                 location.latitude,
                 location.longitude,
                 agency,
@@ -92,7 +92,7 @@ const createReport = (params) => {
                 RETURNING id
             `, [
                 summary,
-                media??[],
+                [media]??[],
                 agency,
                 recommendedSteps,
                 urgency,
@@ -205,7 +205,8 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
                 agency: response.agency,
                 recommendedSteps: response.recommendedSteps,
                 urgency: response.urgency,
-                confidence: response.confidence
+                confidence: response.confidence,
+                media
             })
         }
         // ELSE when HIGH - already report - no further action required
