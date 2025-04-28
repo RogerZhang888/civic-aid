@@ -9,7 +9,7 @@ from sentence_transformers import SentenceTransformer, CrossEncoder
 import hdbscan
 import torch
 from sklearn.metrics.pairwise import cosine_distances
-
+from accelerate import init_empty_weights
 # Configuration
 
 def preprocess_text(text):
@@ -29,12 +29,10 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     # 1. Load data
     df = load_data(parquet_path)
     
-    # 2. Initialize models safely
+    # 2. Initialize only the embedder
     embedder = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
-    cross_encoder = CrossEncoder("cross-encoder/stsb-roberta-base", device="cpu")
-
     
-    # 3. Generate embeddings safely
+    # 3. Generate embeddings
     texts = df["cleaned_text"].tolist()
     embeddings = embedder.encode(
         texts,
@@ -52,7 +50,7 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     )
     cluster_labels = clusterer.fit_predict(distance_matrix)
     
-    # 5. Verify pairs within clusters
+    # 5. Verify pairs within clusters using cosine similarity (no CrossEncoder)
     output_groups = []
     for cluster_id in set(cluster_labels) - {-1}:
         cluster_df = df[cluster_labels == cluster_id]
@@ -60,13 +58,10 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
             continue
             
         report_ids = cluster_df["id"].values
-        text_pairs = list(combinations(cluster_df["cleaned_text"].tolist(), 2))
-        id_pairs = list(combinations(range(len(report_ids)), 2))
+        cluster_embeddings = embeddings[cluster_labels == cluster_id]
         
-        sim_matrix = np.eye(len(report_ids))
-        scores = cross_encoder.predict(text_pairs)
-        for (i,j), score in zip(id_pairs, scores):
-            sim_matrix[i,j] = sim_matrix[j,i] = score
+        # Compute pairwise cosine similarity
+        sim_matrix = 1 - cosine_distances(cluster_embeddings)
         
         visited = set()
         for i in range(len(report_ids)):
