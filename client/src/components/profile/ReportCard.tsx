@@ -58,7 +58,7 @@ export default function ReportCard({ report }: { report: Report }) {
                </span>
             }
          </div>
-         <figure className="max-h-40 overflow-hidden rounded-t-xl">
+         <figure className="h-40 overflow-hidden rounded-t-xl">
             {imageError ? (
                <div className="h-40 w-full bg-gray-200 flex items-center justify-center">
                   <span className="text-gray-500">Unable to load image</span>
@@ -76,11 +76,11 @@ export default function ReportCard({ report }: { report: Report }) {
             <h2 className="card-title">
                {title}
             </h2>
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-600 text-sm line-clamp-4">
                {description}
             </p>
             <p className="text-gray-600 text-sm">
-               Report created on: {formatDate(createdAt)}
+               Report created at: {formatDate(createdAt)}
             </p>
             <div className="card-actions">
                <button
