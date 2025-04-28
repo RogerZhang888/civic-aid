@@ -30,12 +30,9 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     df = load_data(parquet_path)
     
     # 2. Initialize only the embedder
-    with torch.device('meta'):
-        embedder = SentenceTransformer("all-MiniLM-L6-v2")
-    embedder = embedder.to_empty(device='cpu')
-    with torch.no_grad():
-        for param in embedder.parameters():
-            param.normal_()  # Or other initialization
+    embedder = SentenceTransformer("all-MiniLM-L6-v2", 
+                             device="cpu",
+                             low_cpu_mem_usage=False)
 
     # 3. Generate embeddings
     texts = df["cleaned_text"].tolist()
