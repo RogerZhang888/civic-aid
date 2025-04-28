@@ -39,7 +39,7 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
         convert_to_tensor=True,
         show_progress_bar=False,
         normalize_embeddings=True
-    ).cpu().numpy()
+    ).cpu().numpy().astype(np.float64)
     
     # 4. Cluster using cosine distance
     distance_matrix = cosine_distances(embeddings)
