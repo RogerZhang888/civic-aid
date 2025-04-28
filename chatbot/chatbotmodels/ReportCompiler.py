@@ -4,6 +4,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import pandas as pd
 import numpy as np
 import re
+
 from itertools import combinations
 from transformers import AutoTokenizer
 from optimum.onnxruntime import ORTModelForFeatureExtraction
@@ -26,7 +27,8 @@ def load_data(path):
 def onnx_encode_texts(texts, model_name="sentence-transformers/all-MiniLM-L6-v2"):
     """Use ONNX runtime to completely avoid PyTorch meta tensor issues"""
     # Load ONNX model (doesn't use PyTorch meta tensors)
-    model = ORTModelForFeatureExtraction.from_pretrained(model_name)
+    model_file = "model.onnx"
+    model = ORTModelForFeatureExtraction.from_pretrained(model_name, file_name = model_file)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     
     embeddings = []
@@ -44,6 +46,7 @@ def onnx_encode_texts(texts, model_name="sentence-transformers/all-MiniLM-L6-v2"
         embeddings.append(pooled.numpy())
     
     return np.concatenate(embeddings, axis=0).astype(np.float64)
+
 
 def group_identical_issues(parquet_path, similarity_threshold=0.9):
     # 1. Load data
