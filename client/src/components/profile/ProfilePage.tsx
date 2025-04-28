@@ -36,57 +36,45 @@ export default function ProfilePage() {
          <div className="text-2xl font-semibold">Your Badges</div>
 
          <div className="flex flex-wrap justify-center gap-4 w-full max-w-4xl">
-            {earnedBadges.length > 0 ? (
-               <>
-                  {earnedBadges.map(threshold => (
-                     <div key={threshold} className="badge-card flex flex-col items-center p-4 bg-base-200 rounded-lg shadow">
-                        <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mb-2">
-
-                           <img
-                              src={`/badge${threshold}.jpg`}
-                           />
-
+            {earnedBadges.length > 0 
+               ?  <>
+                     {earnedBadges.map(threshold =>
+                        <div key={threshold} className="badge-card flex flex-col items-center p-4 bg-base-200 rounded-lg shadow">
+                           <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mb-2">
+                              <img src={`/badge${threshold}.jpg`}/>
+                           </div>
+                           <span className="font-semibold">
+                              {threshold === 1 ? "First Issue Resolved!" : `${threshold} Issues Resolved!`}
+                           </span>
+                           <span className="text-sm text-gray-500">
+                              {resolvedCount >= threshold && `Earned on ${new Date().toLocaleDateString()}`}
+                           </span>
                         </div>
-                        <span className="font-semibold">
-                           {threshold === 1 ? (
-                              "First Issue Resolved!"
-                           ) : (
-                              `${threshold} Issues Resolved!`
-                           )}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                           {resolvedCount >= threshold && (
-                              `Earned on ${new Date().toLocaleDateString()}`
-                           )}
-                        </span>
-                     </div>
-                  ))}
+                     )}
 
-                  {/* Show progress toward next badge if applicable */}
-                  {resolvedCount < 100 && (
-                     <div className="badge-card flex flex-col items-center p-4 bg-base-200 rounded-lg shadow opacity-60">
-                        <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center mb-2">
-                           <span className="text-2xl">🔒</span>
+                     {resolvedCount < 100 &&
+                        <div className="badge-card flex flex-col items-center p-4 bg-base-200 rounded-lg shadow opacity-60">
+                           <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center mb-2">
+                              <span className="text-2xl">🔒</span>
+                           </div>
+                           <span className="font-semibold">
+                              {badgeThresholds.find(t => t > resolvedCount) || 100} Issues
+                           </span>
+                           <span className="text-sm text-gray-500">
+                              {resolvedCount}/{badgeThresholds.find(t => t > resolvedCount) || 100} resolved
+                           </span>
+                           <progress
+                              className="progress progress-primary w-24 mt-2"
+                              value={resolvedCount}
+                              max={badgeThresholds.find(t => t > resolvedCount) || 100}
+                           ></progress>
                         </div>
-                        <span className="font-semibold">
-                           {badgeThresholds.find(t => t > resolvedCount) || 100} Issues
-                        </span>
-                        <span className="text-sm text-gray-500">
-                           {resolvedCount}/{badgeThresholds.find(t => t > resolvedCount) || 100} resolved
-                        </span>
-                        <progress
-                           className="progress progress-primary w-24 mt-2"
-                           value={resolvedCount}
-                           max={badgeThresholds.find(t => t > resolvedCount) || 100}
-                        ></progress>
-                     </div>
-                  )}
-               </>
-            ) : (
-               <div className="text-gray-500">
-                  No badges yet. Resolve reports to earn badges!
-               </div>
-            )}
+                     }
+                  </>
+               :  <div className="text-gray-500">
+                     No badges yet. Resolve reports to earn badges!
+                  </div>
+            }
          </div>
 
       </section>

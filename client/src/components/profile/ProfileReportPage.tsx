@@ -73,10 +73,9 @@ export default function ProfileReportPage() {
                {thisReport.incidentLocation && (
                   <div>
                      <h2 className="text-xl font-semibold mb-2">Location</h2>
-                     <div className="bg-gray-100 p-3 rounded-lg">
+                     <div className="p-3 rounded-lg">
                         <p><span className="font-medium">Latitude:</span> {thisReport.incidentLocation.latitude}</p>
                         <p><span className="font-medium">Longitude:</span> {thisReport.incidentLocation.longitude}</p>
-                        <p><span className="font-medium">Accuracy:</span> {thisReport.incidentLocation.accuracy} meters</p>
                      </div>
                   </div>
                )}
@@ -98,7 +97,6 @@ export default function ProfileReportPage() {
                   </div>
                </>
             )}
-
 
             <div className="divider"/>
             <div>
