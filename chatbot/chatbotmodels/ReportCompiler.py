@@ -83,6 +83,7 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     
     # 5. Cluster with validation
     distance_matrix = cosine_distances(embeddings).astype(np.float64)
+    print("Distance matrix sample:\n", np.round(distance_matrix[:5, :5], 3))
     print(f"Distance matrix shape: {distance_matrix.shape}")
     
     # Skip clustering if not enough points
