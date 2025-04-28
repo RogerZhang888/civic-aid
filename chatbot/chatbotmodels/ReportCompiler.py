@@ -24,7 +24,7 @@ def load_data(path):
     df["cleaned_text"] = df["description"].apply(preprocess_text)
     return df[df["cleaned_text"].str.len() > 0]
 
-def onnx_encode_texts(texts, model_name="sentence-transformers/all-MiniLM-L6-v2"):
+def onnx_encode_texts(texts, model_name="optimum/all-MiniLM-L6-v2"):
     """Use ONNX runtime to completely avoid PyTorch meta tensor issues"""
     # Load ONNX model (doesn't use PyTorch meta tensors)
     model_file = "model.onnx"
