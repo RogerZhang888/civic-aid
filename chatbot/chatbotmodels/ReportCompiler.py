@@ -1,17 +1,13 @@
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-# Completely disable meta tensors at all levels
-os.environ["HF_DISABLE_META_TENSOR"] = "1"
-os.environ["PYTORCH_DISABLE_META_TENSOR"] = "1"
-os.environ["TRANSFORMERS_NO_META"] = "1"
 
 import pandas as pd
 import numpy as np
 import re
 from itertools import combinations
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoTokenizer
+from optimum.onnxruntime import ORTModelForFeatureExtraction
 import hdbscan
-import torch
 from sklearn.metrics.pairwise import cosine_distances
 
 def preprocess_text(text):
@@ -27,36 +23,24 @@ def load_data(path):
     df["cleaned_text"] = df["description"].apply(preprocess_text)
     return df[df["cleaned_text"].str.len() > 0]
 
-def safe_encode_texts(texts, model_name="sentence-transformers/all-MiniLM-L6-v2"):
-    """Completely meta-tensor-safe encoding implementation"""
-    # Initialize tokenizer and model with disabled meta tensors
+def onnx_encode_texts(texts, model_name="sentence-transformers/all-MiniLM-L6-v2"):
+    """Use ONNX runtime to completely avoid PyTorch meta tensor issues"""
+    # Load ONNX model (doesn't use PyTorch meta tensors)
+    model = ORTModelForFeatureExtraction.from_pretrained(model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     
-    # Load model with all safety flags to prevent meta tensors
-    model = AutoModel.from_pretrained(
-        model_name,
-        low_cpu_mem_usage=False,
-        torch_dtype=torch.float32,
-        device_map=None
-    )
-    
-    # Force immediate CPU placement
-    model = model.cpu()
-    model.eval()
-    
     embeddings = []
-    for text in texts:  # Process one at a time for maximum reliability
+    for text in texts:
         inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
-        inputs = {k: v.cpu() for k, v in inputs.items()}  # Ensure CPU
         
-        with torch.no_grad():
-            outputs = model(**inputs)
+        # ONNX model doesn't need .to(device) or gradient tracking
+        outputs = model(**inputs)
         
-        # Mean pooling with attention
+        # Mean pooling
         attention_mask = inputs['attention_mask']
         last_hidden = outputs.last_hidden_state
         pooled = (last_hidden * attention_mask.unsqueeze(-1)).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
-        pooled = torch.nn.functional.normalize(pooled, p=2, dim=1)
+        pooled = pooled / np.linalg.norm(pooled, axis=1, keepdims=True)
         embeddings.append(pooled.numpy())
     
     return np.concatenate(embeddings, axis=0).astype(np.float64)
@@ -65,9 +49,9 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     # 1. Load data
     df = load_data(parquet_path)
     
-    # 2. Generate embeddings using our safe method
+    # 2. Generate embeddings using ONNX
     texts = df["cleaned_text"].tolist()
-    embeddings = safe_encode_texts(texts)
+    embeddings = onnx_encode_texts(texts)
     
     # 3. Cluster using cosine distance
     distance_matrix = cosine_distances(embeddings)
