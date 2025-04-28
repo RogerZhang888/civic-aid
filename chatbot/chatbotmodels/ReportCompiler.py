@@ -92,9 +92,11 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     
     try:
         clusterer = hdbscan.HDBSCAN(
-            min_cluster_size=2,
+            min_cluster_size=2,                   # Minimum cluster size
+            min_samples=1,                        # More sensitive to small clusters
+            cluster_selection_epsilon=0.3,        # Lower = tighter clusters
             metric="precomputed",
-            cluster_selection_method="eom"
+        cluster_selection_method="leaf"       # Better for small datasets
         )
         cluster_labels = clusterer.fit_predict(distance_matrix)
     except Exception as e:
