@@ -117,7 +117,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     let chatHistory = await getChatHistory(chatId)
     let chatMedia = []
     for (let row in chatHistory) {
-        if (row.media.length != 0) {
+        if (row.media && row.media.length != 0) {
             for (let m of row.media) chatMedia.push(m)
         }
     }
