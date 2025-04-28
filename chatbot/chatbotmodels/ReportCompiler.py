@@ -28,7 +28,7 @@ def load_data(path):
     return df[df["cleaned_text"].str.len() > 0]
 
 def onnx_encode_texts(texts, model_name="optimum/all-MiniLM-L6-v2"):
-    """Improved version with error handling"""
+    """Returns embeddings AND indices of successfully processed texts."""
     try:
         model = ORTModelForFeatureExtraction.from_pretrained(model_name)
         tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -36,31 +36,32 @@ def onnx_encode_texts(texts, model_name="optimum/all-MiniLM-L6-v2"):
         raise RuntimeError(f"Failed to load model/tokenizer: {str(e)}")
 
     embeddings = []
-    for text in texts:
-        if not text or not isinstance(text, str):  # Skip empty/invalid texts
-            continue
-            
+    valid_indices = []  # Track indices of successfully processed texts
+
+    for idx, text in enumerate(texts):  # Iterate with index
+        if not text or not isinstance(text, str):
+            continue  # Skip invalid texts but keep track of their absence
+
         try:
-            # print(text)
             inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
             outputs = model(**{k: v.numpy() for k, v in inputs.items()})
             
-            # Convert outputs to tensor if needed
             last_hidden = torch.from_numpy(outputs.last_hidden_state) if isinstance(outputs.last_hidden_state, np.ndarray) else outputs.last_hidden_state
             attention_mask = inputs['attention_mask']
             
-            # Mean pooling
             pooled = (last_hidden * attention_mask.unsqueeze(-1)).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
             pooled = pooled / torch.norm(pooled, p=2, dim=1, keepdim=True)
+            
             embeddings.append(pooled.detach().numpy())
+            valid_indices.append(idx)  # Record the original index of this text
         except Exception as e:
             print(f"Error processing text '{text[:50]}...': {str(e)}")
             continue
-    
+
     if not embeddings:
         raise ValueError("No valid embeddings generated - check input texts and model")
-    
-    return np.concatenate(embeddings, axis=0).astype(np.float64)
+
+    return np.concatenate(embeddings, axis=0).astype(np.float64), valid_indices
 
 
 def group_identical_issues(parquet_path, similarity_threshold=0.9):
@@ -74,7 +75,9 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     
     # 3. Generate embeddings
     texts = df["cleaned_text"].tolist()
-    embeddings = onnx_encode_texts(texts)
+    embeddings, valid_indices = onnx_encode_texts(texts)
+
+    df = df.iloc[valid_indices].reset_index(drop=True)
     
     # 4. Early return if embeddings failed
     if len(embeddings) < 2:
