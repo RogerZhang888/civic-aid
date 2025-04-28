@@ -10,24 +10,8 @@ from transformers import AutoTokenizer
 from optimum.onnxruntime import ORTModelForFeatureExtraction
 import hdbscan
 from sklearn.metrics.pairwise import cosine_distances
-from functools import lru_cache
 
-@lru_cache(maxsize=1000)  # Cache up to 1000 unique texts
-def get_single_text_embedding(text: str, model_name: str = "optimum/all-MiniLM-L6-v2") -> np.ndarray:
-    """Cache individual text embeddings"""
-    # Initialize model and tokenizer once (will reuse on subsequent calls)
-    if not hasattr(get_single_text_embedding, 'model'):
-        get_single_text_embedding.model = ORTModelForFeatureExtraction.from_pretrained(model_name)
-        get_single_text_embedding.tokenizer = AutoTokenizer.from_pretrained(model_name)
-    
-    inputs = get_single_text_embedding.tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
-    outputs = get_single_text_embedding.model(**{k: v.numpy() for k, v in inputs.items()})
-    
-    # Mean pooling logic
-    last_hidden = torch.from_numpy(outputs.last_hidden_state)
-    attention_mask = inputs['attention_mask']
-    pooled = (last_hidden * attention_mask.unsqueeze(-1)).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
-    return torch.nn.functional.normalize(pooled, p=2, dim=1).numpy()[0]
+
 
 def preprocess_text(text):
     text = str(text).lower().strip()
@@ -43,41 +27,40 @@ def load_data(path):
     print(df[df["cleaned_text"].str.len() > 0].head(5))
     return df[df["cleaned_text"].str.len() > 0]
 
-def onnx_encode_texts(texts):
+def onnx_encode_texts(texts, model_name="optimum/all-MiniLM-L6-v2"):
     """Improved version with error handling"""
-    return np.array([get_single_text_embedding(t) for t in texts if t.strip()])
-    # try:
-    #     model = ORTModelForFeatureExtraction.from_pretrained(model_name)
-    #     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    # except Exception as e:
-    #     raise RuntimeError(f"Failed to load model/tokenizer: {str(e)}")
+    try:
+        model = ORTModelForFeatureExtraction.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+    except Exception as e:
+        raise RuntimeError(f"Failed to load model/tokenizer: {str(e)}")
 
-    # embeddings = []
-    # for text in texts:
-    #     if not text or not isinstance(text, str):  # Skip empty/invalid texts
-    #         continue
+    embeddings = []
+    for text in texts:
+        if not text or not isinstance(text, str):  # Skip empty/invalid texts
+            continue
             
-    #     try:
-    #         print(text)
-    #         inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
-    #         outputs = model(**{k: v.numpy() for k, v in inputs.items()})
+        try:
+            print(text)
+            inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
+            outputs = model(**{k: v.numpy() for k, v in inputs.items()})
             
-    #         # Convert outputs to tensor if needed
-    #         last_hidden = torch.from_numpy(outputs.last_hidden_state) if isinstance(outputs.last_hidden_state, np.ndarray) else outputs.last_hidden_state
-    #         attention_mask = inputs['attention_mask']
+            # Convert outputs to tensor if needed
+            last_hidden = torch.from_numpy(outputs.last_hidden_state) if isinstance(outputs.last_hidden_state, np.ndarray) else outputs.last_hidden_state
+            attention_mask = inputs['attention_mask']
             
-    #         # Mean pooling
-    #         pooled = (last_hidden * attention_mask.unsqueeze(-1)).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
-    #         pooled = pooled / torch.norm(pooled, p=2, dim=1, keepdim=True)
-    #         embeddings.append(pooled.detach().numpy())
-    #     except Exception as e:
-    #         print(f"Error processing text '{text[:50]}...': {str(e)}")
-    #         continue
+            # Mean pooling
+            pooled = (last_hidden * attention_mask.unsqueeze(-1)).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
+            pooled = pooled / torch.norm(pooled, p=2, dim=1, keepdim=True)
+            embeddings.append(pooled.detach().numpy())
+        except Exception as e:
+            print(f"Error processing text '{text[:50]}...': {str(e)}")
+            continue
     
-    # if not embeddings:
-    #     raise ValueError("No valid embeddings generated - check input texts and model")
+    if not embeddings:
+        raise ValueError("No valid embeddings generated - check input texts and model")
     
-    # return np.concatenate(embeddings, axis=0).astype(np.float64)
+    return np.concatenate(embeddings, axis=0).astype(np.float64)
 
 
 def group_identical_issues(parquet_path, similarity_threshold=0.9):
@@ -99,7 +82,7 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
         return []
     
     # 5. Cluster with validation
-    distance_matrix = cosine_distances(embeddings)
+    distance_matrix = cosine_distances(embeddings).astype(np.float64)
     print(f"Distance matrix shape: {distance_matrix.shape}")
     
     # Skip clustering if not enough points
