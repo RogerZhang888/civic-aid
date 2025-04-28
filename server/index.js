@@ -13,6 +13,19 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+if (process.argv.includes("--use_https")) {
+	// In dev, we are testing on localhost, so we need to manually specify keys for https.
+	var fs = require("fs"),
+		https = require("https");
+
+	var options = {
+		key: fs.readFileSync("./certs/localhost-key.pem"),
+		cert: fs.readFileSync("./certs/localhost.pem"),
+	};
+
+	server = https.createServer(options, app).listen(port, serverCallback);
+}
+
 // Health check
 app.get('/health', async (req, res) => {
   try {
