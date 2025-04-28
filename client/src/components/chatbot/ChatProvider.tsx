@@ -112,7 +112,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
             if (error.response?.status === 404) {
                console.log(`No queries were found for chat id ${chatIdToFetch}.`);
                chatsDispatch({ type: "DELETE_CHAT", payload: { chatId: chatIdToFetch! } });
-               toast.error(`No queries were found for chat id ${currChatId}.`);
+               toast.error(`No queries were found for chat id ${chatIdToFetch}.`);
                navigate("/chatbot");
             } else {
                console.log(error);
@@ -127,7 +127,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          setIsFetchingAChat(false);
       })
 
-   }, [ReportJSX, currChatId, navigate])
+   }, [ReportJSX, navigate])
 
    useEffect(() => {
 

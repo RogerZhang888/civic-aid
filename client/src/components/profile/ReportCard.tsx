@@ -67,7 +67,7 @@ export default function ReportCard({ report }: { report: Report }) {
                <img
                   src={imgSrc}
                   alt="Preview image"
-                  className="object-cover w-full h-40"
+                  className="object-cover w-full h-40 min-h-40 max-h-40"
                   onError={() => setImageError(true)}
                />
             )}
