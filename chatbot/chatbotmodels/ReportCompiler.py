@@ -23,6 +23,7 @@ def load_data(path):
     else:
         df = pd.read_csv(path)
     df["cleaned_text"] = df["description"].apply(preprocess_text)
+    print(df["cleaned_text"])
     return df[df["cleaned_text"].str.len() > 0]
 
 def group_identical_issues(parquet_path, similarity_threshold=0.9):
