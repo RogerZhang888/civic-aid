@@ -30,9 +30,8 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     df = load_data(parquet_path)
     
     # 2. Initialize only the embedder
-    embedder = SentenceTransformer("all-MiniLM-L6-v2", 
-                             device="cpu",
-                             low_cpu_mem_usage=False)
+    embedder = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
+
 
     # 3. Generate embeddings
     texts = df["cleaned_text"].tolist()
