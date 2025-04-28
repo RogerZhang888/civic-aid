@@ -37,7 +37,7 @@ export default function ProfileReportPage() {
                         <p><span className="font-medium">Resolved:</span> {resolvedAt}</p>
                         <p><span className="font-medium">Agency:</span> {thisReport.agency}</p>
                         <p><span className="font-medium">Urgency:</span> <span className={`badge ${urgencyColor}`}>{thisReport.urgency}/10</span></p>
-                        <p><span className="font-medium">Confidence:</span> <progress className="progress progress-primary w-24" value={thisReport.reportConfidence} max="100"></progress> {thisReport.reportConfidence}%</p>
+                        <p><span className="font-medium">Confidence:</span> <progress className="progress progress-primary w-24" value={thisReport.reportConfidence} max="1"></progress> {thisReport.reportConfidence}</p>
                      </div>
                   </div>
 

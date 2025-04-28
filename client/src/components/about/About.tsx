@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router";
+import useUser from "../auth/useUser";
 import useTranslation from "../language/useTranslation";
 import CardSection from "./CardSection";
 
@@ -8,12 +10,25 @@ import mascot2 from "/mascot2.png";
 export default function About() {
    const { t } = useTranslation();
 
+   const { data: user } = useUser();
+
+   const navigate = useNavigate();
+
    return (
       <div className="min-h-screen p-8 flex flex-col items-center bg-base-100 relative z-0 space-y-10">
-         <div
-            className="fixed inset-0 z-[-1] bg-no-repeat bg-cover bg-center bg-fixed opacity-20"
-            style={{ backgroundImage: "url('/heartland.avif')" }}
-         />
+  <div className="fixed inset-0 z-[-1] opacity-20">
+    <img
+      src="/heartland.avif"
+      alt="background"
+      className="absolute h-full w-full object-cover object-center"
+      style={{
+        minHeight: '100vh',
+        minWidth: '100vw',
+        top: 0,
+        left: 0,
+      }}
+    />
+  </div>
 
          <CardSection imageSrc={mascot} imageAlt="Leo waving">
             {t('about1')}
@@ -34,6 +49,16 @@ export default function About() {
          <CardSection imageSrc={mascot} imageAlt="Leo ready to help">
             {t('about5')}
          </CardSection>
+
+         {!user &&
+            <button 
+               className="btn btn-primary text-lg py-8 px-15 mb-5"
+               onClick={() => navigate("/auth")}
+            >
+               Log In to CivicAId
+            </button>
+         }
+
       </div>
    );
 }
