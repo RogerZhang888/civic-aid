@@ -123,6 +123,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         }
     }
     if (media) chatMedia.push(media)
+    chatMedia = [...new Set(chatMedia)]
         
     console.log("CHATMEDIA", chatMedia)
     let queriesTracker = []
