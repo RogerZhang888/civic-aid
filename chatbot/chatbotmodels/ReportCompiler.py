@@ -9,7 +9,7 @@ from sentence_transformers import SentenceTransformer, CrossEncoder
 import hdbscan
 import torch
 from sklearn.metrics.pairwise import cosine_distances
-from accelerate import init_empty_weights
+
 # Configuration
 
 def preprocess_text(text):
