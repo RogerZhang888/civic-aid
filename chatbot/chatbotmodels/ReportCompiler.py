@@ -131,4 +131,8 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
             continue
     
     print(output_groups)
+    for item in output_groups:
+        print("new")
+        for item2 in item:
+            print(cluster_df[cluster_df["id"] == item2])
     return output_groups
