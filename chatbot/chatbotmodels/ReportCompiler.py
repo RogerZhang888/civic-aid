@@ -4,7 +4,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import pandas as pd
 import numpy as np
 import re
-
+import torch
 from itertools import combinations
 from transformers import AutoTokenizer
 from optimum.onnxruntime import ORTModelForFeatureExtraction
