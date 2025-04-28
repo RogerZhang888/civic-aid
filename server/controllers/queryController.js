@@ -213,7 +213,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
                 recommendedSteps: response.recommendedSteps,
                 urgency: response.urgency,
                 confidence: response.confidence,
-                chatMedia
+                media: chatMedia
             })
         }
         // ELSE when HIGH - already report - no further action required
