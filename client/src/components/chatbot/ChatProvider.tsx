@@ -1,93 +1,16 @@
 import { useGeolocated } from "react-geolocated";
 import { ChatContext } from "./ChatContext";
 import { useEffect, useReducer, useState } from "react";
-import { Chat, FormState, GetQueriesForChatRes, Query } from "../types";
+import { Chat, FormState, GetChatRes, GetQueriesForChatRes, Query } from "../types";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useNavigate, Link } from "react-router";
-
-type Action = 
-   | { type: "GET_ALL_CHATS"; payload: Chat[] }
-   | { type: "UPDATE_ALL_QUERIES_OF_CHAT"; payload: { chatId: string, queries: Query[] } }
-   | { type: "ADD_NEW_CHAT"; payload: Chat }
-   | { type: "UPDATE_CHAT_WITH_NEW_QUERY"; payload: { newQuery: Query, chatId: string } }
-   | { type: "DELETE_QUERY"; payload: { chatId: string } }
-   | { type: "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA"; payload: { answer: string | React.ReactNode, sources: string[], media?: string, title: string, chatId: string } }
-   | { type: "DELETE_CHAT"; payload: { chatId: string } }
-   | { type: "UPDATE_CHAT_TITLE"; payload: { chatId: string, newTitle: string } };
+import { useNavigate } from "react-router";
+import chatReducer from "./chatReducer";
+import { BookMarked } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
-
-function chatReducer(state: Chat[], action: Action): Chat[] {
-   switch (action.type) {
-
-      case "GET_ALL_CHATS":
-         return action.payload;
-      
-      case "UPDATE_ALL_QUERIES_OF_CHAT":
-         return state.map(chat => 
-            chat.id === action.payload.chatId
-               ?  { ...chat, queries: action.payload.queries }
-               :  chat
-         );
-
-      case "ADD_NEW_CHAT":
-         return [action.payload, ...state];
-
-      case "UPDATE_CHAT_WITH_NEW_QUERY":
-         return state.map(chat => 
-            chat.id === action.payload.chatId
-               ?  { ...chat, queries: [...chat.queries, action.payload.newQuery] }
-               :  chat
-         );
-      
-      case "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA":
-         return state.map(chat => 
-            chat.id === action.payload.chatId
-               ?  {
-                  ...chat,
-                  title: action.payload.title,
-                  queries: chat.queries.map((query, idx) => 
-                     idx === chat.queries.length - 1
-                        ?  { 
-                              ...query,
-                              answer: action.payload.answer,
-                              status: "finished",
-                              sources: action.payload.sources || [],
-                              media: action.payload.media || null
-                           }
-                        :  query
-                  )
-               }
-               :  chat
-         );
-      
-      case "DELETE_QUERY":
-         return state.map(chat => 
-            chat.id === action.payload.chatId
-               ?  {
-                  ...chat,
-                  queries: chat.queries.slice(0, chat.queries.length - 1)
-               }
-               :  chat
-         );
-         
-      case "UPDATE_CHAT_TITLE":
-         return state.map(chat =>
-            chat.id === action.payload.chatId
-               ?  { ...chat, title: action.payload.newTitle }
-               :  chat
-         );
-      
-      case "DELETE_CHAT":
-         return state.filter(chat => chat.id !== action.payload.chatId);
-
-      default:
-         throw new Error('Unknown action');
-
-   }
-}
 
 export default function ChatProvider({ children, currChatId, }: { children: React.ReactNode; currChatId: string | undefined; }) {
 
@@ -99,81 +22,94 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
    const [isWaiting, setIsWaiting] = useState<boolean>(false);
    const [isFetchingAChat, setIsFetchingAChat] = useState<boolean>(false);
 
+   const queryClient = useQueryClient();
+
    const navigate = useNavigate();
 
    useEffect(() => {
 
-      async function fetchAllChats() {
+      function fetchAllChats() {
          console.log("fetching all of user's chats...");
-         const res = await axios.get(
+         return axios.get(
             `${SERVER_API_URL}/api/chats`,
             { withCredentials: true }
-         );
-         const chats = res.data as {
-            id: string,
-            title: string,
-            type: "unknown" | "question" | "report",
-            created_at: string,
-         }[];
-         const formattedChats = chats.map<Chat>(chat => ({
-            id: chat.id,
-            title: chat.title,
-            type: chat.type,
-            createdAt: new Date(chat.created_at),
-            queries: [],
-         }));
-         console.log(`${formattedChats.length} chats fetched for user`);
-         chatsDispatch({ type: "GET_ALL_CHATS", payload: formattedChats });
-         return formattedChats;
+         )
+         .then(res => {
+            const rawChats = res.data as GetChatRes[];
+            const formattedChats = rawChats.map<Chat>(rc => ({
+               id: rc.id,
+               title: rc.title,
+               type: rc.type,
+               createdAt: new Date(rc.created_at),
+               queries: [],
+            }));
+            console.log(`${formattedChats.length} chats fetched for user`);
+            chatsDispatch({ type: "GET_ALL_CHATS", payload: formattedChats });
+            return formattedChats;
+         })
+         .catch(() => {
+            return []
+         })
       }
 
-      async function fetchQueriesForThisChat() {
+      function fetchQueriesForThisChat(chatIdToFetch: string) {
          setIsFetchingAChat(true);
-         console.log(`fetching chat ${currChatId}...`);
-         try {
+         console.log(`fetching chat ${chatIdToFetch}...`);
 
-            const res = await axios.get(
-               `${SERVER_API_URL}/api/chats/${currChatId}`,
-               { withCredentials: true }
-            );
+         axios.get(
+            `${SERVER_API_URL}/api/chats/${chatIdToFetch}`,
+            { withCredentials: true }
+         )
+         .then(res => {
+            const rawQueries = res.data as GetQueriesForChatRes[];
 
-            const queriesRes = res.data as GetQueriesForChatRes[];
-
-            const formattedQueries = queriesRes.map<Query>(qr => {
-               if ('summary' in qr) {
+            const formattedQueries = rawQueries.map<Query>(rq => {
+               if ('summary' in rq) {
                   return {
-                     question: qr.prompt,
-                     media: qr.media || null,
+                     question: rq.prompt,
+                     media: rq.media || null,
                      answer: (
                         <div id="answer-for-report-chat" className="space-y-2">
-                           <div className="text-xl font-semibold">Your Report Was Created. View it <Link to={`/profile/${qr.reportId}`}>here!</Link></div>
+                           <div className="text-xl font-semibold">Your Report Has Been Created!</div>
+                           <p>
+                              Thank you for being an active citizen! Your report will be sent to {rq.agency} for them to take a look. I'll keep you posted on whether this issue has been resolved!
+                           </p>
+                           <button 
+                              className="btn flex flex-row justify-center items-center px-5"
+                              onClick={async () => {
+                                 await queryClient.invalidateQueries({ queryKey: ['current-user-reports']});
+                                 navigate(`/profile/${rq.reportId}`)
+                              }}
+                           >
+                              <BookMarked/> View your report
+                           </button>
                         </div>
                      ),
-                     timestamp: new Date(qr.timestamp),
+                     timestamp: new Date(rq.timestamp),
                      status: "finished",
-                     sources: qr.sources
+                     sources: rq.sources
                   };
                } else {
                   return {
-                     question: qr.prompt,
-                     media: qr.media || null,
-                     answer: qr.answer,
-                     timestamp: new Date(qr.timestamp),
+                     question: rq.prompt,
+                     media: rq.media || null,
+                     answer: rq.answer,
+                     timestamp: new Date(rq.timestamp),
                      status: "finished",
-                     sources: qr.sources
+                     sources: rq.sources
                   }
                }
             });
 
-            console.log(`${formattedQueries.length} queries fetched for chat ${currChatId}`);
-            chatsDispatch({ type: "UPDATE_ALL_QUERIES_OF_CHAT", payload: { chatId: currChatId!, queries: formattedQueries } });
-
-         } catch (error) {
+            console.log(`${formattedQueries.length} queries fetched for chat ${chatIdToFetch}`);
+            chatsDispatch({ type: "UPDATE_ALL_QUERIES_OF_CHAT", payload: { chatId: chatIdToFetch!, queries: formattedQueries } });
+         })
+         .catch(error => {
             if (axios.isAxiosError(error)) {
                if (error.response?.status === 404) {
-                  console.log(`No queries found for chat id ${currChatId}: Deleted chat`);
-                  chatsDispatch({ type: "DELETE_CHAT", payload: { chatId: currChatId! } });
-                  toast.error("There was no history found for your chat.");
+                  console.log(`No queries were found for chat id ${chatIdToFetch}.`);
+                  chatsDispatch({ type: "DELETE_CHAT", payload: { chatId: chatIdToFetch! } });
+                  toast.error(`No queries were found for chat id ${currChatId}.`);
                   navigate("/chatbot");
                } else {
                   console.log(error);
@@ -181,21 +117,22 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
                }
             } else {
                console.log(error);
-               toast.error("An unknown error occured while fetching your chat history. Please refresh the page to try again.");
+               toast.error("An error occured while fetching your chat history. Please refresh the page to try again.");
             }
-
-         } finally {
+         })
+         .finally(() => {               
             setIsFetchingAChat(false);
-         }
+         })
+
       }
 
       if (chats.length === 0 && !areChatsFetchedInitially) {
          fetchAllChats().then(() => {
             setAreChatsFetchedInitially(true);
-            if (currChatId) fetchQueriesForThisChat();
+            if (currChatId) fetchQueriesForThisChat(currChatId);
          })
       } else if (currChatId && chats.find(chat => chat.id === currChatId)?.queries.length === 0) {
-         fetchQueriesForThisChat()
+         fetchQueriesForThisChat(currChatId)
       }
 
    }, [currChatId, chats, navigate, areChatsFetchedInitially])
@@ -363,12 +300,14 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
                title,
                sources,
                reportId,
+               agency,
                media
             } = res.data as { 
                summary: string, 
                title: string,
                sources: string[],
                reportId: string,
+               agency: string,
                media?: string
             }
 
@@ -377,9 +316,18 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
             const reportAnswerComponent = (
                <div id="answer-for-report-chat" className="space-y-2">
                   <div className="text-xl font-semibold">Your Report Has Been Created!</div>
-                  <div>Title: {title}</div>
-                  <div>Summary: {summary}</div>
-                  <div>View more details <Link to={`/profile/${reportId}`}>here!</Link></div>
+                  <p>
+                     Thank you for being an active citizen! Your report will be sent to {agency} for them to take a look. I'll keep you posted on whether this issue has been resolved!
+                  </p>
+                  <button 
+                     className="btn flex flex-row justify-center items-center px-5"
+                     onClick={async () => {
+                        await queryClient.invalidateQueries({ queryKey: ['current-user-reports']});
+                        navigate(`/profile/${reportId}`)
+                     }}
+                  >
+                     <BookMarked/> View your report
+                  </button>
                </div>
             )
    
@@ -419,16 +367,6 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
 
       }
    }
-
-   // async function fetchAllImgs(imgUrls: string[]) {
-
-   //    const promises = imgUrls.map(url => axios.get(`${SERVER_API_URL}/api/images/${url}`, { withCredentials: true }));
-
-   //    const resArr = await Promise.all(promises);
-
-   //    return resArr.map(res => res.data) as string[];
-
-   // }
 
    async function deleteChat(chatIdToDelete: string) {
       try {

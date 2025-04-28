@@ -27,7 +27,7 @@ export default function Chatbot() {
                      {currChat.title}
                   </div>
 
-                  <div className="flex-1 overflow-y-auto w-full max-w-3xl">
+                  <div className="flex-1 overflow-y-auto w-full max-w-4xl">
                      <MessagesDisplay messages={currChat.queries} />
                   </div>
                </>
@@ -38,7 +38,7 @@ export default function Chatbot() {
                </div>
          }
 
-         <div className="mt-auto w-full max-w-2xl pt-3">
+         <div className="mt-auto w-full max-w-3xl pt-3">
             <ChatbotForm/>
             <div className="text-xs text-center m-2 text-gray-500">
                {!coords && 
