@@ -1,5 +1,9 @@
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
+# Disable all meta tensor functionality
+os.environ["HF_DISABLE_META_TENSOR"] = "1"
+os.environ["PYTORCH_DISABLE_META_TENSOR"] = "1"
+
 import pandas as pd
 import numpy as np
 import re
@@ -26,12 +30,13 @@ def load_data(path):
 
 def encode_texts(texts, tokenizer, model, batch_size=32):
     """Custom encoding function with mean pooling"""
+    model = model.to('cpu')  # Ensure model is on CPU
     all_embeddings = []
     
     for i in range(0, len(texts), batch_size):
         batch = texts[i:i+batch_size]
         inputs = tokenizer(batch, padding=True, truncation=True, 
-                         return_tensors="pt", max_length=128)
+                         return_tensors="pt", max_length=128).to('cpu')  # Explicit CPU
         
         with torch.no_grad():
             outputs = model(**inputs)
@@ -51,11 +56,12 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     # 1. Load data
     df = load_data(parquet_path)
     
-    # 2. Initialize Hugging Face model (same as all-MiniLM-L6-v2)
+    # 2. Initialize Hugging Face model with explicit CPU placement
     model_name = "sentence-transformers/all-MiniLM-L6-v2"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModel.from_pretrained(model_name)
-    model.eval()  # Disable dropout if any
+    model = model.to('cpu')  # Force CPU placement
+    model.eval()
     
     # 3. Generate embeddings
     texts = df["cleaned_text"].tolist()
