@@ -1,6 +1,6 @@
 import { useGeolocated } from "react-geolocated";
 import { ChatContext } from "./ChatContext";
-import { useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 import { Chat, FormState, GetChatRes, GetQueriesForChatRes, Query } from "../types";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
@@ -26,105 +26,110 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
 
    const navigate = useNavigate();
 
-   useEffect(() => {
+   const ReportJSX = useCallback((id: string, agency: string) => {
+      return (
+         <div id="answer-for-report-chat" className="space-y-2">
+            <div className="text-xl font-semibold">Your Report Has Been Created!</div>
+            <p>
+               Thank you for being an active citizen! Your report will be sent to {agency} for them to take a look. I'll keep you posted on whether this issue has been resolved!
+            </p>
+            <button 
+               className="btn flex flex-row justify-center items-center px-5"
+               onClick={async () => {
+                  await queryClient.invalidateQueries({ queryKey: ['current-user-reports']});
+                  navigate(`/profile/${id}`)
+               }}
+            >
+               <BookMarked/> View your report
+            </button>
+         </div>
+      )
+   }, [navigate, queryClient])
 
-      function fetchAllChats() {
-         console.log("fetching all of user's chats...");
-         return axios.get(
-            `${SERVER_API_URL}/api/chats`,
-            { withCredentials: true }
-         )
-         .then(res => {
-            const rawChats = res.data as GetChatRes[];
-            const formattedChats = rawChats.map<Chat>(rc => ({
-               id: rc.id,
-               title: rc.title,
-               type: rc.type,
-               createdAt: new Date(rc.created_at),
-               queries: [],
-            }));
-            console.log(`${formattedChats.length} chats fetched for user`);
-            chatsDispatch({ type: "GET_ALL_CHATS", payload: formattedChats });
-            return formattedChats;
-         })
-         .catch(() => {
-            return []
-         })
-      }
+   function fetchAllChats() {
+      console.log("fetching all of user's chats...");
+      return axios.get(
+         `${SERVER_API_URL}/api/chats`,
+         { withCredentials: true }
+      )
+      .then(res => {
+         const rawChats = res.data as GetChatRes[];
+         const formattedChats = rawChats.map<Chat>(rc => ({
+            id: rc.id,
+            title: rc.title,
+            type: rc.type,
+            createdAt: new Date(rc.created_at),
+            queries: [],
+         }));
+         console.log(`${formattedChats.length} chats fetched for user`);
+         chatsDispatch({ type: "GET_ALL_CHATS", payload: formattedChats });
+         return formattedChats;
+      })
+      .catch(() => {
+         toast.error("An error occured while trying to fetch your chats.");
+         return [];
+      })
+   }
 
-      function fetchQueriesForThisChat(chatIdToFetch: string) {
-         setIsFetchingAChat(true);
-         console.log(`fetching chat ${chatIdToFetch}...`);
+   const fetchQueriesForThisChat = useCallback((chatIdToFetch: string) => {
+      setIsFetchingAChat(true);
+      console.log(`fetching chat ${chatIdToFetch}...`);
 
-         axios.get(
-            `${SERVER_API_URL}/api/chats/${chatIdToFetch}`,
-            { withCredentials: true }
-         )
-         .then(res => {
-            const rawQueries = res.data as GetQueriesForChatRes[];
+      axios.get(
+         `${SERVER_API_URL}/api/chats/${chatIdToFetch}`,
+         { withCredentials: true }
+      )
+      .then(res => {
+         const rawQueries = res.data as GetQueriesForChatRes[];
 
-            const formattedQueries = rawQueries.map<Query>(rq => {
-               if ('summary' in rq) {
-                  return {
-                     question: rq.prompt,
-                     media: rq.media || null,
-                     answer: (
-                        <div id="answer-for-report-chat" className="space-y-2">
-                           <div className="text-xl font-semibold">Your Report Has Been Created!</div>
-                           <p>
-                              Thank you for being an active citizen! Your report will be sent to {rq.agency} for them to take a look. I'll keep you posted on whether this issue has been resolved!
-                           </p>
-                           <button 
-                              className="btn flex flex-row justify-center items-center px-5"
-                              onClick={async () => {
-                                 await queryClient.invalidateQueries({ queryKey: ['current-user-reports']});
-                                 navigate(`/profile/${rq.reportId}`)
-                              }}
-                           >
-                              <BookMarked/> View your report
-                           </button>
-                        </div>
-                     ),
-                     timestamp: new Date(rq.timestamp),
-                     status: "finished",
-                     sources: rq.sources
-                  };
-               } else {
-                  return {
-                     question: rq.prompt,
-                     media: rq.media || null,
-                     answer: rq.answer,
-                     timestamp: new Date(rq.timestamp),
-                     status: "finished",
-                     sources: rq.sources
-                  }
+         const formattedQueries = rawQueries.map<Query>(rq => {
+            if ('summary' in rq) {
+               return {
+                  question: rq.prompt,
+                  media: rq.media || null,
+                  answer: ReportJSX(rq.reportId, rq.agency),
+                  timestamp: new Date(rq.timestamp),
+                  status: "finished",
+                  sources: rq.sources
+               };
+            } else {
+               return {
+                  question: rq.prompt,
+                  media: rq.media || null,
+                  answer: rq.answer,
+                  timestamp: new Date(rq.timestamp),
+                  status: "finished",
+                  sources: rq.sources
                }
-            });
+            }
+         });
 
-            console.log(`${formattedQueries.length} queries fetched for chat ${chatIdToFetch}`);
-            chatsDispatch({ type: "UPDATE_ALL_QUERIES_OF_CHAT", payload: { chatId: chatIdToFetch!, queries: formattedQueries } });
-         })
-         .catch(error => {
-            if (axios.isAxiosError(error)) {
-               if (error.response?.status === 404) {
-                  console.log(`No queries were found for chat id ${chatIdToFetch}.`);
-                  chatsDispatch({ type: "DELETE_CHAT", payload: { chatId: chatIdToFetch! } });
-                  toast.error(`No queries were found for chat id ${currChatId}.`);
-                  navigate("/chatbot");
-               } else {
-                  console.log(error);
-                  toast.error(error.response?.data.error);
-               }
+         console.log(`${formattedQueries.length} queries fetched for chat ${chatIdToFetch}`);
+         chatsDispatch({ type: "UPDATE_ALL_QUERIES_OF_CHAT", payload: { chatId: chatIdToFetch!, queries: formattedQueries } });
+      })
+      .catch(error => {
+         if (axios.isAxiosError(error)) {
+            if (error.response?.status === 404) {
+               console.log(`No queries were found for chat id ${chatIdToFetch}.`);
+               chatsDispatch({ type: "DELETE_CHAT", payload: { chatId: chatIdToFetch! } });
+               toast.error(`No queries were found for chat id ${currChatId}.`);
+               navigate("/chatbot");
             } else {
                console.log(error);
-               toast.error("An error occured while fetching your chat history. Please refresh the page to try again.");
+               toast.error(error.response?.data.error);
             }
-         })
-         .finally(() => {               
-            setIsFetchingAChat(false);
-         })
+         } else {
+            console.log(error);
+            toast.error(`An error occured while fetching chat ${chatIdToFetch}'s history.`);
+         }
+      })
+      .finally(() => {               
+         setIsFetchingAChat(false);
+      })
 
-      }
+   }, [ReportJSX, currChatId, navigate])
+
+   useEffect(() => {
 
       if (chats.length === 0 && !areChatsFetchedInitially) {
          fetchAllChats().then(() => {
@@ -135,7 +140,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          fetchQueriesForThisChat(currChatId)
       }
 
-   }, [currChatId, chats, navigate, areChatsFetchedInitially])
+   }, [currChatId, chats, navigate, areChatsFetchedInitially, ReportJSX, fetchQueriesForThisChat]);
 
    // get user's coordinates
    // browser will ask for permission
@@ -313,25 +318,9 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
 
             console.log(`Server successfully created a report: "${summary}"`);
 
-            const reportAnswerComponent = (
-               <div id="answer-for-report-chat" className="space-y-2">
-                  <div className="text-xl font-semibold">Your Report Has Been Created!</div>
-                  <p>
-                     Thank you for being an active citizen! Your report will be sent to {agency} for them to take a look. I'll keep you posted on whether this issue has been resolved!
-                  </p>
-                  <button 
-                     className="btn flex flex-row justify-center items-center px-5"
-                     onClick={async () => {
-                        await queryClient.invalidateQueries({ queryKey: ['current-user-reports']});
-                        navigate(`/profile/${reportId}`)
-                     }}
-                  >
-                     <BookMarked/> View your report
-                  </button>
-               </div>
-            )
+            toast.success("Your report was successfully created!")
    
-            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA", payload: { chatId: chatIdToAddQueryTo, answer: reportAnswerComponent, sources, title, media } });
+            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA", payload: { chatId: chatIdToAddQueryTo, answer: ReportJSX(reportId, agency), sources, title, media } });
 
          } else {
 

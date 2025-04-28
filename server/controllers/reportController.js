@@ -115,8 +115,27 @@ export async function getUserReports(req, res) {
 
     try {
         const userId = req.user.id;
-        const result = await pgsql.query(
-            "SELECT * FROM reports WHERE user_id = $1",
+        const result = await pgsql.query(`
+            SELECT
+               id,
+               user_id,
+               chat_id,
+               title,
+               description,
+               media_url,
+               ST_X(incident_location::geometry) as longitude,
+               ST_Y(incident_location::geometry) as latitude,
+               agency,
+               recommended_steps,
+               urgency,
+               report_confidence,
+               status,
+               created_at,
+               resolved_at
+            FROM
+               reports
+            WHERE 
+               user_id = $1`,
             [userId]
         );
 
@@ -224,4 +243,32 @@ export async function getReportSummaries(req, res) {
     }
 
     res.json(Promise.all(summaries))
+}
+
+export async function getDoesUserHaveReward(req, res) {
+   console.log("CHECKING IF USER IS ELIGIBLE FOR REWARD THIS MONTH");
+
+   try {
+       const userId = req.user.id;
+
+       const firstDayPrevMonthStr = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1)
+         .toISOString()
+         .slice(0, 10);
+
+       const result = await pgsql.query(
+           "SELECT * FROM awards WHERE month = $1",
+           [firstDayPrevMonthStr]
+       );
+
+       if (result.length === 0) {
+           return res
+               .status(404)
+               .json({ error: `Reward data missing for month of ${firstDayPrevMonthStr}` });
+       }
+
+       res.json(result[0].rewarded_users.includes(userId));
+
+   } catch (error) {
+       res.status(500).json({ error: error.message });
+   }
 }
