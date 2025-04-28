@@ -1,8 +1,9 @@
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-# Disable all meta tensor functionality
+# Completely disable meta tensors at all levels
 os.environ["HF_DISABLE_META_TENSOR"] = "1"
 os.environ["PYTORCH_DISABLE_META_TENSOR"] = "1"
+os.environ["TRANSFORMERS_NO_META"] = "1"
 
 import pandas as pd
 import numpy as np
@@ -13,7 +14,6 @@ import hdbscan
 import torch
 from sklearn.metrics.pairwise import cosine_distances
 
-# Configuration
 def preprocess_text(text):
     text = str(text).lower().strip()
     text = re.sub(r"[^a-z0-9\s]", "", text)
@@ -25,49 +25,51 @@ def load_data(path):
     else:
         df = pd.read_csv(path)
     df["cleaned_text"] = df["description"].apply(preprocess_text)
-    print(df[df["cleaned_text"].str.len() > 0])
     return df[df["cleaned_text"].str.len() > 0]
 
-def encode_texts(texts, tokenizer, model, batch_size=32):
-    """Custom encoding function with mean pooling"""
-    model = model.to('cpu')  # Ensure model is on CPU
-    all_embeddings = []
+def safe_encode_texts(texts, model_name="sentence-transformers/all-MiniLM-L6-v2"):
+    """Completely meta-tensor-safe encoding implementation"""
+    # Initialize tokenizer and model with disabled meta tensors
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
     
-    for i in range(0, len(texts), batch_size):
-        batch = texts[i:i+batch_size]
-        inputs = tokenizer(batch, padding=True, truncation=True, 
-                         return_tensors="pt", max_length=128).to('cpu')  # Explicit CPU
+    # Load model with all safety flags to prevent meta tensors
+    model = AutoModel.from_pretrained(
+        model_name,
+        low_cpu_mem_usage=False,
+        torch_dtype=torch.float32,
+        device_map=None
+    )
+    
+    # Force immediate CPU placement
+    model = model.cpu()
+    model.eval()
+    
+    embeddings = []
+    for text in texts:  # Process one at a time for maximum reliability
+        inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
+        inputs = {k: v.cpu() for k, v in inputs.items()}  # Ensure CPU
         
         with torch.no_grad():
             outputs = model(**inputs)
         
-        # Mean pooling with attention mask
+        # Mean pooling with attention
         attention_mask = inputs['attention_mask']
         last_hidden = outputs.last_hidden_state
-        embeddings = (last_hidden * attention_mask.unsqueeze(-1)).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
-        
-        # Normalize embeddings
-        embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
-        all_embeddings.append(embeddings.cpu().numpy())
+        pooled = (last_hidden * attention_mask.unsqueeze(-1)).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
+        pooled = torch.nn.functional.normalize(pooled, p=2, dim=1)
+        embeddings.append(pooled.numpy())
     
-    return np.concatenate(all_embeddings, axis=0)
+    return np.concatenate(embeddings, axis=0).astype(np.float64)
 
 def group_identical_issues(parquet_path, similarity_threshold=0.9):
     # 1. Load data
     df = load_data(parquet_path)
     
-    # 2. Initialize Hugging Face model with explicit CPU placement
-    model_name = "sentence-transformers/all-MiniLM-L6-v2"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModel.from_pretrained(model_name)
-    model = model.to('cpu')  # Force CPU placement
-    model.eval()
-    
-    # 3. Generate embeddings
+    # 2. Generate embeddings using our safe method
     texts = df["cleaned_text"].tolist()
-    embeddings = encode_texts(texts, tokenizer, model).astype(np.float64)
+    embeddings = safe_encode_texts(texts)
     
-    # 4. Cluster using cosine distance
+    # 3. Cluster using cosine distance
     distance_matrix = cosine_distances(embeddings)
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=2,
@@ -76,7 +78,7 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     )
     cluster_labels = clusterer.fit_predict(distance_matrix)
     
-    # 5. Verify pairs within clusters
+    # 4. Verify pairs within clusters
     output_groups = []
     for cluster_id in set(cluster_labels) - {-1}:
         cluster_df = df[cluster_labels == cluster_id]
@@ -85,8 +87,6 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
             
         report_ids = cluster_df["id"].values
         cluster_embeddings = embeddings[cluster_labels == cluster_id]
-        
-        # Compute pairwise cosine similarity
         sim_matrix = 1 - cosine_distances(cluster_embeddings)
         
         visited = set()
