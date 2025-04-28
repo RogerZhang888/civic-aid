@@ -19,6 +19,13 @@ export type Chat = {
    queries: Query[];
 }
 
+export type GetChatRes = {
+   id: string,
+   title: string,
+   type: ChatTypes,
+   created_at: string,
+}
+
 export type GetQueriesForChatRes = {
    // normal reply
    prompt: string,

@@ -16,7 +16,7 @@ function MessagesDisplay({
    return (
       <>
 
-         {messages.map(msg => <MessageBubble message={msg} key={msg.id}/>)}
+         {messages.map((msg, idx) => <MessageBubble message={msg} key={idx}/>)}
 
          <div ref={messagesEndRef} />
 
