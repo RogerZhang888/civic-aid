@@ -1,18 +1,17 @@
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-# Completely disable meta tensors at all levels
-os.environ["HF_DISABLE_META_TENSOR"] = "1"
-os.environ["PYTORCH_DISABLE_META_TENSOR"] = "1"
-os.environ["TRANSFORMERS_NO_META"] = "1"
 
 import pandas as pd
 import numpy as np
 import re
-from itertools import combinations
-from transformers import AutoTokenizer, AutoModel
-import hdbscan
 import torch
+from itertools import combinations
+from transformers import AutoTokenizer
+from optimum.onnxruntime import ORTModelForFeatureExtraction
+import hdbscan
 from sklearn.metrics.pairwise import cosine_distances
+
+
 
 def preprocess_text(text):
     text = str(text).lower().strip()
@@ -25,77 +24,108 @@ def load_data(path):
     else:
         df = pd.read_csv(path)
     df["cleaned_text"] = df["description"].apply(preprocess_text)
+    print(df[df["cleaned_text"].str.len() > 0].head(5))
     return df[df["cleaned_text"].str.len() > 0]
 
-def safe_encode_texts(texts, model_name="sentence-transformers/all-MiniLM-L6-v2"):
-    """Completely meta-tensor-safe encoding implementation"""
-    # Initialize tokenizer and model with disabled meta tensors
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    
-    # Load model with all safety flags to prevent meta tensors
-    model = AutoModel.from_pretrained(
-        model_name,
-        low_cpu_mem_usage=False,
-        torch_dtype=torch.float32,
-        device_map=None
-    )
-    
-    # Force immediate CPU placement
-    model = model.cpu()
-    model.eval()
-    
+def onnx_encode_texts(texts, model_name="optimum/all-MiniLM-L6-v2"):
+    """Improved version with error handling"""
+    try:
+        model = ORTModelForFeatureExtraction.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+    except Exception as e:
+        raise RuntimeError(f"Failed to load model/tokenizer: {str(e)}")
+
     embeddings = []
-    for text in texts:  # Process one at a time for maximum reliability
-        inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
-        inputs = {k: v.cpu() for k, v in inputs.items()}  # Ensure CPU
-        
-        with torch.no_grad():
-            outputs = model(**inputs)
-        
-        # Mean pooling with attention
-        attention_mask = inputs['attention_mask']
-        last_hidden = outputs.last_hidden_state
-        pooled = (last_hidden * attention_mask.unsqueeze(-1)).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
-        pooled = torch.nn.functional.normalize(pooled, p=2, dim=1)
-        embeddings.append(pooled.numpy())
+    for text in texts:
+        if not text or not isinstance(text, str):  # Skip empty/invalid texts
+            continue
+            
+        try:
+            print(text)
+            inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
+            outputs = model(**{k: v.numpy() for k, v in inputs.items()})
+            
+            # Convert outputs to tensor if needed
+            last_hidden = torch.from_numpy(outputs.last_hidden_state) if isinstance(outputs.last_hidden_state, np.ndarray) else outputs.last_hidden_state
+            attention_mask = inputs['attention_mask']
+            
+            # Mean pooling
+            pooled = (last_hidden * attention_mask.unsqueeze(-1)).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
+            pooled = pooled / torch.norm(pooled, p=2, dim=1, keepdim=True)
+            embeddings.append(pooled.detach().numpy())
+        except Exception as e:
+            print(f"Error processing text '{text[:50]}...': {str(e)}")
+            continue
+    
+    if not embeddings:
+        raise ValueError("No valid embeddings generated - check input texts and model")
     
     return np.concatenate(embeddings, axis=0).astype(np.float64)
+
 
 def group_identical_issues(parquet_path, similarity_threshold=0.9):
     # 1. Load data
     df = load_data(parquet_path)
     
-    # 2. Generate embeddings using our safe method
+    # 2. Early return if not enough data
+    if len(df) < 2:
+        print(f"Not enough data points ({len(df)}), returning empty list")
+        return []
+    
+    # 3. Generate embeddings
     texts = df["cleaned_text"].tolist()
-    embeddings = safe_encode_texts(texts)
+    embeddings = onnx_encode_texts(texts)
     
-    # 3. Cluster using cosine distance
-    distance_matrix = cosine_distances(embeddings)
-    clusterer = hdbscan.HDBSCAN(
-        min_cluster_size=2,
-        metric="precomputed",
-        cluster_selection_method="eom"
-    )
-    cluster_labels = clusterer.fit_predict(distance_matrix)
+    # 4. Early return if embeddings failed
+    if len(embeddings) < 2:
+        print(f"Not enough valid embeddings ({len(embeddings)}), returning empty list")
+        return []
     
-    # 4. Verify pairs within clusters
+    # 5. Cluster with validation
+    distance_matrix = cosine_distances(embeddings).astype(np.float64)
+    print("Distance matrix sample:\n", np.round(distance_matrix[:5, :5], 3))
+    print(f"Distance matrix shape: {distance_matrix.shape}")
+    
+    # Skip clustering if not enough points
+    if len(distance_matrix) < 2:
+        return []
+    
+    try:
+        clusterer = hdbscan.HDBSCAN(
+            min_cluster_size=2,
+            metric="precomputed",
+            cluster_selection_method="eom"
+        )
+        cluster_labels = clusterer.fit_predict(distance_matrix)
+    except Exception as e:
+        print(f"Clustering failed: {str(e)}")
+        return []
+    
+    # 6. Group results
     output_groups = []
-    for cluster_id in set(cluster_labels) - {-1}:
+    unique_labels = set(cluster_labels) - {-1}
+    print(f"Found {len(unique_labels)} clusters")
+    
+    for cluster_id in unique_labels:
         cluster_df = df[cluster_labels == cluster_id]
         if len(cluster_df) < 2:
             continue
             
         report_ids = cluster_df["id"].values
         cluster_embeddings = embeddings[cluster_labels == cluster_id]
-        sim_matrix = 1 - cosine_distances(cluster_embeddings)
         
-        visited = set()
-        for i in range(len(report_ids)):
-            if i not in visited:
-                group = [j for j in range(len(report_ids)) 
-                        if sim_matrix[i,j] >= similarity_threshold]
-                visited.update(group)
-                if len(group) > 1:
-                    output_groups.append(report_ids[group].tolist())
+        try:
+            sim_matrix = 1 - cosine_distances(cluster_embeddings)
+            visited = set()
+            for i in range(len(report_ids)):
+                if i not in visited:
+                    group = [j for j in range(len(report_ids)) 
+                            if sim_matrix[i,j] >= similarity_threshold]
+                    visited.update(group)
+                    if len(group) > 1:
+                        output_groups.append(report_ids[group].tolist())
+        except Exception as e:
+            print(f"Error processing cluster {cluster_id}: {str(e)}")
+            continue
     
     return output_groups

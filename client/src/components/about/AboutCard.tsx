@@ -1,4 +1,4 @@
-export default function CardSection({
+export default function AboutCard({
    children,
    imageSrc,
    imageAlt,

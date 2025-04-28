@@ -6,7 +6,7 @@ const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 async function queryFn(): Promise<Report[]> {
 
-   console.log("invoking useReport...");
+   console.log("invoking useReports...");
 
    try {
       
@@ -53,7 +53,7 @@ async function queryFn(): Promise<Report[]> {
 
     } catch (error) {
 
-        console.log("user not validated");
+        console.log(`Unable to fetch reports due to ${error}`);
 
         throw error;
 

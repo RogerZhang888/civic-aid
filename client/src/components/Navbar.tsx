@@ -55,15 +55,15 @@ export default function Navbar() {
                               {t('chatbot')}
                            </Link>
                         </li>
-                        <li>
-                           <Link
-                              to="/about"
-                           >
-                              {t('about')}
-                           </Link>
-                        </li>
                      </>
                   }
+                  <li>
+                     <Link
+                        to="/about"
+                     >
+                        {t('about')}
+                     </Link>
+                  </li>
                   <li>
                      <LanguagesDropDown/>
                   </li>
@@ -97,21 +97,20 @@ export default function Navbar() {
                            {t('chatbot')}
                         </Link>
                      </li>
-                     <li>
-                        <Link
-                           to="/about"
-                           className={`hover:text-white transition ${pathname === "/about" ? "text-primary-content" : ""}`}
-                        >
-                           {t('about')}
-                        </Link>
-                     </li>
-
                   </ul>
                </div>
             )}
 
             <div className="hidden lg:flex">
-               <ul className={`menu menu-horizontal ${user ? "" : "px-4"}`}>
+               <ul className={`menu menu-horizontal space-x-4 ${user ? "" : "px-4"}`}>
+                  <li>
+                     <Link
+                        to="/about"
+                        className={`hover:text-white transition ${pathname === "/about" ? "text-primary-content" : ""}`}
+                     >
+                        {t('about')}
+                     </Link>
+                  </li>
                   <li>
                      <LanguagesDropDown/>
                   </li>
