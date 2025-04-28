@@ -1,6 +1,8 @@
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-os.environ["DISABLE_METATENSOR"] = "1"  
+os.environ["DISABLE_METATENSOR"] = "1"
+os.environ["PYTORCH_DISABLE_META_TENSOR"] = "1"
+
 import pandas as pd
 import numpy as np
 import re
