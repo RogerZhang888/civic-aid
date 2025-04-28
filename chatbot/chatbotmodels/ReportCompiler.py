@@ -60,36 +60,32 @@ def onnx_encode_texts(texts, model_name="optimum/all-MiniLM-L6-v2"):
 
 
 def group_identical_issues(parquet_path, similarity_threshold=0.9):
-    # 1. Load data with validation
-    try:
-        df = load_data(parquet_path)
-        if len(df) == 0:
-            raise ValueError("Loaded DataFrame is empty")
-    except Exception as e:
-        raise ValueError(f"Data loading failed: {str(e)}")
-
-    # 2. Generate embeddings with validation
+    # 1. Load data
+    df = load_data(parquet_path)
+    
+    # 2. Early return if not enough data
+    if len(df) < 2:
+        print(f"Not enough data points ({len(df)}), returning empty list")
+        return []
+    
+    # 3. Generate embeddings
     texts = df["cleaned_text"].tolist()
-    if not texts:
-        raise ValueError("No texts available after preprocessing")
+    embeddings = onnx_encode_texts(texts)
     
-    print(f"Processing {len(texts)} texts...")  # Debug output
+    # 4. Early return if embeddings failed
+    if len(embeddings) < 2:
+        print(f"Not enough valid embeddings ({len(embeddings)}), returning empty list")
+        return []
+    
+    # 5. Cluster with validation
+    distance_matrix = cosine_distances(embeddings)
+    print(f"Distance matrix shape: {distance_matrix.shape}")
+    
+    # Skip clustering if not enough points
+    if len(distance_matrix) < 2:
+        return []
     
     try:
-        embeddings = onnx_encode_texts(texts)
-        if len(embeddings) == 0:
-            raise ValueError("No embeddings generated - check model and texts")
-    except Exception as e:
-        raise ValueError(f"Embedding generation failed: {str(e)}")
-
-    # 3. Cluster with validation
-    try:
-        distance_matrix = cosine_distances(embeddings)
-        print(f"Distance matrix shape: {distance_matrix.shape}")  # Debug
-        
-        if distance_matrix.size == 0:
-            raise ValueError("Empty distance matrix generated")
-        
         clusterer = hdbscan.HDBSCAN(
             min_cluster_size=2,
             metric="precomputed",
@@ -97,12 +93,13 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
         )
         cluster_labels = clusterer.fit_predict(distance_matrix)
     except Exception as e:
-        raise ValueError(f"Clustering failed: {str(e)}")
-
-    # 4. Group results with validation
+        print(f"Clustering failed: {str(e)}")
+        return []
+    
+    # 6. Group results
     output_groups = []
     unique_labels = set(cluster_labels) - {-1}
-    print(f"Found {len(unique_labels)} clusters")  # Debug
+    print(f"Found {len(unique_labels)} clusters")
     
     for cluster_id in unique_labels:
         cluster_df = df[cluster_labels == cluster_id]
@@ -126,4 +123,4 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
             print(f"Error processing cluster {cluster_id}: {str(e)}")
             continue
     
-    return output_groups or []  # Return empty list if no groups found
+    return output_groups
