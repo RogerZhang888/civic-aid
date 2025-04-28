@@ -1,18 +1,18 @@
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-os.environ["DISABLE_METATENSOR"] = "1"
+# Completely disable meta tensors at all levels
+os.environ["HF_DISABLE_META_TENSOR"] = "1"
 os.environ["PYTORCH_DISABLE_META_TENSOR"] = "1"
+os.environ["TRANSFORMERS_NO_META"] = "1"
 
 import pandas as pd
 import numpy as np
 import re
 from itertools import combinations
-from sentence_transformers import SentenceTransformer, CrossEncoder
+from transformers import AutoTokenizer, AutoModel
 import hdbscan
 import torch
 from sklearn.metrics.pairwise import cosine_distances
-
-# Configuration
 
 def preprocess_text(text):
     text = str(text).lower().strip()
@@ -25,28 +25,51 @@ def load_data(path):
     else:
         df = pd.read_csv(path)
     df["cleaned_text"] = df["description"].apply(preprocess_text)
-    print(df[df["cleaned_text"].str.len() > 0])
     return df[df["cleaned_text"].str.len() > 0]
+
+def safe_encode_texts(texts, model_name="sentence-transformers/all-MiniLM-L6-v2"):
+    """Completely meta-tensor-safe encoding implementation"""
+    # Initialize tokenizer and model with disabled meta tensors
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    
+    # Load model with all safety flags to prevent meta tensors
+    model = AutoModel.from_pretrained(
+        model_name,
+        low_cpu_mem_usage=False,
+        torch_dtype=torch.float32,
+        device_map=None
+    )
+    
+    # Force immediate CPU placement
+    model = model.cpu()
+    model.eval()
+    
+    embeddings = []
+    for text in texts:  # Process one at a time for maximum reliability
+        inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
+        inputs = {k: v.cpu() for k, v in inputs.items()}  # Ensure CPU
+        
+        with torch.no_grad():
+            outputs = model(**inputs)
+        
+        # Mean pooling with attention
+        attention_mask = inputs['attention_mask']
+        last_hidden = outputs.last_hidden_state
+        pooled = (last_hidden * attention_mask.unsqueeze(-1)).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
+        pooled = torch.nn.functional.normalize(pooled, p=2, dim=1)
+        embeddings.append(pooled.numpy())
+    
+    return np.concatenate(embeddings, axis=0).astype(np.float64)
 
 def group_identical_issues(parquet_path, similarity_threshold=0.9):
     # 1. Load data
     df = load_data(parquet_path)
     
-    # 2. Initialize only the embedder
-    embedder = SentenceTransformer("all-MiniLM-L6-v2")
-    # embedder = embedder.to_empty("cpu")
-
-
-    # 3. Generate embeddings
+    # 2. Generate embeddings using our safe method
     texts = df["cleaned_text"].tolist()
-    embeddings = embedder.encode(
-        texts,
-        convert_to_tensor=True,
-        show_progress_bar=False,
-        normalize_embeddings=True
-    ).cpu().numpy().astype(np.float64)
+    embeddings = safe_encode_texts(texts)
     
-    # 4. Cluster using cosine distance
+    # 3. Cluster using cosine distance
     distance_matrix = cosine_distances(embeddings)
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=2,
@@ -55,7 +78,7 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     )
     cluster_labels = clusterer.fit_predict(distance_matrix)
     
-    # 5. Verify pairs within clusters using cosine similarity (no CrossEncoder)
+    # 4. Verify pairs within clusters
     output_groups = []
     for cluster_id in set(cluster_labels) - {-1}:
         cluster_df = df[cluster_labels == cluster_id]
@@ -64,8 +87,6 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
             
         report_ids = cluster_df["id"].values
         cluster_embeddings = embeddings[cluster_labels == cluster_id]
-        
-        # Compute pairwise cosine similarity
         sim_matrix = 1 - cosine_distances(cluster_embeddings)
         
         visited = set()
