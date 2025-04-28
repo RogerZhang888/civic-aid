@@ -25,25 +25,36 @@ def load_data(path):
     return df[df["cleaned_text"].str.len() > 0]
 
 def onnx_encode_texts(texts, model_name="optimum/all-MiniLM-L6-v2"):
-    """Use ONNX runtime to completely avoid PyTorch meta tensor issues"""
-    # Load ONNX model (doesn't use PyTorch meta tensors)
-    model_file = "model.onnx"
-    model = ORTModelForFeatureExtraction.from_pretrained(model_name, file_name = model_file)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    
+    """Improved version with error handling"""
+    try:
+        model = ORTModelForFeatureExtraction.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+    except Exception as e:
+        raise RuntimeError(f"Failed to load model/tokenizer: {str(e)}")
+
     embeddings = []
     for text in texts:
-        inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
-        
-        # ONNX model doesn't need .to(device) or gradient tracking
-        outputs = model(**inputs)
-        
-        # Mean pooling
-        attention_mask = inputs['attention_mask']
-        last_hidden = outputs.last_hidden_state
-        pooled = (last_hidden * attention_mask.unsqueeze(-1)).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
-        pooled = pooled / np.linalg.norm(pooled, axis=1, keepdims=True)
-        embeddings.append(pooled.numpy())
+        if not text or not isinstance(text, str):  # Skip empty/invalid texts
+            continue
+            
+        try:
+            inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=128)
+            outputs = model(**{k: v.numpy() for k, v in inputs.items()})
+            
+            # Convert outputs to tensor if needed
+            last_hidden = torch.from_numpy(outputs.last_hidden_state) if isinstance(outputs.last_hidden_state, np.ndarray) else outputs.last_hidden_state
+            attention_mask = inputs['attention_mask']
+            
+            # Mean pooling
+            pooled = (last_hidden * attention_mask.unsqueeze(-1)).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
+            pooled = pooled / torch.norm(pooled, p=2, dim=1, keepdim=True)
+            embeddings.append(pooled.detach().numpy())
+        except Exception as e:
+            print(f"Error processing text '{text[:50]}...': {str(e)}")
+            continue
+    
+    if not embeddings:
+        raise ValueError("No valid embeddings generated - check input texts and model")
     
     return np.concatenate(embeddings, axis=0).astype(np.float64)
 
