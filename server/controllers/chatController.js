@@ -54,7 +54,7 @@ exports.getChatHistory = async (req, res) => {
             [userId]
         );
 
-        console.log(chatRes);
+      console.log(`${chatRes.length} chats found for user ${userId}`);
 
         res.status(200).json(chatRes);
     } catch (err) {

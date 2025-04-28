@@ -1,11 +1,14 @@
 import { useNavigate } from "react-router";
 import { Report } from "../types";
+import { useState } from "react";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 export default function ReportCard({ report }: { report: Report }) {
 
    const navigate = useNavigate();
+
+   const [imageError, setImageError] = useState(false);
 
    const {
       mediaUrl,
@@ -56,11 +59,18 @@ export default function ReportCard({ report }: { report: Report }) {
             }
          </div>
          <figure className="max-h-40 overflow-hidden rounded-t-xl">
-            <img
-               src={imgSrc}
-               alt="Preview image"
-               className="object-cover"
-            />
+            {imageError ? (
+               <div className="h-40 w-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500">Unable to load image</span>
+               </div>
+            ) : (
+               <img
+                  src={imgSrc}
+                  alt="Preview image"
+                  className="object-cover w-full h-40"
+                  onError={() => setImageError(true)}
+               />
+            )}
          </figure>
          <div className="card-body">
             <h2 className="card-title">

@@ -139,7 +139,7 @@ export default function Register() {
                }
             </button>
             <div>
-            {t('haveAccount')}{' '}<Link to="/auth" className="link">{t('login')}</Link>
+            {t('haveAccount')}{' '}<Link to="/auth" className="link link-info">{t('login')}</Link>
             </div>
          </div>
 

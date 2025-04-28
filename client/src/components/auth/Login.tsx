@@ -124,7 +124,7 @@ export default function Login() {
                }
             </button>
             <div>
-               {t('noAccount')}{' '}<Link to="/auth/reg" className="link link-hover">{t('register')}</Link>
+               {t('noAccount')}{' '}<Link to="/auth/reg" className="link link-info">{t('register')}</Link>
             </div>
          </div>
 
