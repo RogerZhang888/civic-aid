@@ -89,6 +89,6 @@ export const responseParsers = {
         return r
     },
     noParser: (res) => {
-        return res?{answer:res, valid:true}:{valid:false};
+        return res?{answer:res.replace(/^[\*\#\`]+|[\*\#\`]+$/g, ""), valid:true}:{valid:false};
     }
 }
