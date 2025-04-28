@@ -122,7 +122,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         }
     }
     if (media) chatMedia.push(media)
-    console.log("CHATMEDIA", chatMedia)
+    console.log("CHATMEDIA", chatHistory)
     let queriesTracker = []
     let response = {}
 
