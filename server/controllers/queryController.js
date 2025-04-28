@@ -117,12 +117,13 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     let chatHistory = await getChatHistory(chatId)
     let chatMedia = []
     for (let row in chatHistory) {
-        if (row.media_url && row.media_url.length != 0) {
-            for (let m of row.media_url) chatMedia.push(m)
+        mediaUrlArr = JSON.parse(mediaUrlArr)
+        if (Array.isArray(mediaUrlArr) && mediaUrlArr.length != 0) {
+            for (let m of mediaUrlArr) chatMedia.push(m)
         }
     }
     if (media) chatMedia.push(media)
-    console.log("CHATMEDIA", chatHistory)
+    console.log("CHATMEDIA", chatMedia)
     let queriesTracker = []
     let response = {}
 
