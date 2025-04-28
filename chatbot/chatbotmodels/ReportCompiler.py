@@ -1,19 +1,15 @@
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-os.environ["DISABLE_METATENSOR"] = "1"
-os.environ["PYTORCH_DISABLE_META_TENSOR"] = "1"
-
 import pandas as pd
 import numpy as np
 import re
 from itertools import combinations
-from sentence_transformers import SentenceTransformer, CrossEncoder
+from transformers import AutoTokenizer, AutoModel
 import hdbscan
 import torch
 from sklearn.metrics.pairwise import cosine_distances
 
 # Configuration
-
 def preprocess_text(text):
     text = str(text).lower().strip()
     text = re.sub(r"[^a-z0-9\s]", "", text)
@@ -28,23 +24,42 @@ def load_data(path):
     print(df[df["cleaned_text"].str.len() > 0])
     return df[df["cleaned_text"].str.len() > 0]
 
+def encode_texts(texts, tokenizer, model, batch_size=32):
+    """Custom encoding function with mean pooling"""
+    all_embeddings = []
+    
+    for i in range(0, len(texts), batch_size):
+        batch = texts[i:i+batch_size]
+        inputs = tokenizer(batch, padding=True, truncation=True, 
+                         return_tensors="pt", max_length=128)
+        
+        with torch.no_grad():
+            outputs = model(**inputs)
+        
+        # Mean pooling with attention mask
+        attention_mask = inputs['attention_mask']
+        last_hidden = outputs.last_hidden_state
+        embeddings = (last_hidden * attention_mask.unsqueeze(-1)).sum(1) / attention_mask.sum(-1).unsqueeze(-1)
+        
+        # Normalize embeddings
+        embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
+        all_embeddings.append(embeddings.cpu().numpy())
+    
+    return np.concatenate(all_embeddings, axis=0)
+
 def group_identical_issues(parquet_path, similarity_threshold=0.9):
     # 1. Load data
     df = load_data(parquet_path)
     
-    # 2. Initialize only the embedder
-    embedder = SentenceTransformer("all-MiniLM-L6-v2")
-    # embedder = embedder.to_empty("cpu")
-
-
+    # 2. Initialize Hugging Face model (same as all-MiniLM-L6-v2)
+    model_name = "sentence-transformers/all-MiniLM-L6-v2"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModel.from_pretrained(model_name)
+    model.eval()  # Disable dropout if any
+    
     # 3. Generate embeddings
     texts = df["cleaned_text"].tolist()
-    embeddings = embedder.encode(
-        texts,
-        convert_to_tensor=True,
-        show_progress_bar=False,
-        normalize_embeddings=True
-    ).cpu().numpy().astype(np.float64)
+    embeddings = encode_texts(texts, tokenizer, model).astype(np.float64)
     
     # 4. Cluster using cosine distance
     distance_matrix = cosine_distances(embeddings)
@@ -55,7 +70,7 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     )
     cluster_labels = clusterer.fit_predict(distance_matrix)
     
-    # 5. Verify pairs within clusters using cosine similarity (no CrossEncoder)
+    # 5. Verify pairs within clusters
     output_groups = []
     for cluster_id in set(cluster_labels) - {-1}:
         cluster_df = df[cluster_labels == cluster_id]
