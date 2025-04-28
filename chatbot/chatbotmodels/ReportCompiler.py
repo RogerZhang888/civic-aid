@@ -34,7 +34,7 @@ def group_identical_issues(parquet_path, similarity_threshold=0.9):
     
     # 2. Initialize only the embedder
     embedder = SentenceTransformer("all-MiniLM-L6-v2")
-    embedder = embedder.to_empty("cpu")
+    # embedder = embedder.to_empty("cpu")
 
 
     # 3. Generate embeddings
