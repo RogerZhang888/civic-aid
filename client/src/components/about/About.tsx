@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import useUser from "../auth/useUser";
 import useTranslation from "../language/useTranslation";
-import CardSection from "./CardSection";
+import AboutCard from "./AboutCard";
 
 import mascot from "/mascot.png";
 import mascot1 from "/mascot1.png";
@@ -30,25 +30,25 @@ export default function About() {
     />
   </div>
 
-         <CardSection imageSrc={mascot} imageAlt="Leo waving">
+         <AboutCard imageSrc={mascot} imageAlt="Leo waving">
             {t('about1')}
-         </CardSection>
+         </AboutCard>
 
-         <CardSection imageSrc={mascot1} imageAlt="Leo reporting issues" reverse>
+         <AboutCard imageSrc={mascot1} imageAlt="Leo reporting issues" reverse>
             {t('about2')}
-         </CardSection>
+         </AboutCard>
 
-         <CardSection imageSrc={mascot} imageAlt="Leo explaining features">
+         <AboutCard imageSrc={mascot} imageAlt="Leo explaining features">
             {t('about3')}
-         </CardSection>
+         </AboutCard>
 
-         <CardSection imageSrc={mascot2} imageAlt="Leo celebrating" reverse>
+         <AboutCard imageSrc={mascot2} imageAlt="Leo celebrating" reverse>
             {t('about4')}
-         </CardSection>
+         </AboutCard>
 
-         <CardSection imageSrc={mascot} imageAlt="Leo ready to help">
+         <AboutCard imageSrc={mascot} imageAlt="Leo ready to help">
             {t('about5')}
-         </CardSection>
+         </AboutCard>
 
          {!user &&
             <button 

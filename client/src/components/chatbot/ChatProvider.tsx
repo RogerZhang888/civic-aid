@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router";
 import chatReducer from "./chatReducer";
 import { BookMarked } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -20,6 +21,8 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
    const [imgPreview, setImgPreview] = useState<string | null>(null);
    const [isWaiting, setIsWaiting] = useState<boolean>(false);
    const [isFetchingAChat, setIsFetchingAChat] = useState<boolean>(false);
+
+   const queryClient = useQueryClient();
 
    const navigate = useNavigate();
 
@@ -72,8 +75,11 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
                               Thank you for being an active citizen! Your report will be sent to {rq.agency} for them to take a look. I'll keep you posted on whether this issue has been resolved!
                            </p>
                            <button 
-                              className="btn flex flex-row justify-center items-center px-5 text-lg"
-                              onClick={() => navigate(`/profile/${rq.reportId}`)}
+                              className="btn flex flex-row justify-center items-center px-5"
+                              onClick={async () => {
+                                 await queryClient.invalidateQueries({ queryKey: ['current-user-reports']});
+                                 navigate(`/profile/${rq.reportId}`)
+                              }}
                            >
                               <BookMarked/> View your report
                            </button>
@@ -314,8 +320,11 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
                      Thank you for being an active citizen! Your report will be sent to {agency} for them to take a look. I'll keep you posted on whether this issue has been resolved!
                   </p>
                   <button 
-                     className="btn flex flex-row justify-center items-center px-5 text-lg"
-                     onClick={() => navigate(`/profile/${reportId}`)}
+                     className="btn flex flex-row justify-center items-center px-5"
+                     onClick={async () => {
+                        await queryClient.invalidateQueries({ queryKey: ['current-user-reports']});
+                        navigate(`/profile/${reportId}`)
+                     }}
                   >
                      <BookMarked/> View your report
                   </button>
