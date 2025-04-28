@@ -76,7 +76,7 @@ const createReport = (params) => {
                 chatId,
                 title,
                 summary,
-                media?[media]:[],
+                media,
                 location.latitude,
                 location.longitude,
                 agency,
@@ -92,7 +92,7 @@ const createReport = (params) => {
                 RETURNING id
             `, [
                 summary,
-                media?[media]:[],
+                media,
                 agency,
                 recommendedSteps,
                 urgency,
