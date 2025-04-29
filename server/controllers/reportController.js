@@ -247,6 +247,10 @@ export async function updateReportStatus(req, res) {
 }
 
 export async function getReportSummaries(req, res) {
+    const userId = req.user.id;
+
+    if (userId > 0) res.status(401).json({error:"Only admins may request report summaries"})
+
     const reportParquetSchema = new parquet.ParquetSchema({
         id: { type: "UTF8" },
         description: { type: "UTF8" },
