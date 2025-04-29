@@ -9,7 +9,7 @@ import { responseParsers } from "../services/parsers.js";
 export const updateReportsDB = async (params) => {
     let {userId, chatId, title, summary, media, location, agency, recommendedSteps, urgency, confidence} = params
     return pgsql.query(`SELECT * FROM reports WHERE chat_id = $1`, [chatId]).then((res) => {
-        if (res.length == 0) {
+        if (res.length == 0 || chatId == null) {
             return pgsql.query(`
                 INSERT INTO reports 
                 (user_id, chat_id, title, description, media_url, incident_location, agency, recommended_steps, urgency, report_confidence)
@@ -328,19 +328,18 @@ export async function getReportSummaries(req, res) {
 
         let dbUpdatePromises = []
         for (let report of reports) {
-            // TODO: NOT WORKING DUE TO DB CONSTRAINTS
-            // dbUpdatePromises.push(updateReportsDB({
-            //     userId: -2,
-            //     chatId: "5efe2ea9-6252-4c5d-b14d-ab3da144fd3a",
-            //     title: `Summarised report ${new Date().toISOString()} ${report.agency}`,
-            //     summary: report.summary,
-            //     media: [],
-            //     location: {longitude:null, latitude:null},
-            //     agency: report.agency,
-            //     recommendedSteps: report.recommendedSteps,
-            //     urgency: report.urgency,
-            //     confidence: report.confidence
-            // }))
+            dbUpdatePromises.push(updateReportsDB({
+                userId: -2,
+                chatId: null,
+                title: `Summarised report ${new Date().toISOString()} ${report.agency}`,
+                summary: report.summary,
+                media: [],
+                location: {longitude:null, latitude:null},
+                agency: report.agency,
+                recommendedSteps: report.recommendedSteps,
+                urgency: report.urgency,
+                confidence: report.confidence
+            }))
         }
 
         Promise.all(dbUpdatePromises).then((r) => {
