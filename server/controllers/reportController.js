@@ -237,9 +237,8 @@ export async function getReportSummaries(req, res) {
                     'Content-Type': 'application/json'
                 }
             }).then((r) => {
-                return r.json()
-            }).then((r) => {
                 console.log("OUTPUT JSON", r)
+                return r.json()
             })
         )
     }
