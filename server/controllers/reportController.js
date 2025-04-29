@@ -237,14 +237,26 @@ export async function getReportSummaries(req, res) {
                     'Content-Type': 'application/json'
                 }
             }).then((r) => {
-                return r.json()
+                return {
+                    agency:reportGroup.agency,
+                    response:r.json()
+                }
             })
         )
     }
 
     Promise.all(summaries).then((r) => {
-        console.log(r)
-        res.json(r)
+        console.log("SUMMARY", r)
+        let compiledSummary = []
+        for (let summary of r) {
+            if (summary.response.length == 0) continue
+            for (let subgroup of summary) {
+                compiledSummary.push(subgroup.map((reportId) => reports.find((e) => e.id == reportId)))
+            }
+        }
+        return compiledSummary
+    }).then((r) => {
+        res.json(compiledSummary)
     })
     // res.json(Promise.all(summaries))
 }
