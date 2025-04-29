@@ -56,8 +56,8 @@ Backend available at [http://localhost:3000](http://localhost:3000).
 
 ### 3. llmserver
 
-The LLM server cannot be run locally because the custom model.safetensors file used in RAG is too large to upload to this repo.
-Additionally, files containing API keys to call deepseek via openrouter.ai are not provided in this repo.
+Please contact the developers to run the LLM server locally because the custom model.safetensors file used in RAG is too large to upload to this repo.
+Additionally, files containing API keys to call deepseek via openrouter.ai are not provided in this repo. Please contact the developers for the format of the file and how to obtain the API keys.
 
 ## Architecture Overview
 
