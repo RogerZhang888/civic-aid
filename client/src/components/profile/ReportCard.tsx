@@ -20,8 +20,6 @@ export default function ReportCard({ report }: { report: Report }) {
       urgency
    } = report;
 
-   console.log(mediaUrl);
-
    function formatDate(date: Date) {
       const d = new Date(date);
       const day = String(d.getDate()).padStart(2, '0');
