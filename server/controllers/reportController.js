@@ -2,6 +2,8 @@ import pgsql from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
 import { generate } from "random-words";
 import parquet from "parquetjs";
+import { callModel } from "../services/llmService.js";
+import { systempromptTemplates } from "../services/promptbook.js";
 
 // manually creates a report based on:
 // 1. user_id (from JWT)
@@ -260,6 +262,16 @@ export async function getReportSummaries(req, res) {
         return compiledSummary
     }).then((r) => {
         res.json(r)
+    }).then((reportGroups) => {
+        let finalReportPromises = []
+        for (let reportGroup of reportGroups) {
+            const reportQuery = "---\n---\nREPORTS\n" + reportGroup.map((report, i) => `${i}.${report.description}\n`).join("---\n")
+            finalReportPromises.push(callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}))
+        }
+
+        return Promise.all(finalReportPromises)
+    }).then((finalReports) => {
+        res.json(finalReports)
     })
     // res.json(Promise.all(summaries))
 }

@@ -9,7 +9,7 @@ Your task is to analyse the user's question and answer within the context of Sin
 const reportpreface = `built to write and process incident reports. \
 Your task is to analyse the prompt and produce a short report which can be escalated to the relevant agencies for action. `
 
-const template = (instructions, output, userprompt, chatHistory) => {
+const template = (instructions, output, userprompt, chatHistory = []) => {
     let processedChatHistory = chatHistory.map((q) => {
         if (q.isValid || q.is_valid) return `Prompt: ${(q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
         else return ''
@@ -155,4 +155,41 @@ However I can provide a better answer with some additional information. <Follow 
             chatHistory
         )
     },
+    checkReportSummaryTemplate: (userprompt) => {
+        template(
+            preface+genericpreface+`A list of similar reports were identified from users where identified. Verify which these reports are indeed of the same issue, and summarise them into a single report if they are. `,
+            `Format your response as a JSON object. The JSON object is an Array of Reports, each Report with the fields 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. Each Report in the array should be a summarised report of all the reports that are of the same issue. \
+Agency should contain the full name of a government agency only. \
+Urgency and confidence should be a decimal between 0 and 1 exclusive. \
+Sources should be an array of URL links. 
+For example:
+[
+    {
+        'summary': 'The user reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas.',
+        'confidence': 0.63,
+        'urgency': 0.94,
+        'recommendedSteps': 'Inspect and repair the burst fire hydrant at the reported location.',
+        'agency': 'Public Utilities Board',
+        'sources':[
+            <url 1>,
+            <url 2>,
+            ...
+        ]
+    },
+    {
+        'summary': 'The user reported a tree falling down on Sengkang East Avenue, partially obstructing traffic flow in one direction.',
+        'confidence': 0.93,
+        'urgency': 0.85,
+        'recommendedSteps': 'Dispatch a team to assess and remove the fallen tree to restore traffic flow and ensure safety.',
+        'agency': 'National Parks Board',
+        'sources':[
+            <url 1>,
+            <url 2>,
+            ...
+        ]
+    },
+]`,
+            userprompt
+        )
+    }
 }

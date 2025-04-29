@@ -2,8 +2,7 @@
 
 > Last updated: 29/04/2025
 
-**CivicAId** is an AI-powered civic chatbot designed to streamline interactions between citizens and government services in Singapore.  
-It integrates an LLM backend for intelligent conversations, local agentic workflows for performance optimisation, supports real-time issue reporting, and delivers customized, localized answers for the Singaporean context.
+**CivicAId** is an AI-powered civic chatbot designed to streamline interactions between citizens and government services in Singapore. It integrates an LLM backend for intelligent conversations, local agentic workflows for performance optimisation, supports real-time issue reporting, and delivers customized, localized answers for the Singaporean context.
 
 🌐 [Visit the live demo](https://civic-aid.ziwyy.com)
 
