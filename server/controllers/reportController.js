@@ -326,7 +326,7 @@ export async function getReportSummaries(req, res) {
     }).then((r) => {
         const reports = r.map((raw) => responseParsers.reportParser(raw))
 
-        dbUpdatePromises = []
+        let dbUpdatePromises = []
         for (let report of reports) {
             dbUpdatePromises.push(updateReportsDB({
                 userId: -2,
