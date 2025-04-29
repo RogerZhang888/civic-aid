@@ -64,12 +64,13 @@ pip install -r requirements.txt
 python llmserver.py
 ```
 
-LLM server available at [http://localhost:5000](http://localhost:5000).
+LLM server available at [http://localhost:7346](http://localhost:7346).
 
 ## Architecture Overview
 
 ```
 civic-aid/
+├── LICENSE                       # MIT License
 ├── client/                       # Frontend: Vite / React.js app
 │   ├── public/                   # Public assets (eg. images)
 │   └── src/
@@ -129,7 +130,7 @@ civic-aid/
 - **Domain and Security**  
   Managed through Cloudflare for DNS and DDoS protection.
 
-_Nginx and pm2 configuration files available upon request._
+_Nginx configuration files available upon request._
 
 </details>
 
