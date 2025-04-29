@@ -169,24 +169,14 @@ For example:
         'confidence': 0.63,
         'urgency': 0.94,
         'recommendedSteps': 'Inspect and repair the burst fire hydrant at the reported location.',
-        'agency': 'Public Utilities Board',
-        'sources':[
-            <url 1>,
-            <url 2>,
-            ...
-        ]
+        'agency': 'Public Utilities Board'
     },
     {
         'summary': 'The user reported a tree falling down on Sengkang East Avenue, partially obstructing traffic flow in one direction.',
         'confidence': 0.93,
         'urgency': 0.85,
         'recommendedSteps': 'Dispatch a team to assess and remove the fallen tree to restore traffic flow and ensure safety.',
-        'agency': 'National Parks Board',
-        'sources':[
-            <url 1>,
-            <url 2>,
-            ...
-        ]
+        'agency': 'National Parks Board'
     },
 ]`,
             userprompt

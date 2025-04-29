@@ -263,13 +263,18 @@ export async function getReportSummaries(req, res) {
     }).then((reportGroups) => {
         let finalReportPromises = []
         for (let reportGroup of reportGroups) {
-            const reportQuery = "---\n---\nREPORTS\n" + reportGroup.map((report, i) => `Report ${i}:\n\`\`\`\n${JSON.stringify(report)}\n\`\`\`\n`).join("---\n")
+            const reportQuery = "---\n---\nREPORTS\n" + reportGroup.map((report, i) => `Report ${i}:\n\`\`\`\n${JSON.stringify({
+                summary:report.description, 
+                recommendedSteps:report.recommended_steps,
+                agency:report.agency,
+                confidence:report.report_confidence,
+                urgency:report.urgency
+            })}\n\`\`\`\n`).join("---\n")
             finalReportPromises.push(callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}))
         }
-
         return Promise.all(finalReportPromises)
-    }).then((finalReports) => {
-        res.json(finalReports)
+    }).then((r) => {
+        res.json(r)
     })
     // res.json(Promise.all(summaries))
 }
