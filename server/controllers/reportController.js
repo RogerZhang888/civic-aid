@@ -332,6 +332,7 @@ export async function getReportSummaries(req, res) {
 
         let dbUpdatePromises = []
         for (let report of reports) {
+            if (!report.valid) continue
             dbUpdatePromises.push(updateReportsDB({
                 userId: -2,
                 chatId: null,
