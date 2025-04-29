@@ -54,17 +54,10 @@ Backend available at [http://localhost:3000](http://localhost:3000).
 
 **Note:** The development server connects directly to the live PostgreSQL database if `.env` is correctly configured.
 
-### 3. Flask LLM and AI Server
+### llmserver
 
-```bash
-cd chatbot
-python -m venv .venv        # Optional but recommended
-source .venv/bin/activate   # Skip if virtual environment not created
-pip install -r requirements.txt
-python llmserver.py
-```
-
-LLM server available at [http://localhost:7346](http://localhost:7346).
+The LLM server cannot be run locally because the custom model.safetensors file used in RAG is too large to upload to this repo.
+Additionally, files containing API keys to call deepseek via openrouter.ai are not provided in this repo.
 
 ## Architecture Overview
 
@@ -132,6 +125,8 @@ civic-aid/
 
 _Nginx configuration files available upon request._
 
+_model.safetensors file available upon request._
+ 
 </details>
 
 ## Acknowledgments
