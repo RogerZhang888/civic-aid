@@ -259,7 +259,7 @@ export async function getReportSummaries(req, res) {
         }
         return compiledSummary
     }).then((r) => {
-        res.json(compiledSummary)
+        res.json(r)
     })
     // res.json(Promise.all(summaries))
 }
