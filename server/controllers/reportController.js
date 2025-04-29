@@ -331,7 +331,7 @@ export async function getReportSummaries(req, res) {
             dbUpdatePromises.push(updateReportsDB({
                 userId: -2,
                 chatId: "5efe2ea9-6252-4c5d-b14d-ab3da144fd3a",
-                title: `Summarised report ${Date.now()} ${report.agency}`,
+                title: `Summarised report ${new Date().toISOString()} ${report.agency}`,
                 summary: report.summary,
                 media: [],
                 location: {longitude:null, latitude:null},
