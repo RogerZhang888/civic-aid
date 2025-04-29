@@ -25,60 +25,49 @@ export default function ProfileReportPage() {
       return word.charAt(0).toUpperCase() + word.slice(1);
    }
 
-   console.log(thisReport.incidentLocation)
-
    return (
       <div className="card bg-base-100 m-10 shadow-[0_0_10px_1px_rgba(0,0,0,0.2)]">
          <div className="card-body text-base">
-            <h1 className="card-title text-3xl mb-4">{thisReport.title}</h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h1 className="card-title text-3xl">{thisReport.title}</h1>
+
+            <div className="divider"/>
+
+            <div className="max-w-100">
                
-               <div>
-                  <h2 className="text-xl font-semibold mb-2">Details</h2>
-                  <div className="space-y-3">
-                     <div className="flex justify-between">
-                        <span className="font-medium">Status:</span>
-                        <span className={`badge ${statusColor} p-3`}>{capitalize(thisReport.status)}</span>
-                     </div>
-                     <div className="flex justify-between">
-                        <span className="font-medium">Created:</span>
-                        <span>{createdAt}</span>
-                     </div>
-                     <div className="flex justify-between">
-                        <span className="font-medium">Resolved:</span>
-                        <span>{resolvedAt}</span>
-                     </div>
-                     <div className="flex justify-between">
-                        <span className="font-medium">Agency:</span>
-                        <span>{thisReport.agency}</span>
-                     </div>
-                     <div className="flex justify-between items-center">
-                        <span className="font-medium">Urgency:</span>
-                        <div className="flex items-center gap-2">
-                           <progress className="progress progress-info w-30" value={thisReport.urgency} max="1"></progress>
-                           <span>{thisReport.urgency.toFixed(2)} / 1</span>
-                        </div>
-                     </div>
-                     <div className="flex justify-between items-center">
-                        <span className="font-medium">Confidence:</span>
-                        <div className="flex items-center gap-2">
-                           <progress className="progress progress-primary w-30" value={thisReport.reportConfidence} max="1"></progress>
-                           <span>{thisReport.reportConfidence.toFixed(2)} / 1</span>
-                        </div>
-                     </div>
+               <h2 className="text-xl font-semibold mb-2">Details</h2>
+               <div className="space-y-3">
+                  <div className="flex justify-between">
+                     <span className="font-medium">Status:</span>
+                     <span className={`badge ${statusColor} p-3`}>{capitalize(thisReport.status)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                     <span className="font-medium">Created:</span>
+                     <span>{createdAt}</span>
+                  </div>
+                  <div className="flex justify-between">
+                     <span className="font-medium">Resolved:</span>
+                     <span>{resolvedAt}</span>
+                  </div>
+                  <div className="flex justify-between">
+                     <span className="font-medium">Agency:</span>
+                     <span>{thisReport.agency}</span>
                   </div>
                </div>
 
-               {thisReport.incidentLocation && (
-                  <div>
-                     <h2 className="text-xl font-semibold mb-2">Location</h2>
-                     <div className="p-3 rounded-lg">
+            </div>
+
+            <div className="divider"/>
+
+            <div>
+               <h2 className="text-xl font-semibold mb-2">Location</h2>
+               {thisReport.incidentLocation 
+                  ?  <div className="whitespace-pre-line bg-base-200 p-4 rounded-lg">
                         <p><span className="font-medium">Latitude:</span> {thisReport.incidentLocation.latitude}</p>
                         <p><span className="font-medium">Longitude:</span> {thisReport.incidentLocation.longitude}</p>
-                     </div>
-                  </div>
-               )}
+                     </div>  
+                  :  "No location data for this report."
+               }
             </div>
 
             <div className="divider"/>
@@ -121,3 +110,21 @@ export default function ProfileReportPage() {
       </div>
    );
 }
+
+/**
+ * 
+ *                   {/* <div className="flex justify-between items-center">
+                     <span className="font-medium">Urgency:</span>
+                     <div className="flex items-center gap-2">
+                        <progress className="progress progress-info w-30" value={thisReport.urgency} max="1"></progress>
+                        <span>{thisReport.urgency.toFixed(2)} / 1</span>
+                     </div>
+                  </div>
+                  <div className="flex justify-between items-center">
+                     <span className="font-medium">Confidence:</span>
+                     <div className="flex items-center gap-2">
+                        <progress className="progress progress-primary w-30" value={thisReport.reportConfidence} max="1"></progress>
+                        <span>{thisReport.reportConfidence.toFixed(2)} / 1</span>
+                     </div>
+                  </div>
+ */
