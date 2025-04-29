@@ -6,6 +6,55 @@ import { callModel } from "../services/llmService.js";
 import { systempromptTemplates } from "../services/promptbook.js";
 import { responseParsers } from "../services/parsers.js";
 
+export const updateReportsDB = async (params) => {
+    let {userId, chatId, title, summary, media, location, agency, recommendedSteps, urgency, confidence} = params
+    return pgsql.query(`SELECT * FROM reports WHERE chat_id = $1`, [chatId]).then((res) => {
+        if (res.length == 0) {
+            return pgsql.query(`
+                INSERT INTO reports 
+                (user_id, chat_id, title, description, media_url, incident_location, agency, recommended_steps, urgency, report_confidence)
+                VALUES (
+                    $1, $2, $3, $4, $5, 
+                    CASE
+                        WHEN $6::double precision IS NOT NULL AND $7::double precision IS NOT NULL
+                        THEN ST_SetSRID(ST_MakePoint($6, $7), 4326)
+                        ELSE NULL
+                    END,
+                    $8, $9, $10, $11
+                )
+                RETURNING id
+            `, [
+                userId,
+                chatId,
+                title,
+                summary,
+                media,
+                location.latitude,
+                location.longitude,
+                agency,
+                recommendedSteps, 
+                urgency,
+                confidence
+            ])
+        } else {
+            return pgsql.query(`
+                UPDATE reports 
+                SET description = $1, media_url = $2, agency = $3, recommended_steps = $4, urgency = $5, report_confidence = $6
+                WHERE chat_id = $7
+                RETURNING id
+            `, [
+                summary,
+                media,
+                agency,
+                recommendedSteps,
+                urgency,
+                confidence,
+                chatId
+            ])
+        }
+    })
+}
+
 // manually creates a report based on:
 // 1. user_id (from JWT)
 // 2. chat_id (chat which report is based on)
@@ -277,7 +326,28 @@ export async function getReportSummaries(req, res) {
     }).then((r) => {
         const reports = r.map((raw) => responseParsers.reportParser(raw))
 
-        res.json(reports)
+        dbUpdatePromises = []
+        for (let report of reports) {
+            dbUpdatePromises.push(updateReportsDB({
+                userId: -2,
+                chatId: "5efe2ea9-6252-4c5d-b14d-ab3da144fd3a",
+                title: `Summarised report ${Date.now()} ${report.agency}`,
+                summary: report.summary,
+                media: [],
+                location: {longitude:null, latitude:null},
+                agency: report.agency,
+                recommendedSteps: report.recommendedSteps,
+                urgency: report.urgency,
+                confidence: report.confidence
+            }))
+        }
+
+        Promise.all(dbUpdatePromises).then((r) => {
+            res.json(reports)
+        }).catch((e) => {
+            console.log("Error updating reports DB", e)
+            res.status(500).json({ error: e.message });
+        })
     })
     // res.json(Promise.all(summaries))
 }
