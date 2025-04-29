@@ -237,9 +237,11 @@ export async function getReportSummaries(req, res) {
                     'Content-Type': 'application/json'
                 }
             }).then((r) => {
+                return r.json()
+            }).then((r) => {
                 return {
                     agency:reportGroup.agency,
-                    response:r.json()
+                    response: r
                 }
             })
         )
@@ -249,6 +251,7 @@ export async function getReportSummaries(req, res) {
         console.log("SUMMARY", r)
         let compiledSummary = []
         for (let summary of r) {
+            console.log(`Processing summary for ${r.agency}`, r.response)
             if (summary.response.length == 0) continue
             for (let subgroup of summary) {
                 compiledSummary.push(subgroup.map((reportId) => reports.find((e) => e.id == reportId)))
