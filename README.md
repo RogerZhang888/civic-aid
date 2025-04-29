@@ -54,7 +54,7 @@ Backend available at [http://localhost:3000](http://localhost:3000).
 
 **Note:** The development server connects directly to the live PostgreSQL database if `.env` is correctly configured.
 
-### llmserver
+### 3. llmserver
 
 The LLM server cannot be run locally because the custom model.safetensors file used in RAG is too large to upload to this repo.
 Additionally, files containing API keys to call deepseek via openrouter.ai are not provided in this repo.
