@@ -44,7 +44,9 @@ def callsummariser():
     params = request.get_json()
     parquet_path = '../server/parquets/' + params['parquet_path']
 
-    return jsonify(callReportCompiler(parquet_path))
+    res = callReportCompiler(parquet_path)
+    print(f"Summariser parquets {parquet_path} processed", res)
+    return jsonify(res)
 
 # Health check endpoint 
 @app.route('/health', methods=['GET'])

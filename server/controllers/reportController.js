@@ -238,6 +238,8 @@ export async function getReportSummaries(req, res) {
                 }
             }).then((r) => {
                 return r.json()
+            }).then((r) => {
+                console.log("OUTPUT JSON", r)
             })
         )
     }
