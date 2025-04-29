@@ -22,7 +22,7 @@ function MessageBubble({
    return (
       <React.Fragment key={message.question.slice(0, 5)}>         
          <div className="chat chat-end tracking-wide mt-3">
-            <div className="chat-bubble space-y-1">
+            <div className="chat-bubble space-y-1 whitespace-pre-wrap">
                {message.question && <div>{message.question}</div>}
                {message.media &&
                   <div className="text-xs flex items-center space-x-1">

@@ -34,7 +34,8 @@ const updateQueriesDB = (params)  => {
             confidence
         ]
       ).then(() => {
-        console.log("Updated Queries table", params)
+        return;
+        // console.log("Updated Queries table", params)
     }).catch((err) => {
         console.log("Error updating queries table", err)
     })
@@ -47,7 +48,7 @@ const getChatHistory = async (chatId) => {
 }
 const getChat = async (chatId) => {
     let chat = await pgsql.query("SELECT * FROM chats WHERE id = $1", [chatId])
-    console.log("Extracting chat info", chat)
+    // console.log("Extracting chat info", chat)
     if (chat.length === 0) return {id:null}
     return chat[0]
 }
@@ -116,12 +117,16 @@ const getConfidence = (score, count) => {
 const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     let chatHistory = await getChatHistory(chatId)
     let chatMedia = []
-    for (let row in chatHistory) {
-        if (row.media && row.media.length != 0) {
-            for (let m of row.media) chatMedia.push(m)
+    
+    for (let row of chatHistory) {
+        if (Array.isArray(row.media_url) && row.media_url != 0) {
+            for (let m of row.media_url) chatMedia.push(m)
         }
     }
     if (media) chatMedia.push(media)
+    chatMedia = [...new Set(chatMedia)]
+        
+    // console.log("CHATMEDIA", chatMedia)
     let queriesTracker = []
     let response = {}
 
@@ -130,7 +135,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         // NEVER means this output is never used as a reply, 
         // ALWAYS means this output will always be used as a reply, 
         // HIGH means this output will be used as a reply only when the confidence is HIGH
-        console.log("Querying LLM", query)
+        // console.log("Querying LLM", query)
 
         // TODO: Actually calling the model
         let parsedRes
@@ -166,7 +171,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         }
         // TOOD: better way to reprompt for invalid output format?
 
-        console.log(`Result for query ${query}`, parsedRes)
+        // console.log(`Result for query ${query}`, parsedRes)
         return parsedRes
     }
 
@@ -251,10 +256,10 @@ exports.submitQuery = async (req, res) => {
         const userId = req.user?.id || null;
         const uploadedFile = req.file;
 
-        console.log("Received prompt:", prompt);
-        console.log("Location:", latitude, longitude);
-        console.log("User ID:", userId);
-        console.log("Uploaded file:", uploadedFile);
+        // console.log("Received prompt:", prompt);
+        // console.log("Location:", latitude, longitude);
+        // console.log("User ID:", userId);
+        // console.log("Uploaded file:", uploadedFile);
 
         if ((!prompt) && (!uploadedFile)) {
             return res.status(400).json({ error: "Prompt is required" });

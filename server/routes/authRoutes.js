@@ -78,7 +78,7 @@ router.post("/login", async (req, res) => {
             email: resEmail
          },
          process.env.JWT_SECRET,
-         { expiresIn: 60 * 60 }
+         { expiresIn: 60 * 60 * 24 * 30 }
       );
 
       console.log(`User ${resUsername} logged in successfully`);

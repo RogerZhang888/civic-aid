@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createReport, getReport, getUserReports, updateReportStatus, getReportSummaries } = require('../controllers/reportController');
+const { createReport, getReport, getUserReports, updateReportStatus, getReportSummaries, getDoesUserHaveReward } = require('../controllers/reportController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 // create a report (TODO: DEPRECATE??)
@@ -16,6 +16,9 @@ router.get('/reports', authMiddleware, getUserReports);
 router.patch('/reports/:id', authMiddleware, updateReportStatus);
 
 // get summarised reports
-router.get('/reports_summary', authMiddleware, getReportSummaries)
+router.get('/reports_summary', authMiddleware, getReportSummaries);
+
+// check if user is eligible for reward this month
+router.get('/reports/reward', authMiddleware, getDoesUserHaveReward);
 
 module.exports = router;

@@ -25,9 +25,11 @@ export default function ProfileReportPage() {
       return word.charAt(0).toUpperCase() + word.slice(1);
    }
 
+   console.log(thisReport.incidentLocation)
+
    return (
       <div className="card bg-base-100 m-10 shadow-[0_0_10px_1px_rgba(0,0,0,0.2)]">
-         <div className="card-body">
+         <div className="card-body text-base">
             <h1 className="card-title text-3xl mb-4">{thisReport.title}</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -54,15 +56,15 @@ export default function ProfileReportPage() {
                      <div className="flex justify-between items-center">
                         <span className="font-medium">Urgency:</span>
                         <div className="flex items-center gap-2">
-                           <progress className="progress progress-info w-24" value={thisReport.urgency} max="1"></progress>
-                           <span>{thisReport.urgency}</span>
+                           <progress className="progress progress-info w-30" value={thisReport.urgency} max="1"></progress>
+                           <span>{thisReport.urgency.toFixed(2)} / 1</span>
                         </div>
                      </div>
                      <div className="flex justify-between items-center">
                         <span className="font-medium">Confidence:</span>
                         <div className="flex items-center gap-2">
-                           <progress className="progress progress-primary w-24" value={thisReport.reportConfidence} max="1"></progress>
-                           <span>{thisReport.reportConfidence}</span>
+                           <progress className="progress progress-primary w-30" value={thisReport.reportConfidence} max="1"></progress>
+                           <span>{thisReport.reportConfidence.toFixed(2)} / 1</span>
                         </div>
                      </div>
                   </div>
@@ -71,10 +73,9 @@ export default function ProfileReportPage() {
                {thisReport.incidentLocation && (
                   <div>
                      <h2 className="text-xl font-semibold mb-2">Location</h2>
-                     <div className="bg-gray-100 p-3 rounded-lg">
+                     <div className="p-3 rounded-lg">
                         <p><span className="font-medium">Latitude:</span> {thisReport.incidentLocation.latitude}</p>
                         <p><span className="font-medium">Longitude:</span> {thisReport.incidentLocation.longitude}</p>
-                        <p><span className="font-medium">Accuracy:</span> {thisReport.incidentLocation.accuracy} meters</p>
                      </div>
                   </div>
                )}
@@ -96,7 +97,6 @@ export default function ProfileReportPage() {
                   </div>
                </>
             )}
-
 
             <div className="divider"/>
             <div>
