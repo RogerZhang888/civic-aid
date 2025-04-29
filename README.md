@@ -3,7 +3,7 @@
 > Last updated: 29/04/2025
 
 **CivicAId** is an AI-powered civic chatbot designed to streamline interactions between citizens and government services in Singapore.  
-It integrates an LLM backend for intelligent conversations, supports real-time issue reporting, and delivers customized, localized answers for the Singaporean context.
+It integrates an LLM backend for intelligent conversations, local agentic workflows for performance optimisation, supports real-time issue reporting, and delivers customized, localized answers for the Singaporean context.
 
 🌐 [Visit the live demo](https://civic-aid.ziwyy.com)
 
@@ -21,7 +21,7 @@ It integrates an LLM backend for intelligent conversations, supports real-time i
 | --------------- | --------------------------------------------- |
 | **Frontend**    | React.js (Vite) served statically via Nginx |
 | **Backend**     | Express.js (Node.js) managed with PM2, reverse proxied by Nginx |
-| **LLM Server**  | Flask (Python) serving local LLM models |
+| **LLM Server**  | Flask (Python) serving local AI/NLP models and Deepseek API calls via Openrouter |
 | **Database**    | PostgreSQL hosted on NeonDB |
 | **Hosting**     | Huawei Cloud Elastic Cloud Server (ECS) |
 | **Domain & Security** | Cloudflare (Domain management and DDoS protection) |
@@ -107,7 +107,7 @@ civic-aid/
     │   │                           captioning model
     │   └── ReportCompiler.py     # For grouping similar reports
     ├── Dockerfile                # For optional Docker support
-    └── govsg_crawler_2           # Webcrawler
+    └── govsg_crawler_2           # Webcrawler and knowledge base for RAG
 ```
 
 ## Production Deployment
@@ -145,3 +145,9 @@ _Nginx configuration files available upon request._
 - [OpenRouter.ai](https://openrouter.ai/)
 - [NeonDB](https://neon.tech/)
 - [Huawei Cloud](https://www.huaweicloud.com/)
+- [Transformers (HuggingFace)](https://huggingface.co/docs/transformers) 
+- [Optimum (HuggingFace)](https://huggingface.co/docs/optimum)
+- [PyTorch](https://pytorch.org/docs/stable/)
+- [HDBSCAN](https://hdbscan.readthedocs.io/) 
+- [scikit-learn](https://scikit-learn.org/stable/)
+- [ONNX Runtime](https://onnxruntime.ai/) 
