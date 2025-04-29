@@ -328,18 +328,19 @@ export async function getReportSummaries(req, res) {
 
         let dbUpdatePromises = []
         for (let report of reports) {
-            dbUpdatePromises.push(updateReportsDB({
-                userId: -2,
-                chatId: "5efe2ea9-6252-4c5d-b14d-ab3da144fd3a",
-                title: `Summarised report ${new Date().toISOString()} ${report.agency}`,
-                summary: report.summary,
-                media: [],
-                location: {longitude:null, latitude:null},
-                agency: report.agency,
-                recommendedSteps: report.recommendedSteps,
-                urgency: report.urgency,
-                confidence: report.confidence
-            }))
+            // TODO: NOT WORKING DUE TO DB CONSTRAINTS
+            // dbUpdatePromises.push(updateReportsDB({
+            //     userId: -2,
+            //     chatId: "5efe2ea9-6252-4c5d-b14d-ab3da144fd3a",
+            //     title: `Summarised report ${new Date().toISOString()} ${report.agency}`,
+            //     summary: report.summary,
+            //     media: [],
+            //     location: {longitude:null, latitude:null},
+            //     agency: report.agency,
+            //     recommendedSteps: report.recommendedSteps,
+            //     urgency: report.urgency,
+            //     confidence: report.confidence
+            // }))
         }
 
         Promise.all(dbUpdatePromises).then((r) => {

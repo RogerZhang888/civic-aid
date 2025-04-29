@@ -6,7 +6,7 @@ const { responseParsers } = require('../services/parsers');
 const { updateReportsDB: createReport } = require('./reportController');
 
 const updateQueriesDB = (params)  => {
-    let {userId, chatId, userprompt, media, systemprompt, location, response, isValid, toReply, confidence} = params
+    let {userId, chatId, userprompt, media, systemprompt, location, response, isValid, toReply, confidence, sources} = params
     // console.log("PRE QUERY CHECK", {userId, chatId, userprompt, media, systemprompt, location, response, isValid, toReply, confidence})
     pgsql.query(
         `INSERT INTO queries
@@ -29,7 +29,7 @@ const updateQueriesDB = (params)  => {
             location.longitude,
             systemprompt,
             response,
-            [], // TODO: sources?? — will still work as an empty array
+            sources??[],
             isValid,
             toReply,
             confidence
@@ -88,7 +88,6 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         // HIGH means this output will be used as a reply only when the confidence is HIGH
         // console.log("Querying LLM", query)
 
-        // TODO: Actually calling the model
         let parsedRes
         let promptcount = 0
         const repromptLimit = 3
