@@ -251,9 +251,9 @@ export async function getReportSummaries(req, res) {
         console.log("SUMMARY", r)
         let compiledSummary = []
         for (let summary of r) {
-            console.log(`Processing summary for ${r.agency}`, r.response)
+            console.log(`Processing summary for ${summary.agency}`, summary.response)
             if (summary.response.length == 0) continue
-            for (let subgroup of summary) {
+            for (let subgroup of summary.response) {
                 compiledSummary.push(subgroup.map((reportId) => reports.find((e) => e.id == reportId)))
             }
         }
