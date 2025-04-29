@@ -260,8 +260,6 @@ export async function getReportSummaries(req, res) {
             }
         }
         return compiledSummary
-    }).then((r) => {
-        res.json(r)
     }).then((reportGroups) => {
         let finalReportPromises = []
         for (let reportGroup of reportGroups) {
