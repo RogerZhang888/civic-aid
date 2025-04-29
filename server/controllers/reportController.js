@@ -265,12 +265,12 @@ export async function getReportSummaries(req, res) {
 }
 
 export async function getDoesUserHaveReward(req, res) {
-   console.log("CHECKING IF USER IS ELIGIBLE FOR REWARD THIS MONTH");
+   const now = new Date();
+   const userId = req.user.id;
+   console.log(`CHECKING IF USER ${userId} IS ELIGIBLE FOR REWARD THIS MONTH (${now.toDateString()})`);
 
    try {
-       const userId = req.user.id;
 
-       const now = new Date();
        const firstDayPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
        const firstDayPrevMthFormatted = [
          firstDayPrevMonth.getFullYear(),
@@ -288,6 +288,8 @@ export async function getDoesUserHaveReward(req, res) {
                .status(404)
                .json({ error: `Reward data missing for month of ${firstDayPrevMthFormatted}` });
        }
+
+       console.log("Rewarded users: id " + result[0].rewarded_users);
 
        res.json(result[0].rewarded_users.includes(userId));
 

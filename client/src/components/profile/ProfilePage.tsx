@@ -115,20 +115,9 @@ export default function ProfilePage() {
             ) : (
                <div className="card w-full max-w-md bg-base-200 shadow-xl">
                   <div className="card-body items-center text-center">
-                     <h2 className="card-title text-2xl mb-2">No Reward This Month</h2>
-                     <div className="text-4xl mb-2">😢</div>
+                     <h2 className="card-title text-2xl mb-2">No Reward This Month 😢</h2>
                      <p>You haven't qualified for a reward this month.</p>
                      <p>Keep submitting reports to earn rewards!</p>
-                     <div className="w-full mt-4">
-                        <progress
-                           className="progress progress-primary w-full"
-                           value={resolvedCount}
-                           max="5"
-                        ></progress>
-                        <p className="text-sm mt-1">
-                           {resolvedCount}/5 reports needed
-                        </p>
-                     </div>
                   </div>
                </div>
             )}
