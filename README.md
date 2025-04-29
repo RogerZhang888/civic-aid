@@ -54,7 +54,7 @@ Backend available at [http://localhost:3000](http://localhost:3000).
 
 **Note:** The development server connects directly to the live PostgreSQL database if `.env` is correctly configured.
 
-### 3. llmserver
+### 3. Flask AI / LLM Server
 
 Please contact the developers to run the LLM server locally because the custom model.safetensors file used in RAG is too large to upload to this repo.
 Additionally, files containing API keys to call Deepseek via openrouter.ai are not provided in this repo. Please contact the developers for the format of the file and how to obtain the API keys.
