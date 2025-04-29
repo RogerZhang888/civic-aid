@@ -19,6 +19,6 @@ router.patch('/reports/:id', authMiddleware, updateReportStatus);
 router.get('/reports_summary', authMiddleware, getReportSummaries);
 
 // check if user is eligible for reward this month
-router.get('/reports/reward', authMiddleware, getDoesUserHaveReward);
+router.get('/reports_reward', authMiddleware, getDoesUserHaveReward);
 
 module.exports = router;

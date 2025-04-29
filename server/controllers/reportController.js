@@ -251,19 +251,23 @@ export async function getDoesUserHaveReward(req, res) {
    try {
        const userId = req.user.id;
 
-       const firstDayPrevMonthStr = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1)
-         .toISOString()
-         .slice(0, 10);
+       const now = new Date();
+       const firstDayPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+       const firstDayPrevMthFormatted = [
+         firstDayPrevMonth.getFullYear(),
+         String(firstDayPrevMonth.getMonth() + 1).padStart(2, '0'),
+         '01'
+       ].join('-');
 
        const result = await pgsql.query(
            "SELECT * FROM awards WHERE month = $1",
-           [firstDayPrevMonthStr]
+           [firstDayPrevMthFormatted]
        );
 
        if (result.length === 0) {
            return res
                .status(404)
-               .json({ error: `Reward data missing for month of ${firstDayPrevMonthStr}` });
+               .json({ error: `Reward data missing for month of ${firstDayPrevMthFormatted}` });
        }
 
        res.json(result[0].rewarded_users.includes(userId));

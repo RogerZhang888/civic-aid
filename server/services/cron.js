@@ -22,18 +22,22 @@ cron.schedule('50 23 28-31 * *', async () => {
       
       const top3UserIDs = res.map(row => row.user_id);
 
-      const firstDayStr = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-         .toISOString()
-         .slice(0, 10);
+      const firstDayCurrentMonth = new Date();
+      firstDayCurrentMonth.setDate(1);
+      const formattedDate = [
+        firstDayCurrentMonth.getFullYear(),
+        String(firstDayCurrentMonth.getMonth() + 1).padStart(2, '0'),
+        '01'
+      ].join('-');
 
       await pgsql.query(
          `INSERT INTO awards (month, rewarded_users)
             VALUES ($1, $2)`,
-         [firstDayStr, top3UserIDs]
+         [formattedDate, top3UserIDs]
       );
 
    } catch (error) {
-      console.error("Error fetching top users for this month:", err);
+      console.error("Error fetching or updating top users for this month:", err);
    }
    
 }, {
