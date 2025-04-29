@@ -158,7 +158,7 @@ However I can provide a better answer with some additional information. <Follow 
     checkReportSummaryTemplate: (userprompt) => {
         return template(
             preface+genericpreface+`A list of similar reports were identified from users where identified. Verify which these reports are indeed of the same issue, and summarise them into a single report if they are. `,
-            `Format your response as a JSON object. The JSON object is an Array of Reports, each Report with the fields 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. Each Report in the array should be a summarised report of all the reports that are of the same issue. \
+            `Format your response as a JSON object. The JSON object is an Array of Reports, each Report with the fields 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. Only generate a single Report for all the reports that are of the same issue. \
 Agency should contain the full name of a government agency only. \
 Urgency and confidence should be a decimal between 0 and 1 exclusive. \
 Sources should be an array of URL links. 
