@@ -1,45 +1,52 @@
 const cron = require('node-cron');
 const pgsql = require('../config/db');
 
-cron.schedule('50 23 28-31 * *', async () => {
-   const tday = new Date();
-   const tmr = new Date(tday);
-   tmr.setDate(tday.getDate() + 1);
+cron.schedule('55 23 28-31 * *', async () => {
+   const today = new Date();
+   const tomorrow = new Date(today);
+   tomorrow.setDate(today.getDate() + 1);
 
-   if (tomorrow.getDate() !== 1) return; 
+   // Only run on last day of month
+   if (tomorrow.getDate() !== 1) return;
 
-   console.log(`${tday.toString()}: RUNNING USER REWARD UPDATER FOR ${tday.getMonth()}...`);
+   console.log(`${today.toString()}: RUNNING MONTHLY USER REWARD UPDATER FOR ${today.toLocaleString('default', { month: 'long' })}...`);
 
    try {
+      // Get first and last moments of current month
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 50, 0);
 
       const res = await pgsql.query(`
          SELECT user_id, COUNT(*) as report_count
          FROM reports
+         WHERE 
+            resolved_at >= $1
+            AND resolved_at <= $2
          GROUP BY user_id
          ORDER BY report_count DESC
          LIMIT 3
-         `);
+      `, [firstDay, lastDay]);
       
-      const top3UserIDs = res.map(row => row.user_id);
+      const top3UserIDs = res.rows.map(row => row.user_id);
 
-      const firstDayCurrentMonth = new Date();
-      firstDayCurrentMonth.setDate(1);
-      const formattedDate = [
-        firstDayCurrentMonth.getFullYear(),
-        String(firstDayCurrentMonth.getMonth() + 1).padStart(2, '0'),
-        '01'
+      const monthIdentifier = [
+         today.getFullYear(),
+         String(today.getMonth() + 1).padStart(2, '0')
       ].join('-');
 
       await pgsql.query(
          `INSERT INTO awards (month, rewarded_users)
-            VALUES ($1, $2)`,
-         [formattedDate, top3UserIDs]
+         VALUES ($1, $2)
+         ON CONFLICT (month) 
+         DO UPDATE SET rewarded_users = $2`,
+         [monthIdentifier, top3UserIDs]
       );
 
+      console.log(`Updated awards for ${monthIdentifier}:`, top3UserIDs);
+
    } catch (error) {
-      console.error("Error fetching or updating top users for this month:", err);
+      console.error("Error in monthly reward update:", error);
    }
-   
 }, {
    timezone: "Asia/Singapore"
-})
+});
