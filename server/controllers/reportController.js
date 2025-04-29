@@ -242,7 +242,11 @@ export async function getReportSummaries(req, res) {
         )
     }
 
-    res.json(Promise.all(summaries))
+    Promise.all(summaries).then((r) => {
+        console.log(r)
+        res.json(r)
+    })
+    // res.json(Promise.all(summaries))
 }
 
 export async function getDoesUserHaveReward(req, res) {
