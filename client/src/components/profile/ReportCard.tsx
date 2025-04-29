@@ -17,7 +17,7 @@ export default function ReportCard({ report }: { report: Report }) {
       id,
       createdAt,
       status,
-      urgency
+      // urgency
    } = report;
 
    function formatDate(date: Date) {
@@ -42,7 +42,7 @@ export default function ReportCard({ report }: { report: Report }) {
       return word.charAt(0).toUpperCase() + word.slice(1);
    }
 
-   const isUrgent = urgency > 0.75;
+   // const isUrgent = urgency > 0.75;
 
    return (
       <div className="card shadow-lg h-100 w-75 relative">
@@ -50,11 +50,11 @@ export default function ReportCard({ report }: { report: Report }) {
             <span className={`badge ${statusColor} p-3 font-semibold shadow-[0_0_2px_1px_rgba(0,0,0,0.3)]`}>
                {capitalize(status)}
             </span>
-            {isUrgent &&
+            {/* {isUrgent &&
                <span className="badge badge-error p-3 font-semibold shadow-[0_0_2px_1px_rgba(0,0,0,0.3)]">
                   Urgent
                </span>
-            }
+            } */}
          </div>
          <figure className="h-40 overflow-hidden rounded-t-xl">
             {imageError ? (
