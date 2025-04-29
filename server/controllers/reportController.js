@@ -4,6 +4,7 @@ import { generate } from "random-words";
 import parquet from "parquetjs";
 import { callModel } from "../services/llmService.js";
 import { systempromptTemplates } from "../services/promptbook.js";
+import { responseParsers } from "../services/parsers.js";
 
 // manually creates a report based on:
 // 1. user_id (from JWT)
@@ -274,7 +275,9 @@ export async function getReportSummaries(req, res) {
         }
         return Promise.all(finalReportPromises)
     }).then((r) => {
-        res.json(r)
+        const reports = r.map((raw) => responseParsers.reportParser(raw))
+
+        res.json(reports)
     })
     // res.json(Promise.all(summaries))
 }

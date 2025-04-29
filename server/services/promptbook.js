@@ -158,27 +158,18 @@ However I can provide a better answer with some additional information. <Follow 
     checkReportSummaryTemplate: (userprompt) => {
         return template(
             preface+genericpreface+`A list of similar reports were identified from users where identified. Verify which these reports are indeed of the same issue, and summarise them into a single report if they are. `,
-            `Format your response as a JSON object. The JSON object is an Array of Reports, each Report with the fields 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. Only generate a single Report for all the reports that are of the same issue. \
+            `Format your response as a JSON object with the fields 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. Only generate a single report summarising all the reports that are of the same issue. \
 Agency should contain the full name of a government agency only. \
 Urgency and confidence should be a decimal between 0 and 1 exclusive. \
 Sources should be an array of URL links. 
 For example:
-[
-    {
-        'summary': 'The user reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas.',
-        'confidence': 0.63,
-        'urgency': 0.94,
-        'recommendedSteps': 'Inspect and repair the burst fire hydrant at the reported location.',
-        'agency': 'Public Utilities Board'
-    },
-    {
-        'summary': 'The user reported a tree falling down on Sengkang East Avenue, partially obstructing traffic flow in one direction.',
-        'confidence': 0.93,
-        'urgency': 0.85,
-        'recommendedSteps': 'Dispatch a team to assess and remove the fallen tree to restore traffic flow and ensure safety.',
-        'agency': 'National Parks Board'
-    },
-]`,
+{
+    'summary': 'The user reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas.',
+    'confidence': 0.63,
+    'urgency': 0.94,
+    'recommendedSteps': 'Inspect and repair the burst fire hydrant at the reported location.',
+    'agency': 'Public Utilities Board'
+}`,
             userprompt
         )
     }
