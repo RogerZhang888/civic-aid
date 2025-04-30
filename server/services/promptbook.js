@@ -66,7 +66,7 @@ For example:
             preface+reportpreface+`With the help of the context provided, assist the government to summarise the incident as below. \
 Your output is sent to the reviewing team, not the citizen reporting. \
 Also output how urgent the issue is, on a scale of 0 to 1, with a higher score representing greater urgency \
-Output confidence that you the user's report has comprehensive details, such as the exact location of the incident, on a scale of 0 to 1, with a higher score representing more completeness of details provided by the user. \
+Output 'confidence' as the level of detail in the user's report, such as whether the exact absolute geographical location of the incident is provided, on a scale of 0 to 1, with a higher score representing more completeness of details provided by the user. \
 Also indicate which sources you used, both from the context provided and otherwise.`,
 
 `Format your response as a JSON object with the fields 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. \
