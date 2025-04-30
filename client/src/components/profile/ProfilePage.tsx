@@ -82,7 +82,7 @@ export default function ProfilePage() {
                   }
                </>
                : <div className="text-gray-500">
-                  No badges yet. Resolve reports to earn badges!
+                  No badges yet. You'll earn badges when your reports are resolved.
                </div>
             }
          </div>
