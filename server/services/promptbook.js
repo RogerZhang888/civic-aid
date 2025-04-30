@@ -14,6 +14,7 @@ const template = (instructions, output, userprompt, chatHistory = []) => {
         if (q.isValid || q.is_valid) return `Prompt: ${(q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
         else return ''
     }).join("\n")
+    console.log("CHAT HISTORY joined", processedChatHistory)
 
     return `CHAT HISTORY (for context only)
 ${processedChatHistory}
