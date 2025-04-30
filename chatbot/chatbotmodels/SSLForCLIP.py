@@ -1,12 +1,12 @@
 import json
 import os
+import random
 from typing import List
 import torch
 import numpy as np
 from datasets import Dataset, load_from_disk
 from transformers import CLIPProcessor, CLIPModel
 from peft import LoraConfig, get_peft_model
-from sentence_transformers import InputExample, losses
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -22,118 +22,111 @@ class Config:
     LORA_DROPOUT = 0.1
     TARGET_MODULES = [
         "text_projection",
-        "text_model.encoder.layers.11.self_attn.q_proj",  # Query projection
-        "text_model.encoder.layers.11.self_attn.v_proj",  # Value projection
-        "text_model.encoder.layers.11.mlp.fc1",           # MLP layer 1
-        "text_model.encoder.layers.11.mlp.fc2",           # MLP layer 2
+        "text_model.encoder.layers.11.self_attn.q_proj",
+        "text_model.encoder.layers.11.self_attn.v_proj",
+        "text_model.encoder.layers.11.mlp.fc1",
+        "text_model.encoder.layers.11.mlp.fc2",
     ]
 
     # Training
-    BATCH_SIZE = 32
+    BATCH_SIZE = 128  # Larger for better negative sampling
     EPOCHS = 3
     LEARNING_RATE = 2e-5
+    PROJ_DIM = 256    # Projection head dimension
 
-# --- Initialize CLIP ---
-device = "cuda" if torch.cuda.is_available() else "cpu"
-processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
-base_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device)
+# --- Text Augmentations ---
+def augment_text(text: str, p_drop=0.1, p_swap=0.2) -> str:
+    """Simple text augmentation for contrastive learning"""
+    words = text.split()
+    
+    # Word dropout
+    if len(words) > 2 and random.random() < p_drop:
+        mask = np.random.rand(len(words)) > p_drop
+        words = list(np.array(words)[mask])
+    
+    # Word swap
+    if len(words) > 3 and random.random() < p_swap:
+        i, j = sorted(random.sample(range(len(words)), 2))
+        words[i], words[j] = words[j], words[i]
+    
+    return " ".join(words).strip()
 
-# --- Freeze the image tower and visual projection ---
-for param in base_model.vision_model.parameters():
-    param.requires_grad = False
+# --- Projection Head ---
+class ProjectionHead(torch.nn.Module):
+    def _init_(self, input_dim=512, output_dim=Config.PROJ_DIM):
+        super()._init_()
+        self.dense = torch.nn.Linear(input_dim, output_dim)
+        self.gelu = torch.nn.GELU()
+        self.layer_norm = torch.nn.LayerNorm(output_dim)
+        
+    def forward(self, x):
+        return self.layer_norm(self.gelu(self.dense(x)))
 
-for param in base_model.visual_projection.parameters():
-    param.requires_grad = False
+# --- Modified CLIP Model ---
+class CustomCLIP(torch.nn.Module):
+    def _init_(self, base_model):
+        super()._init_()
+        self.clip = base_model
+        self.projection = ProjectionHead()
+        
+    def forward(self, **inputs):
+        features = self.clip.get_text_features(**inputs)
+        return self.projection(features)
 
-# --- Chunking Functions ---
-def chunk_text(text: str, processor: CLIPProcessor) -> List[str]:
-    """Split text into CLIP-friendly chunks with overlap."""
+# --- Chunking & Data Processing ---
+def chunk_text(text: str, processor) -> List[str]:
     tokenized = processor.tokenizer.encode(text, add_special_tokens=False)
     chunks = []
     for i in range(0, len(tokenized), Config.CHUNK_SIZE - Config.OVERLAP):
         chunk = tokenized[i:i + Config.CHUNK_SIZE]
-        if len(chunk) + 2 > 77:  # CLIP's max length
+        if len(chunk) + 2 > 77:
             chunk = chunk[:77-2]
         chunks.append(processor.tokenizer.decode(chunk, skip_special_tokens=True))
     return chunks
 
 def process_jl_file(input_path: str, output_dir: str) -> Dataset:
-    """Process .jl file into chunked dataset."""
     os.makedirs(output_dir, exist_ok=True)
-    chunks, metadata = [], []
+    chunks = []
     
     with open(input_path, 'r', encoding='utf-8') as f:
         for line in tqdm(f, desc="Chunking data"):
             entry = json.loads(line)
             content = entry.get("content", "")
-            if not content:
-                continue
-                
-            entry_chunks = chunk_text(content, processor)
-            chunks.extend(entry_chunks)
-            metadata.extend([{
-                "source_url": entry.get("url", ""),
-                "source_text": content[:200] + ("..." if len(content) > 200 else "")
-            }] * len(entry_chunks))
+            chunks.extend(chunk_text(content, processor))
     
+    return Dataset.from_dict({"text": chunks})
+
+# --- Training Components ---
+def create_ssl_dataset(dataset: Dataset) -> Dataset:
+    """Create dataset with augmented pairs"""
+    texts = dataset["text"]
     return Dataset.from_dict({
-        "chunk_text": chunks,
-        "metadata": metadata
+        "text": texts,
+        "augmented_text": [augment_text(t) for t in texts]
     })
 
-# --- LoRA Adaptation ---
-def setup_lora(model: CLIPModel) -> CLIPModel:
-    """Attach LoRA adapters to CLIP."""
-    config = LoraConfig(
-        r=Config.LORA_RANK,
-        lora_alpha=Config.LORA_ALPHA,
-        target_modules=Config.TARGET_MODULES,
-        lora_dropout=Config.LORA_DROPOUT,
-        bias="none"
-    )
-    return get_peft_model(model, config)
+def contrastive_loss(logits, temperature):
+    """InfoNCE loss with in-batch negatives"""
+    n = logits.size(0)
+    labels = torch.arange(n, device=logits.device)
+    return torch.nn.functional.cross_entropy(logits / temperature, labels)
 
-def create_ssl_pairs(dataset: Dataset) -> Dataset:
-    """Generate self-supervised pairs as a HuggingFace Dataset"""
-    examples = []
-    for i in range(len(dataset)):
-        # Positive pair
-        examples.append({
-            "text1": dataset[i]["chunk_text"],
-            "text2": dataset[i]["chunk_text"],
-            "label": 1.0
-        })
-        # Negative pair
-        if i > 0:
-            j = np.random.randint(0, i)
-            examples.append({
-                "text1": dataset[i]["chunk_text"],
-                "text2": dataset[j]["chunk_text"],
-                "label": 0.0
-            })
-    return Dataset.from_list(examples)
-
-def train_ssl(model: CLIPModel, dataset: Dataset):
-    """Train with contrastive loss using proper batching"""
+def train_ssl(model: CustomCLIP, dataset: Dataset):
     model.train()
-    optimizer = torch.optim.AdamW(model.parameters(), lr=Config.LEARNING_RATE)
-    
-    # Convert to PyTorch format
-    dataset = dataset.with_format("torch")
-    
-    # Custom collate function
-    def collate_fn(batch):
-        return {
-            "text1": [item["text1"] for item in batch],
-            "text2": [item["text2"] for item in batch],
-            "labels": torch.stack([item["label"] for item in batch])
-        }
+    optimizer = torch.optim.AdamW([
+        {'params': model.clip.parameters(), 'lr': Config.LEARNING_RATE},
+        {'params': model.projection.parameters(), 'lr': Config.LEARNING_RATE},
+    ])
+    temperature = torch.nn.Parameter(torch.tensor([0.07]).to(device))
     
     dataloader = DataLoader(
-        dataset,
+        dataset.with_format("torch"),
         batch_size=Config.BATCH_SIZE,
         shuffle=True,
-        collate_fn=collate_fn
+        collate_fn=lambda batch: {
+            "text": [item["text"] for item in batch],
+            "augmented_text": [item["augmented_text"] for item in batch]
+        }
     )
     
     for epoch in range(Config.EPOCHS):
@@ -141,70 +134,84 @@ def train_ssl(model: CLIPModel, dataset: Dataset):
         for batch in tqdm(dataloader, desc=f"Epoch {epoch+1}"):
             optimizer.zero_grad()
             
-            # Get embeddings for both texts - REMOVE torch.no_grad()!
-            inputs1 = processor(text=batch["text1"], return_tensors="pt", padding=True, truncation=True).to(device)
-            inputs2 = processor(text=batch["text2"], return_tensors="pt", padding=True, truncation=True).to(device)
+            # Process both views
+            inputs1 = processor(
+                text=batch["text"], 
+                return_tensors="pt", 
+                padding=True, 
+                truncation=True
+            ).to(device)
             
-            # Forward pass - keep computation graph
-            emb1 = model.get_text_features(**inputs1)
-            emb2 = model.get_text_features(**inputs2)
+            inputs2 = processor(
+                text=batch["augmented_text"], 
+                return_tensors="pt", 
+                padding=True, 
+                truncation=True
+            ).to(device)
             
-            # Compute contrastive loss
-            sim = torch.nn.functional.cosine_similarity(emb1, emb2)
-            loss = torch.nn.functional.mse_loss(sim, batch["labels"].to(device))
+            # Get projections
+            proj1 = model(**inputs1)
+            proj2 = model(**inputs2)
+            
+            # Compute similarity matrix
+            logits = proj1 @ proj2.t()
+            
+            # Compute loss
+            loss = contrastive_loss(logits, temperature)
             
             loss.backward()
             optimizer.step()
             epoch_loss += loss.item()
         
         print(f"Epoch {epoch+1} Loss: {epoch_loss/len(dataloader):.4f}")
+        print(f"Current temperature: {temperature.item():.4f}")
 
 # --- Main Pipeline ---
 def main():
-    # 1. Chunk the raw data
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-    data_path = os.path.join(SCRIPT_DIR, "..", "govsg_crawler_2", "gov_text_output_cleaned.jl")
-    data_path = os.path.normpath(data_path)
+    # Initialize base model
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+    base_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device)
+    
+    # Freeze vision components
+    for param in base_model.vision_model.parameters():
+        param.requires_grad = False
+    for param in base_model.visual_projection.parameters():
+        param.requires_grad = False
+    
+    # Wrap with LoRA
+    lora_config = LoraConfig(
+        r=Config.LORA_RANK,
+        lora_alpha=Config.LORA_ALPHA,
+        target_modules=Config.TARGET_MODULES,
+        lora_dropout=Config.LORA_DROPOUT,
+        bias="none"
+    )
+    lora_model = get_peft_model(base_model, lora_config)
+    
+    # Create custom model
+    model = CustomCLIP(lora_model).to(device)
+    model.print_trainable_parameters()
+    
+    # Prepare data
+    data_path = "path_to_your_data.jl"
     output_dir = "chunked_data"
     if not os.path.exists(os.path.join(output_dir, "dataset_info.json")):
-        print("Chunking data...")
         dataset = process_jl_file(data_path, output_dir)
         dataset.save_to_disk(output_dir)
     else:
         dataset = load_from_disk(output_dir)
     
-    # 2. Setup LoRA
-    model = setup_lora(base_model)
-    model.print_trainable_parameters()  # Should show ~0.2% trainable
+    # Create SSL dataset
+    ssl_dataset = create_ssl_dataset(dataset)
     
-    # 3. Generate self-supervised pairs
-    ssl_dataset = create_ssl_pairs(dataset)
-    
-    # 4. Train
+    # Train
     train_ssl(model, ssl_dataset)
-
-    model = model.merge_and_unload()  # Combine LoRA with base model
-
-    # Save ALL required files
-    model.save_pretrained("clip_lora_merged", safe_serialization=True)
-    processor.save_pretrained("clip_lora_merged")
-
-    # Verify all files exist
-    required_files = [
-    "config.json",
-    "preprocessor_config.json",
-    #"pytorch_model.bin",  # or model.safetensors if using safe_serialization
-    "special_tokens_map.json",
-    "tokenizer_config.json",
-    "vocab.json"
-    ]
-    for file in required_files:
-        assert os.path.exists(f"clip_lora_merged/{file}"), f"Missing {file}"
-
     
-    # 5. Save
+    # Save model
+    merged_model = model.clip.merge_and_unload()
+    merged_model.save_pretrained("clip_lora_finetuned")
+    processor.save_pretrained("clip_lora_finetuned")
 
-
-if __name__ == "__main__":
+if _name_ == "_main_":
     main()
-    
