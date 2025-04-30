@@ -65,6 +65,7 @@ For example:
         return debug?"2":template(
             preface+reportpreface+`With the help of the context provided, assist the government to summarise the incident as below. \
 Your output is sent to the reviewing team, not the citizen reporting. \
+Your summary should contain details such as the exact location, the specific problem, and recommended steps, such that a reviewing officer can take immediate action without consulting other sources of information. The summary should be about 2 to 3 sentences long. \
 Also output how urgent the issue is, on a scale of 0 to 1, with a higher score representing greater urgency \
 Output 'confidence' as the level of detail in the user's report, such as whether the exact absolute geographical location of the incident is provided, on a scale of 0 to 1, with a higher score representing more completeness of details provided by the user. \
 Also indicate which sources you used, both from the context provided and otherwise.`,
@@ -75,7 +76,7 @@ Urgency and confidence should be a decimal between 0 and 1 exclusive. \
 Sources should be an array of URL links. 
 For example:
 {
-    'summary': 'The user reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas.',
+    'summary': 'The user reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas. The area has become impassable for vehicles causing traffic hold-up. ',
     'confidence': 0.63,
     'urgency': 0.94,
     'recommendedSteps': 'Inspect and repair the burst fire hydrant at the reported location.',
