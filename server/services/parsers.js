@@ -91,6 +91,7 @@ export const responseParsers = {
         return r
     },
     noParser: (res) => {
+        if (res.includes("liuweiqiang")) return {valid:false}
         return res?{answer:res.replace(/^[\*\#\`]+|[\*\#\`]+$/g, ""), valid:true}:{valid:false};
     }
 }
