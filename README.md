@@ -1,6 +1,6 @@
 # CivicAId
 
-> Last updated: 29/04/2025
+> Last updated: 30/04/2025
 
 **CivicAId** is an AI-powered civic chatbot designed to streamline interactions between citizens and government services in Singapore. It integrates an LLM backend for intelligent conversations, local agentic workflows for performance optimisation, supports real-time issue reporting, and delivers customized, localized answers for the Singaporean context.
 
@@ -126,6 +126,257 @@ _Nginx configuration files available upon request._
 
 _model.safetensors file available upon request._
  
+</details>
+
+## Server Routes
+
+<details>
+<summary>Click to expand routes details</summary>
+
+### Authentication
+`POST /register`
+```ts
+Request {
+    username: string,
+    email: string,
+    password: string
+}
+
+Response {
+    success: boolean,
+    error: undefined | string
+}
+```
+`POST /login`
+```ts
+Request {
+    username: string,
+    password: string
+}
+
+Response {
+    id: number,
+    username: string,
+    email: string
+} | {
+    error: string
+}
+```
+`POST /logout`
+```ts
+Request {
+    null
+}
+
+Response {
+    success: boolean,
+    error: undefined | string
+}
+```
+`GET /protected`
+```ts
+Response {
+    id: number,
+    username: string,
+    email: string,
+    iat: string,
+    exp: string
+} | {
+    error: string
+}
+```
+
+### Chat routes
+`POST /chats`
+```ts
+Request {
+    chatId: string,
+    title: string,
+    type: string,
+    createdAt: string
+}
+
+Response {
+    success: boolean,
+    error: undefined | string
+}
+```
+`PATCH /chats/:chatId`
+```ts
+Request {
+    title: string
+}
+
+Response {
+    success: boolean,
+    error: undefined | string
+}
+```
+`GET /chats`
+```ts
+Response Array<{
+    id: string,
+    user_id: number,
+    type: string,
+    created_at: string,
+    title: string
+}> | {
+    error: string
+}
+```
+`GET /chats/:chatId`
+```ts
+Response Array<{
+    id: string,
+    user_id: number,
+    chat_id: string,
+    created_at: string,
+    user_prompt: string,
+    media_url: Array<string>,
+    query_location: string,
+    system_prompt: string,
+    response: string,
+    sources: Array<string>,
+    is_valid: boolean,
+    to_reply: boolean,
+    query_confidence: number | null
+}> | {
+    error: string
+}
+```
+`DELETE /chats/:chatId`
+```ts
+Response {
+    success: boolean
+} | {
+    error: string
+}
+```
+
+### Query routes
+`POST /query`
+```ts
+Request {
+    media: File | undefined,
+    prompt: string,
+    latitude: string,
+    longitude: string,
+    chatId: string
+}
+
+Response {
+    title: string,
+    media: string | undefined,
+    summary: string,
+    urgency: number,
+    recommendedSteps: string,
+    agency: string,
+    sources: Array<string> | undefined,
+    valid: true
+} | {
+    answer: string,
+    sources: Array<string> | undefined,
+    valid: true
+    media: string | undefined
+} | {
+    valid: false
+} | {
+    error: string
+}
+```
+
+### Reporting routes
+`GET /reports/:id`
+```ts
+Response {
+    id: string,
+    user_id: number,
+    chat_id: string,
+    title: string,
+    description: string,
+    media_url: Array<string>,
+    incident_location: string,
+    agency: string,
+    recommended_steps: string,
+    urgency: number,
+    report_confidence: number,
+    status: 'pending' | 'in progress' | 'resolved' | 'rejected',
+    created_at: string,
+    resolved_at: string
+} | {
+    error: string
+}
+```
+`GET /reports`
+```ts
+Response {
+    id: string,
+    user_id: number,
+    chat_id: string,
+    title: string,
+    description: string,
+    media_url: Array<string>,
+    longitude: string,
+    latitude: string,
+    agency: string,
+    recommended_steps: string,
+    urgency: number,
+    report_confidence: number,
+    status: 'pending' | 'in progress' | 'resolved' | 'rejected',
+    created_at: string,
+    resolved_at: string
+} | {
+    error: string
+}
+```
+`PATCH /reports/:id`,
+```ts
+Request {
+    newStatus: 'pending' | 'in progress' | 'resolved' | 'rejected'
+}
+
+Response {
+    id: string,
+    user_id: number,
+    chat_id: string,
+    title: string,
+    description: string,
+    media_url: Array<string>,
+    incident_location: string,
+    agency: string,
+    recommended_steps: string,
+    urgency: number,
+    report_confidence: number,
+    status: 'pending' | 'in progress' | 'resolved' | 'rejected',
+    created_at: string,
+    resolved_at: string
+} | {
+    error: string
+}
+```
+`GET /reports_summary`
+```ts
+Request {
+    newStatus: 'pending' | 'in progress' | 'resolved' | 'rejected'
+}
+
+Response Array<
+    {
+        summary: string,
+        description: string,
+        agency: string,
+        recommendedSteps: string,
+        urgency: number,
+        confidence: number,
+        valid: true
+    } | {
+        valid: false
+    }
+> | {
+    error: string
+}
+```
+
 </details>
 
 ## Acknowledgments
