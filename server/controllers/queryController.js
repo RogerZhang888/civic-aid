@@ -59,8 +59,9 @@ const updateChatType = async (chatId, type, title) => {
 
 const getConfidence = (score, count) => {
     // TOOD: Confirm boundaries
-    if (score > 0.7 || (score > 0.5 && count > 3) || count > 5) return 'HIGH'
-    else if (score > 0.3 || (score > 0.1 && count > 3)) return 'MED'
+    const adjustedScore = score + (0.03 * count)
+    if (adjustedScore > 0.7) return 'HIGH'
+    else if (adjustedScore > 0.3) return 'MED'
     else return 'LOW'
 }
 
