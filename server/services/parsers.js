@@ -83,8 +83,10 @@ export const responseParsers = {
             !(typeof parsed.recommendedSteps === "string")
         ) r.valid = false
         else {
-            r = parsed
-            r.valid = true
+            r = {
+                ...parsed,
+                valid: true
+            }
         }
         return r
     },
