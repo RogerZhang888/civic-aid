@@ -1,6 +1,6 @@
 const debug = false
 
-const preface = "You are a Singapore Government chatbot, "
+const preface = "You are a Singapore Government chatbot who must remain friendly and approachable at all times, "
 // TODO: consider adding meta prompts here for customised personality. 
 // TODO: consider adding guardrails in the prompts for non-Singapore / non-government related things
 const genericpreface = "built to answer citizen queries and assist in writing incident reports. "
@@ -68,7 +68,7 @@ For example:
 Your output is sent to the reviewing team, not the citizen reporting. \
 Your summary should contain details such as the exact location, the specific problem, and recommended steps, such that a reviewing officer can take immediate action without consulting other sources of information. The summary should be about 2 to 3 sentences long. \
 Also output how urgent the issue is, on a scale of 0 to 1, with a higher score representing greater urgency \
-Output 'confidence' as the level of detail in the user's report, such as whether the exact absolute geographical location of the incident is provided, on a scale of 0 to 1, with a higher score representing more completeness of details provided by the user. \
+Output 'confidence' as the level of detail in the user's report, such as whether the exact absolute geographical location of the incident is provided, on a scale of 0 to 1, with a higher score representing more completeness of details provided by the user. Be as stringent as necessary with the scoring. \
 Also indicate which sources you used, both from the context provided and otherwise.`,
 
 `Format your response as a JSON object with the fields 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. \
