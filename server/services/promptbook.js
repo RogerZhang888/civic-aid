@@ -14,7 +14,7 @@ const template = (instructions, output, userprompt, chatHistory = []) => {
         if (q.isValid || q.is_valid) return `Prompt: ${(q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
         else return ''
     }).join("\n")
-    console.log("CHAT HISTORY joined", processedChatHistory)
+    // console.log("CHAT HISTORY joined", processedChatHistory)
 
     return `CHAT HISTORY (for context only)
 ${processedChatHistory}
@@ -68,7 +68,7 @@ For example:
 Your output is sent to the reviewing team, not the citizen reporting. \
 Your summary should contain details such as the exact location, the specific problem, and recommended steps, such that a reviewing officer can take immediate action without consulting other sources of information. The summary should be about 2 to 3 sentences long. \
 Also output how urgent the issue is, on a scale of 0 to 1, with a higher score representing greater urgency \
-Output 'confidence' as the level of detail in the user's report, such as whether the exact absolute geographical location of the incident is provided, on a scale of 0 to 1, with a higher score representing more completeness of details provided by the user. Be as stringent as necessary with the scoring. \
+Output 'confidence' as the level of detail in the user's report, such as whether the exact absolute geographical location of the incident is provided, on a scale of 0 to 1, with a higher score representing more completeness of details provided by the user. Be as stringent as necessary with the scoring, avoiding unnecessarily high score above 0.8 unless you are completely certain of the detailedness of the report. \
 Also indicate which sources you used, both from the context provided and otherwise.`,
 
 `Format your response as a JSON object with the fields 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. \
