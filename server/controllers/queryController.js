@@ -99,6 +99,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
             parsedRes = await callModel({query, prompt, model, imagePath: media, chatHistory}).then((res) => {
                 console.log(`${promptcount}: Received raw LLM response`, res)
                 parsed = parseResponse(res)
+                console.log(`RESPONSE PARSED VALID? ${parsed.valid}`)
                 queryParams = {
                     userId, 
                     chatId, 
