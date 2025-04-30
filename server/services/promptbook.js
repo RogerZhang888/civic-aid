@@ -65,7 +65,7 @@ For example:
         return debug?"2":template(
             preface+reportpreface+`With the help of the context provided, assist the government to summarise the incident as below. \
 Your output is sent to the reviewing team, not the citizen reporting. \
-Also output how urgent the issue is, and how confident you are, that you have a complete understanding of the user's report and that you have all the information necessary to rectify the issue including the exact location (street address or coordinates), on a scale of 0 to 1, with a higher score representing greater urgency / confidence. \
+Also output how urgent the issue is, and how confident you are, that you have a complete understanding of the user's report, on a scale of 0 to 1, with a higher score representing greater urgency / confidence. If detailed info is not provided such as location, give a low confidence score. \
 Also indicate which sources you used, both from the context provided and otherwise.`,
 
 `Format your response as a JSON object with the fields 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. \
