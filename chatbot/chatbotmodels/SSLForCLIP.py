@@ -53,8 +53,8 @@ def augment_text(text: str, p_drop=0.1, p_swap=0.2) -> str:
 
 # --- Projection Head ---
 class ProjectionHead(torch.nn.Module):
-    def _init_(self, input_dim=512, output_dim=Config.PROJ_DIM):
-        super()._init_()
+    def __init__(self, input_dim=512, output_dim=Config.PROJ_DIM):
+        super().__init__()
         self.dense = torch.nn.Linear(input_dim, output_dim)
         self.gelu = torch.nn.GELU()
         self.layer_norm = torch.nn.LayerNorm(output_dim)
@@ -64,8 +64,8 @@ class ProjectionHead(torch.nn.Module):
 
 # --- Modified CLIP Model ---
 class CustomCLIP(torch.nn.Module):
-    def _init_(self, base_model):
-        super()._init_()
+    def __init__(self, base_model):
+        super().__init__()
         self.clip = base_model
         self.projection = ProjectionHead()
         
@@ -213,5 +213,5 @@ def main():
     merged_model.save_pretrained("clip_lora_finetuned")
     processor.save_pretrained("clip_lora_finetuned")
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
