@@ -157,7 +157,8 @@ Request {
 Response {
     id: number,
     username: string,
-    email: string
+    email: string,
+    permissions: "USER" | "ADMIN"
 } | {
     error: string
 }
@@ -179,6 +180,7 @@ Response {
     id: number,
     username: string,
     email: string,
+    permissions: "USER" | "ADMIN",
     iat: string,
     exp: string
 } | {
@@ -302,7 +304,7 @@ Response {
     report_confidence: number,
     status: 'pending' | 'in progress' | 'resolved' | 'rejected',
     created_at: string,
-    resolved_at: string
+    resolved_at: string | null
 } | {
     error: string
 }
@@ -324,7 +326,7 @@ Response {
     report_confidence: number,
     status: 'pending' | 'in progress' | 'resolved' | 'rejected',
     created_at: string,
-    resolved_at: string
+    resolved_at: string | null
 } | {
     error: string
 }
@@ -349,7 +351,7 @@ Response {
     report_confidence: number,
     status: 'pending' | 'in progress' | 'resolved' | 'rejected',
     created_at: string,
-    resolved_at: string
+    resolved_at: string | null
 } | {
     error: string
 }
@@ -373,6 +375,59 @@ Response Array<
         valid: false
     }
 > | {
+    error: string
+}
+```
+
+### Government routes
+`GET /gov/reports`
+```ts
+Response Array<
+    {
+        id: string,
+        user_id: number,
+        chat_id: string,
+        title: string,
+        description: string,
+        media_url: Array<string>,
+        incident_location: string,
+        agency: string,
+        recommended_steps: string,
+        urgency: number,
+        report_confidence: number,
+        status: 'pending' | 'in progress' | 'resolved' | 'rejected',
+        created_at: string,
+        resolved_at: string | null
+    } | {
+        valid: false
+    }
+> | {
+    error: string
+}
+```
+
+`PATCH /gov/reports/:id`
+```ts
+Request {
+    newStatus: "pending" | "in progress" | "resolved" | "rejected",
+}
+
+Response {
+    id: string,
+    user_id: number,
+    chat_id: string,
+    title: string,
+    description: string,
+    media_url: Array<string>,
+    incident_location: string,
+    agency: string,
+    recommended_steps: string,
+    urgency: number,
+    report_confidence: number,
+    status: 'pending' | 'in progress' | 'resolved' | 'rejected',
+    created_at: string,
+    resolved_at: string | null
+} | {
     error: string
 }
 ```

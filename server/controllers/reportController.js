@@ -206,6 +206,9 @@ export async function getUserReports(req, res) {
 // updates a specific report based on its id (in the URL params)
 // and the new status (in the body)
 export async function updateReportStatus(req, res) {
+    // TODO: Check own route
+    res.json({ error: "Route deprecated" })
+    return
     console.log("UPDATING REPORT STATUS");
 
     try {

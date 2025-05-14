@@ -42,11 +42,13 @@ const queryRoutes = require('./routes/queryRoutes');
 const authRoutes = require('./routes/authRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const govRoutes = require('./routes/govRoutes');
 
 app.use('/api', authRoutes);
 app.use('/api', queryRoutes);
 app.use('/api', reportRoutes);
 app.use('/api', chatRoutes);
+app.use('/api', govRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
