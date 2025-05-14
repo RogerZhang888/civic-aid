@@ -1,6 +1,6 @@
 const debug = false
 
-const preface = "You are a Singapore Government chatbot, "
+const preface = "You are a Singapore Government chatbot who must remain friendly and approachable at all times, "
 // TODO: consider adding meta prompts here for customised personality. 
 // TODO: consider adding guardrails in the prompts for non-Singapore / non-government related things
 const genericpreface = "built to answer citizen queries and assist in writing incident reports. "
@@ -9,11 +9,12 @@ Your task is to analyse the user's question and answer within the context of Sin
 const reportpreface = `built to write and process incident reports. \
 Your task is to analyse the prompt and produce a short report which can be escalated to the relevant agencies for action. `
 
-const template = (instructions, output, userprompt, chatHistory) => {
+const template = (instructions, output, userprompt, chatHistory = []) => {
     let processedChatHistory = chatHistory.map((q) => {
         if (q.isValid || q.is_valid) return `Prompt: ${(q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
         else return ''
     }).join("\n")
+    // console.log("CHAT HISTORY joined", processedChatHistory)
 
     return `CHAT HISTORY (for context only)
 ${processedChatHistory}
@@ -30,7 +31,7 @@ ${output}
 export const systempromptTemplates = {
     getTypeDecisionTemplate: (userprompt, chatHistory) => {
         return debug?"0":template(
-            preface+genericpreface+"Identify if the query below is a question or a report, and output how confident you are on a scale of 0 to 1, with a higher score representing higher confidence. Come up with a short title of 10 words or less to summarise the query. ",
+            preface+genericpreface+"Identify if the query below is a question or a report, and output how confident you are, that you have a complete understanding of the situation and can take action, on a scale of 0 to 1, with a higher score representing higher confidence. Come up with a short title of 10 words or less to summarise the query. ",
 `Format your response as a JSON object with the fields 'type', 'confidence' and 'title'. \
 Type should be reported as either 'report' or 'question'. \
 Confidence should be a decimal between 0 and 1 exclusive. \
@@ -65,7 +66,9 @@ For example:
         return debug?"2":template(
             preface+reportpreface+`With the help of the context provided, assist the government to summarise the incident as below. \
 Your output is sent to the reviewing team, not the citizen reporting. \
-Also output how urgent the issue is, and how confident you are that you have a complete understanding of the user's report on a scale of 0 to 1, with a higher score representing greater urgency / confidence. \
+Your summary should contain details such as the exact location, the specific problem, and recommended steps, such that a reviewing officer can take immediate action without consulting other sources of information. The summary should be about 2 to 3 sentences long. \
+Also output how urgent the issue is, on a scale of 0 to 1, to 2 decimal places, with a higher score representing greater urgency. \
+Output 'confidence' as the level of detail in the user's report, such as whether the exact absolute geographical location of the incident is provided, on a scale of 0 to 1, to 2 decimal places, with a higher score representing more completeness of details provided by the user. Be as stringent as necessary with the scoring, avoiding unnecessarily high score above 0.8 unless you are completely certain of the detailedness of the report. \
 Also indicate which sources you used, both from the context provided and otherwise.`,
 
 `Format your response as a JSON object with the fields 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. \
@@ -74,7 +77,7 @@ Urgency and confidence should be a decimal between 0 and 1 exclusive. \
 Sources should be an array of URL links. 
 For example:
 {
-    'summary': 'The user reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas.',
+    'summary': 'The user reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas. The area has become impassable for vehicles causing traffic hold-up. ',
     'confidence': 0.63,
     'urgency': 0.94,
     'recommendedSteps': 'Inspect and repair the burst fire hydrant at the reported location.',
@@ -155,4 +158,22 @@ However I can provide a better answer with some additional information. <Follow 
             chatHistory
         )
     },
+    checkReportSummaryTemplate: (userprompt) => {
+        return template(
+            preface+genericpreface+`A list of similar reports were identified from users where identified. Verify which these reports are indeed of the same issue, and summarise them into a single report if they are. `,
+            `Format your response as a JSON object with the fields 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. Only generate a single report summarising all the reports that are of the same issue. \
+Agency should contain the full name of a government agency only. \
+Urgency and confidence should be a decimal between 0 and 1 exclusive. \
+Sources should be an array of URL links. 
+For example:
+{
+    'summary': 'The user reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas.',
+    'confidence': 0.63,
+    'urgency': 0.94,
+    'recommendedSteps': 'Inspect and repair the burst fire hydrant at the reported location.',
+    'agency': 'Public Utilities Board'
+}`,
+            userprompt
+        )
+    }
 }

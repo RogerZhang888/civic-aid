@@ -2,6 +2,58 @@ import pgsql from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
 import { generate } from "random-words";
 import parquet from "parquetjs";
+import { callModel } from "../services/llmService.js";
+import { systempromptTemplates } from "../services/promptbook.js";
+import { responseParsers } from "../services/parsers.js";
+
+export const updateReportsDB = async (params) => {
+    let {userId, chatId, title, summary, media, location, agency, recommendedSteps, urgency, confidence} = params
+    return pgsql.query(`SELECT * FROM reports WHERE chat_id = $1`, [chatId]).then((res) => {
+        if (res.length == 0 || chatId == null) {
+            return pgsql.query(`
+                INSERT INTO reports 
+                (user_id, chat_id, title, description, media_url, incident_location, agency, recommended_steps, urgency, report_confidence)
+                VALUES (
+                    $1, $2, $3, $4, $5, 
+                    CASE
+                        WHEN $6::double precision IS NOT NULL AND $7::double precision IS NOT NULL
+                        THEN ST_SetSRID(ST_MakePoint($6, $7), 4326)
+                        ELSE NULL
+                    END,
+                    $8, $9, $10, $11
+                )
+                RETURNING id
+            `, [
+                userId,
+                chatId,
+                title,
+                summary,
+                media,
+                location.latitude,
+                location.longitude,
+                agency,
+                recommendedSteps, 
+                urgency,
+                confidence
+            ])
+        } else {
+            return pgsql.query(`
+                UPDATE reports 
+                SET description = $1, media_url = $2, agency = $3, recommended_steps = $4, urgency = $5, report_confidence = $6
+                WHERE chat_id = $7
+                RETURNING id
+            `, [
+                summary,
+                media,
+                agency,
+                recommendedSteps,
+                urgency,
+                confidence,
+                chatId
+            ])
+        }
+    })
+}
 
 // manually creates a report based on:
 // 1. user_id (from JWT)
@@ -195,6 +247,10 @@ export async function updateReportStatus(req, res) {
 }
 
 export async function getReportSummaries(req, res) {
+    const userId = req.user.id;
+
+    if (userId > 0) res.status(401).json({error:"Only admins may request report summaries"})
+
     const reportParquetSchema = new parquet.ParquetSchema({
         id: { type: "UTF8" },
         description: { type: "UTF8" },
@@ -238,33 +294,95 @@ export async function getReportSummaries(req, res) {
                 }
             }).then((r) => {
                 return r.json()
+            }).then((r) => {
+                return {
+                    agency:reportGroup.agency,
+                    response: r
+                }
             })
         )
     }
 
-    res.json(Promise.all(summaries))
+    Promise.all(summaries).then((r) => {
+        console.log("SUMMARY", r)
+        let compiledSummary = []
+        for (let summary of r) {
+            console.log(`Processing summary for ${summary.agency}`, summary.response)
+            if (summary.response.length == 0) continue
+            for (let subgroup of summary.response) {
+                compiledSummary.push(subgroup.map((reportId) => reports.find((e) => e.id == reportId)))
+            }
+        }
+        return compiledSummary
+    }).then((reportGroups) => {
+        let finalReportPromises = []
+        for (let reportGroup of reportGroups) {
+            const reportQuery = "---\n---\nREPORTS\n" + reportGroup.map((report, i) => `Report ${i}:\n\`\`\`\n${JSON.stringify({
+                summary:report.description, 
+                recommendedSteps:report.recommended_steps,
+                agency:report.agency,
+                confidence:report.report_confidence,
+                urgency:report.urgency
+            })}\n\`\`\`\n`).join("---\n")
+            finalReportPromises.push(callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}))
+        }
+        return Promise.all(finalReportPromises)
+    }).then((r) => {
+        const reports = r.map((raw) => responseParsers.reportParser(raw))
+
+        let dbUpdatePromises = []
+        for (let report of reports) {
+            if (!report.valid) continue
+            dbUpdatePromises.push(updateReportsDB({
+                userId: -2,
+                chatId: null,
+                title: `Summarised report ${new Date().toISOString()} ${report.agency}`,
+                summary: report.summary,
+                media: [],
+                location: {longitude:null, latitude:null},
+                agency: report.agency,
+                recommendedSteps: report.recommendedSteps,
+                urgency: report.urgency,
+                confidence: report.confidence
+            }))
+        }
+
+        Promise.all(dbUpdatePromises).then((r) => {
+            res.json(reports)
+        }).catch((e) => {
+            console.log("Error updating reports DB", e)
+            res.status(500).json({ error: e.message });
+        })
+    })
+    // res.json(Promise.all(summaries))
 }
 
 export async function getDoesUserHaveReward(req, res) {
-   console.log("CHECKING IF USER IS ELIGIBLE FOR REWARD THIS MONTH");
+   const now = new Date();
+   const userId = req.user.id;
+   console.log(`CHECKING IF USER ${userId} IS ELIGIBLE FOR REWARD THIS MONTH (${now.toDateString()})`);
 
    try {
-       const userId = req.user.id;
 
-       const firstDayPrevMonthStr = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1)
-         .toISOString()
-         .slice(0, 10);
+       const firstDayPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+       const firstDayPrevMthFormatted = [
+         firstDayPrevMonth.getFullYear(),
+         String(firstDayPrevMonth.getMonth() + 1).padStart(2, '0'),
+         '01'
+       ].join('-');
 
        const result = await pgsql.query(
            "SELECT * FROM awards WHERE month = $1",
-           [firstDayPrevMonthStr]
+           [firstDayPrevMthFormatted]
        );
 
        if (result.length === 0) {
            return res
                .status(404)
-               .json({ error: `Reward data missing for month of ${firstDayPrevMonthStr}` });
+               .json({ error: `Reward data missing for month of ${firstDayPrevMthFormatted}` });
        }
+
+       console.log("Rewarded users: id " + result[0].rewarded_users);
 
        res.json(result[0].rewarded_users.includes(userId));
 

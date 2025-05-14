@@ -83,12 +83,15 @@ export const responseParsers = {
             !(typeof parsed.recommendedSteps === "string")
         ) r.valid = false
         else {
-            r = parsed
-            r.valid = true
+            r = {
+                ...parsed,
+                valid: true
+            }
         }
         return r
     },
     noParser: (res) => {
+        if (res.includes("liuweiqiang")) return {valid:false}
         return res?{answer:res.replace(/^[\*\#\`]+|[\*\#\`]+$/g, ""), valid:true}:{valid:false};
     }
 }

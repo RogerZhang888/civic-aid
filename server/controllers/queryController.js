@@ -3,9 +3,10 @@ const pgsql = require("../config/db");
 const { callModel } = require('../services/llmService');
 const { systempromptTemplates } = require('../services/promptbook');
 const { responseParsers } = require('../services/parsers');
+const { updateReportsDB: createReport } = require('./reportController');
 
 const updateQueriesDB = (params)  => {
-    let {userId, chatId, userprompt, media, systemprompt, location, response, isValid, toReply, confidence} = params
+    let {userId, chatId, userprompt, media, systemprompt, location, response, isValid, toReply, confidence, sources} = params
     // console.log("PRE QUERY CHECK", {userId, chatId, userprompt, media, systemprompt, location, response, isValid, toReply, confidence})
     pgsql.query(
         `INSERT INTO queries
@@ -28,7 +29,7 @@ const updateQueriesDB = (params)  => {
             location.longitude,
             systemprompt,
             response,
-            [], // TODO: sources?? — will still work as an empty array
+            sources??[],
             isValid,
             toReply,
             confidence
@@ -55,61 +56,14 @@ const getChat = async (chatId) => {
 const updateChatType = async (chatId, type, title) => {
     return pgsql.query("UPDATE chats SET type = $1, title = $2 WHERE id = $3", [type, title, chatId])
 }
-const createReport = (params) => {
-    let {userId, chatId, title, summary, media, location, agency, recommendedSteps, urgency, confidence} = params
-    return pgsql.query(`SELECT * FROM reports WHERE chat_id = $1`, [chatId]).then((res) => {
-        if (res.length == 0) {
-            return pgsql.query(`
-                INSERT INTO reports 
-                (user_id, chat_id, title, description, media_url, incident_location, agency, recommended_steps, urgency, report_confidence)
-                VALUES (
-                    $1, $2, $3, $4, $5, 
-                    CASE
-                        WHEN $6::double precision IS NOT NULL AND $7::double precision IS NOT NULL
-                        THEN ST_SetSRID(ST_MakePoint($6, $7), 4326)
-                        ELSE NULL
-                    END,
-                    $8, $9, $10, $11
-                )
-                RETURNING id
-            `, [
-                userId,
-                chatId,
-                title,
-                summary,
-                media,
-                location.latitude,
-                location.longitude,
-                agency,
-                recommendedSteps, 
-                urgency,
-                confidence
-            ])
-        } else {
-            return pgsql.query(`
-                UPDATE reports 
-                SET description = $1, media_url = $2, agency = $3, recommended_steps = $4, urgency = $5, report_confidence = $6
-                WHERE chat_id = $7
-                RETURNING id
-            `, [
-                summary,
-                media,
-                agency,
-                recommendedSteps,
-                urgency,
-                confidence,
-                chatId
-            ])
-        }
-    })
-    
-    
-}
 
 const getConfidence = (score, count) => {
     // TOOD: Confirm boundaries
-    if (score > 0.7 || (score > 0.5 && count > 3) || count > 5) return 'HIGH'
-    else if (score > 0.3 || (score > 0.1 && count > 3)) return 'MED'
+    if (!score) return 'LOW'
+    const adjustedScore = score + (1 - score) * ( 1 / (1 + Math.exp(4 - 0.57 * count)))
+    console.log(`Confidence score adjustments, raw ${score} count ${count}`, adjustedScore)
+    if (adjustedScore > 0.8) return 'HIGH'
+    else if (adjustedScore > 0.3) return 'MED'
     else return 'LOW'
 }
 
@@ -137,7 +91,6 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         // HIGH means this output will be used as a reply only when the confidence is HIGH
         // console.log("Querying LLM", query)
 
-        // TODO: Actually calling the model
         let parsedRes
         let promptcount = 0
         const repromptLimit = 3
@@ -146,6 +99,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
             parsedRes = await callModel({query, prompt, model, imagePath: media, chatHistory}).then((res) => {
                 console.log(`${promptcount}: Received raw LLM response`, res)
                 parsed = parseResponse(res)
+                console.log(`RESPONSE PARSED VALID? ${parsed.valid}`)
                 queryParams = {
                     userId, 
                     chatId, 

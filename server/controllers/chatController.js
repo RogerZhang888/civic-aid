@@ -118,13 +118,29 @@ exports.getSpecificChatHistory = async (req, res) => {
 
             res.status(200).json(queries);
         } else {
-            // no queries associated with this chat: delete it
-            console.log(`No queries fetched for chatid ${chatId}: deleting this chat`);
-            await pgsql.query(
-                `DELETE FROM chats WHERE user_id = $1 AND id = $2`,
-                [userId, chatId]
+            // no queries associated with this chat
+            console.log(`No queries fetched for chatid ${chatId}`);
+
+            // don't delete if chat was created recently
+            const chat = await pgsql.query(
+               `SELECT created_at FROM chats WHERE id = $1`,
+               [chatId]
             );
-            res.status(404).json({ error: "No queries for this chat" });
+            const chatAge = Date.now() - new Date(chat[0].created_at).getTime();
+
+            if (chatAge < 60000) { // 60 second grace period
+               console.log(`chat ${chatId} age less than 60 seconds - will not be deleted`);
+               return res.status(200).json([]);
+            } else {
+               // only delete chat if it wasn't created recently
+               console.log(`chat ${chatId} age more than 60 seconds - will be deleted`);
+               await pgsql.query(
+                   `DELETE FROM chats WHERE user_id = $1 AND id = $2`,
+                   [userId, chatId]
+               );
+               return res.status(404).json({ error: "No queries for this chat" });
+            }
+
         }
     } catch (err) {
         console.error("Failed to fetch specific chat history:", err);

@@ -22,10 +22,11 @@ async function queryFn(): Promise<User> {
       return res.data; 
 
    } catch (error) {
-
-      console.log("user not validated");
-
-      throw error;
+      console.log(`error while validating user: ${error}`);
+      if (axios.isAxiosError(error)) {
+         throw new Error(error.response?.data?.message || 'Authentication failed');
+      }
+      throw new Error('Unexpected error occurred');
 
    }
 
@@ -36,6 +37,8 @@ export default function useUser() {
       queryKey: ['current-user'],
       queryFn,
       staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
       retry: false,
    });
 }
