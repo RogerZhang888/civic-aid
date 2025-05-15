@@ -84,7 +84,7 @@ def chunk_text(text: str, processor) -> List[str]:
         chunks.append(processor.tokenizer.decode(chunk, skip_special_tokens=True))
     return chunks
 
-def process_jl_file(input_path: str, output_dir: str) -> Dataset:
+def process_jl_file(input_path: str, output_dir: str, processor) -> Dataset:
     os.makedirs(output_dir, exist_ok=True)
     chunks = []
     
@@ -111,13 +111,21 @@ def contrastive_loss(logits, temperature):
     labels = torch.arange(n, device=logits.device)
     return torch.nn.functional.cross_entropy(logits / temperature, labels)
 
-def train_ssl(model: CustomCLIP, dataset: Dataset):
+def train_ssl(model: CustomCLIP, dataset: Dataset, device: torch.device, processor: CLIPProcessor):
     model.train()
+    
+    # Initialize temperature on correct device
+    temperature = torch.nn.Parameter(torch.tensor([0.07], device=device))
+
+    # Initialize optimizer with temperature parameter
     optimizer = torch.optim.AdamW([
         {'params': model.clip.parameters(), 'lr': Config.LEARNING_RATE},
         {'params': model.projection.parameters(), 'lr': Config.LEARNING_RATE},
-    ])
-    temperature = torch.nn.Parameter(torch.tensor([0.07]).to(device))
+        {'params': [temperature], 'lr': 0.01}  # Temperature learns faster
+    ], lr=Config.LEARNING_RATE)
+    
+    # Add gradient scaler for mixed precision
+    scaler = torch.cuda.amp.GradScaler(enabled=(device.type == 'cuda'))
     
     dataloader = DataLoader(
         dataset.with_format("torch"),
@@ -134,43 +142,58 @@ def train_ssl(model: CustomCLIP, dataset: Dataset):
         for batch in tqdm(dataloader, desc=f"Epoch {epoch+1}"):
             optimizer.zero_grad()
             
-            # Process both views
-            inputs1 = processor(
-                text=batch["text"], 
-                return_tensors="pt", 
-                padding=True, 
-                truncation=True
-            ).to(device)
+            # Process both views with mixed precision
+            with torch.cuda.amp.autocast(enabled=(device.type == 'cuda')):
+                inputs1 = processor.tokenizer(
+                    text=batch["text"],
+                    return_tensors="pt",
+                    padding=True,
+                    truncation=True,
+                    max_length=77
+                ).to(device)
+                
+                inputs2 = processor.tokenizer(
+                    text=batch["augmented_text"],
+                    return_tensors="pt",
+                    padding=True,
+                    truncation=True,
+                    max_length=77
+                ).to(device)
+                
+                # Forward pass
+                proj1 = model(**inputs1)
+                proj2 = model(**inputs2)
+                
+                # Compute similarity matrix
+                logits = proj1 @ proj2.t()
+                
+                # Compute loss
+                loss = contrastive_loss(logits, temperature)
             
-            inputs2 = processor(
-                text=batch["augmented_text"], 
-                return_tensors="pt", 
-                padding=True, 
-                truncation=True
-            ).to(device)
+            # Backprop with gradient scaling
+            scaler.scale(loss).backward()
             
-            # Get projections
-            proj1 = model(**inputs1)
-            proj2 = model(**inputs2)
+            # Gradient clipping
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             
-            # Compute similarity matrix
-            logits = proj1 @ proj2.t()
+            # Update parameters
+            scaler.step(optimizer)
+            scaler.update()
             
-            # Compute loss
-            loss = contrastive_loss(logits, temperature)
-            
-            loss.backward()
-            optimizer.step()
             epoch_loss += loss.item()
         
         print(f"Epoch {epoch+1} Loss: {epoch_loss/len(dataloader):.4f}")
-        print(f"Current temperature: {temperature.item():.4f}")
+        print(f"Temperature: {temperature.item():.4f}")
 
 # --- Main Pipeline ---
 def main():
+    # Initialize processor FIRST
+    processor = CLIPProcessor.from_pretrained(
+        "openai/clip-vit-base-patch32",
+        use_fast=True  # Fixes the slow processor warning
+    )
     # Initialize base model
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     base_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(device)
     
     # Freeze vision components
@@ -191,13 +214,13 @@ def main():
     
     # Create custom model
     model = CustomCLIP(lora_model).to(device)
-    model.print_trainable_parameters()
+    model.clip.print_trainable_parameters()
     
     # Prepare data
-    data_path = "path_to_your_data.jl"
+    data_path = "../govsg_crawler_2/gov_text_output_cleaned.jl"
     output_dir = "chunked_data"
     if not os.path.exists(os.path.join(output_dir, "dataset_info.json")):
-        dataset = process_jl_file(data_path, output_dir)
+        dataset = process_jl_file(data_path, output_dir,processor)
         dataset.save_to_disk(output_dir)
     else:
         dataset = load_from_disk(output_dir)
@@ -206,11 +229,11 @@ def main():
     ssl_dataset = create_ssl_dataset(dataset)
     
     # Train
-    train_ssl(model, ssl_dataset)
+    train_ssl(model, ssl_dataset, device,processor)
     
     # Save model
-    merged_model = model.clip.merge_and_unload()
-    merged_model.save_pretrained("clip_lora_finetuned")
+    model.clip = model.clip.merge_and_unload()  # Merge LoRA first
+    torch.save(model.state_dict(), "clip_lora_finetuned/full_model.pt")
     processor.save_pretrained("clip_lora_finetuned")
 
 if __name__ == "__main__":

@@ -43,7 +43,7 @@ print(f"Using device: {device}")
 
 # 1. Load CLIP model with GPU support
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(SCRIPT_DIR, "clip_lora_merged")
+MODEL_PATH = os.path.join(SCRIPT_DIR, "clip_lora_finetuned")
 MODEL_PATH = os.path.normpath(MODEL_PATH)
 clip_processor = CLIPProcessor.from_pretrained(MODEL_PATH, local_files_only=True)
 clip_model = CLIPModel.from_pretrained(MODEL_PATH, local_files_only=True).to(device)
@@ -288,7 +288,7 @@ def rag_search(query: str, database: Dict, index, retriever, top_k: int = 3, ima
     
     context_blocks = []
     sources = []
-    source_threshold = 0.85
+    source_threshold = 0.8
     
     for i, (idx, score) in enumerate(zip(indices, scores)):
         context_blocks.append(
@@ -302,8 +302,7 @@ def rag_search(query: str, database: Dict, index, retriever, top_k: int = 3, ima
     context = "\n\n".join(context_blocks)
     avg_score = float(np.mean(scores))
     max_score = float(np.max(scores))
-    
-    use_rag = avg_score > 0.8 and max_score > 0.9
+    use_rag = avg_score > 0.7 and max_score > 0.8
     
     if use_rag:
         prompt = f"""### Context:
@@ -371,6 +370,7 @@ def call_model(text_query, prompt, image_path=None):
     # print(f"\nQuery: {query}")
     print("\nAnswer:")
     print(result["answer"])
+
     # print(result["used_rag"])
     # if result["sources"]:
     #     print("\nSources:")
@@ -396,4 +396,4 @@ def call_model(text_query, prompt, image_path=None):
 # }"
 
 
-# call_model("today i am free. no under saf.", prompt)
+# call_model("How do I deal with cuts?", prompt)
