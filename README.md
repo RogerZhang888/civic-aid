@@ -304,7 +304,10 @@ Response {
     report_confidence: number,
     status: 'pending' | 'in progress' | 'resolved' | 'rejected',
     created_at: string,
-    resolved_at: string | null
+    resolved_at: string | null,
+    is_public: boolean,
+    upvote_count: number,
+    remarks: string
 } | {
     error: string
 }
@@ -326,7 +329,10 @@ Response {
     report_confidence: number,
     status: 'pending' | 'in progress' | 'resolved' | 'rejected',
     created_at: string,
-    resolved_at: string | null
+    resolved_at: string | null,
+    is_public: boolean,
+    upvote_count: number,
+    remarks: string
 } | {
     error: string
 }
@@ -334,7 +340,8 @@ Response {
 `PATCH /reports/:id`,
 ```ts
 Request {
-    newStatus: 'pending' | 'in progress' | 'resolved' | 'rejected'
+    newStatus: 'pending' | 'in progress' | 'resolved' | 'rejected',
+    remarks: string
 }
 
 Response {
@@ -351,7 +358,10 @@ Response {
     report_confidence: number,
     status: 'pending' | 'in progress' | 'resolved' | 'rejected',
     created_at: string,
-    resolved_at: string | null
+    resolved_at: string | null,
+    is_public: boolean,
+    upvote_count: number,
+    remarks: string
 } | {
     error: string
 }
@@ -397,7 +407,10 @@ Response Array<
         report_confidence: number,
         status: 'pending' | 'in progress' | 'resolved' | 'rejected',
         created_at: string,
-        resolved_at: string | null
+        resolved_at: string | null,
+        is_public: boolean,
+        upvote_count: number,
+        remarks: string
     } | {
         valid: false
     }
@@ -426,7 +439,10 @@ Response {
     report_confidence: number,
     status: 'pending' | 'in progress' | 'resolved' | 'rejected',
     created_at: string,
-    resolved_at: string | null
+    resolved_at: string | null,
+    is_public: boolean,
+    upvote_count: number,
+    remarks: string
 } | {
     error: string
 }

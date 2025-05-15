@@ -27,7 +27,7 @@ exports.patchReport = async (req, res) => {
         }
 
         const reportId = req.params.id;
-        const { newStatus } = req.body;
+        const { newStatus, remarks } = req.body;
 
         // Add validation for allowed status values
         const allowedStatuses = [
@@ -44,10 +44,10 @@ exports.patchReport = async (req, res) => {
         // Explicitly return updated record
         const result = await pgsql.query(
             `UPDATE reports 
-            SET status = $1 ${newStatus==='resolved'?", resolved_at = CURRENT_TIMESTAMP":""}
-            WHERE id = $2 
+            SET status = $1 ${newStatus==='resolved'?", resolved_at = CURRENT_TIMESTAMP":""}, remarks = $2
+            WHERE id = $3 
             RETURNING *`,
-            [newStatus, reportId]
+            [newStatus, remarks, reportId]
         );
 
         if (result.length === 0) {
