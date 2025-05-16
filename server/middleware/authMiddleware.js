@@ -1,4 +1,4 @@
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken"
 
 // middleware to verify JWT token
 // requires token in cookies or Authorization header
@@ -53,4 +53,5 @@ const authMiddleware = (req, res, next) => {
 
    next();
 };
-module.exports = authMiddleware;
+
+export default authMiddleware;

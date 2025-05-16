@@ -1,13 +1,14 @@
-const express = require('express');
+import express from 'express';
+import authMiddleware from '../middleware/authMiddleware.js';
+import {
+  startNewChat,
+  updateChatName,
+  getChatHistory,
+  getSpecificChatHistory,
+  deleteSpecificChat
+} from '../controllers/chatController.js';
+
 const router = express.Router();
-const authMiddleware = require('../middleware/authMiddleware');
-const { 
-   startNewChat,
-   updateChatName,
-   getChatHistory, 
-   getSpecificChatHistory,
-   deleteSpecificChat
-} = require('../controllers/chatController');
 
 // Endpoint to start a new chat for a user
 router.post('/chats', authMiddleware, startNewChat);
@@ -24,4 +25,4 @@ router.get('/chats/:chatId', authMiddleware, getSpecificChatHistory);
 // Endpoint to delete a chat
 router.delete('/chats/:chatId', authMiddleware, deleteSpecificChat);
 
-module.exports = router;
+export default router;

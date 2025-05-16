@@ -1,7 +1,7 @@
-const pgsql = require("../config/db");
-const { responseParsers } = require("../services/parsers");
+import pgsql from '../config/db.js';
+import { responseParsers } from '../services/parsers.js';
 
-exports.startNewChat = async (req, res) => {
+export const startNewChat = async (req, res) => {
     try {
         const userId = req.user.id; // from auth middleware
 
@@ -24,7 +24,7 @@ exports.startNewChat = async (req, res) => {
     }
 };
 
-exports.updateChatName = async (req, res) => {
+export const updateChatName = async (req, res) => {
     try {
         const userId = req.user.id; // from auth middleware
         const chatId = req.params.chatId; // from request parameters
@@ -42,7 +42,7 @@ exports.updateChatName = async (req, res) => {
     }
 };
 
-exports.getChatHistory = async (req, res) => {
+export const getChatHistory = async (req, res) => {
 
     console.log("GETTING ALL CHAT HISTORY FOR USER");
 
@@ -64,7 +64,7 @@ exports.getChatHistory = async (req, res) => {
 
 };
 
-exports.getSpecificChatHistory = async (req, res) => {
+export const getSpecificChatHistory = async (req, res) => {
     console.log("GETTING SPECIFIC CHAT HISTORY FOR USER");
 
     try {
@@ -151,7 +151,7 @@ exports.getSpecificChatHistory = async (req, res) => {
 };
 
 
-exports.deleteSpecificChat = async (req, res) => {
+export const deleteSpecificChat = async (req, res) => {
     console.log("DELETING SPECIFIC CHAT FOR USER");
 
     try {
