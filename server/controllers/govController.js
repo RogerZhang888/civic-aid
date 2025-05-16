@@ -1,7 +1,11 @@
-const pgsql = require("../config/db");
-const { parsePermissios } = require("../services/gov");
+import pgsql from '../config/db.js';
+import { parsePermissions } from '../services/gov.js';
+import parquet from "parquetjs";
+import { callModel } from "../services/llmService.js";
+import { systempromptTemplates } from "../services/promptbook.js";
+import { responseParsers } from "../services/parsers.js";
 
-exports.getGovReports = async (req, res) => {
+export const getGovReports = async (req, res) => {
     try {
         const includeResolved = req.query.include_resolved == 1
         if (req.user.permissions.includes("ADMIN")) {
@@ -12,7 +16,7 @@ exports.getGovReports = async (req, res) => {
                 res.status(500).json({ error: e.message });
             })
         } else {
-            const permissions = parsePermissios(req.user.permissions)
+            const permissions = parsePermissions(req.user.permissions)
             const qlist = []
 
             if (permissions.length === 0) {
@@ -34,9 +38,9 @@ exports.getGovReports = async (req, res) => {
     }
 }
 
-exports.patchReport = async (req, res) => {
+export const patchReport = async (req, res) => {
     try {
-        const permissions = parsePermissios(req.user.permissions)
+        const permissions = parsePermissions(req.user.permissions)
         if ((!req.user.permissions.includes('ADMIN')) && permissions.length === 0) {
             res.status(403).json({ error: "Unauthorised" })
             return
@@ -96,4 +100,120 @@ exports.patchReport = async (req, res) => {
         console.error("Update error:", e);
         res.status(500).json({ error: e.message });
     }
+}
+
+export async function getReportSummaries(req, res) {
+    if (!req.user.permissions.includes('ADMIN')) {
+        res.status(401).json({error:"Only admins may request report summaries"})
+        return
+    }
+
+    const reportParquetSchema = new parquet.ParquetSchema({
+        id: { type: "UTF8" },
+        description: { type: "UTF8" },
+    });
+    const reports = await pgsql.query("SELECT * FROM reports");
+
+    const groupedReports = Object.entries(
+        reports.reduce((acc, report) => {
+            if (!acc[report.agency]) {
+                acc[report.agency] = [];
+            }
+            acc[report.agency].push(report);
+            return acc;
+        }, {})
+    ).map(([agency, reports]) => ({
+        agency,
+        reports,
+    }));
+
+    let summaries = []
+    for (let reportGroup of groupedReports) {
+        let path = `${reportGroup.agency}-${Date.now()}.parquet`;
+        let curParquetWriter = await parquet.ParquetWriter.openFile(
+            reportParquetSchema,
+            `./parquets/${path}`
+        );
+        for (let report of reportGroup.reports) {
+            await curParquetWriter.appendRow({
+                id: report.id,
+                description: report.description,
+            });
+        }
+        await curParquetWriter.close();
+
+        summaries.push(
+            fetch(`${process.env.MODELURL}/api/callsummariser`, {
+                method:"POST",
+                body:JSON.stringify({parquet_path: path}),
+                headers:{
+                    'Content-Type': 'application/json'
+                }
+            }).then((r) => {
+                return r.json()
+            }).then((r) => {
+                return {
+                    agency:reportGroup.agency,
+                    response: r
+                }
+            }).catch((e) => {
+                res.status(500).json({error: e})
+            })
+        )
+    }
+
+    Promise.all(summaries).then((r) => {
+        console.log("SUMMARY", r)
+        let compiledSummary = []
+        for (let summary of r) {
+            console.log(`Processing summary for ${summary.agency}`, summary.response)
+            if (summary.response.length == 0) continue
+            for (let subgroup of summary.response) {
+                compiledSummary.push(subgroup.map((reportId) => reports.find((e) => e.id == reportId)))
+            }
+        }
+        return compiledSummary
+    }).then((reportGroups) => {
+        let finalReportPromises = []
+        for (let reportGroup of reportGroups) {
+            const reportQuery = "---\n---\nREPORTS\n" + reportGroup.map((report, i) => `Report ${i}:\n\`\`\`\n${JSON.stringify({
+                summary:report.description, 
+                recommendedSteps:report.recommended_steps,
+                agency:report.agency,
+                confidence:report.report_confidence,
+                urgency:report.urgency
+            })}\n\`\`\`\n`).join("---\n")
+            finalReportPromises.push(callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}))
+        }
+        return Promise.all(finalReportPromises)
+    }).then((r) => {
+        const reports = r.map((raw) => responseParsers.reportParser(raw))
+
+        let dbUpdatePromises = []
+        for (let report of reports) {
+            if (!report.valid) continue
+            dbUpdatePromises.push(updateReportsDB({
+                userId: -2,
+                chatId: null,
+                title: `Summarised report ${new Date().toISOString()} ${report.agency}`,
+                summary: report.summary,
+                media: [],
+                location: {longitude:null, latitude:null},
+                agency: report.agency,
+                recommendedSteps: report.recommendedSteps,
+                urgency: report.urgency,
+                confidence: report.confidence
+            }))
+        }
+
+        Promise.all(dbUpdatePromises).then((r) => {
+            res.json(reports)
+        }).catch((e) => {
+            console.log("Error updating reports DB", e)
+            res.status(500).json({ error: e.message });
+        })
+    }).catch((e) => {
+        res.status(500).json({error: e})
+    })
+    // res.json(Promise.all(summaries))
 }

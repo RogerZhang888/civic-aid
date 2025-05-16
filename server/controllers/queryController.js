@@ -1,9 +1,8 @@
-const { v4: uuidv4 } = require('uuid');
-const pgsql = require("../config/db");
-const { callModel } = require('../services/llmService');
-const { systempromptTemplates } = require('../services/promptbook');
-const { responseParsers } = require('../services/parsers');
-const { updateReportsDB: createReport } = require('./reportController');
+import pgsql from '../config/db.js';
+import { callModel } from '../services/llmService.js';
+import { systempromptTemplates } from '../services/promptbook.js';
+import { responseParsers } from '../services/parsers.js';
+import { updateReportsDB as createReport } from './reportController.js';
 
 const updateQueriesDB = (params)  => {
     let {userId, chatId, userprompt, media, systemprompt, location, response, isValid, toReply, confidence, sources} = params
@@ -98,9 +97,9 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
             promptcount++
             parsedRes = await callModel({query, prompt, model, imagePath: media, chatHistory}).then((res) => {
                 console.log(`${promptcount}: Received raw LLM response`, res)
-                parsed = parseResponse(res)
+                let parsed = parseResponse(res)
                 console.log(`RESPONSE PARSED VALID? ${parsed.valid}`)
-                queryParams = {
+                let queryParams = {
                     userId, 
                     chatId, 
                     userprompt, 
@@ -137,7 +136,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         })
     }
     if (chat.type == 'unknown') {
-        systemprompt = systempromptTemplates.getTypeDecisionTemplate(userprompt, chatHistory)
+        let systemprompt = systempromptTemplates.getTypeDecisionTemplate(userprompt, chatHistory)
         response = await queryLLM({query:userprompt, prompt: systemprompt, model:'basic'}, responseParsers.typeDecisionParser, 'NEVER')
         
         if (getConfidence(response.confidence, chatHistory.length) == 'LOW' || getConfidence(response.confidence, chatHistory.length) == 'MED') {
@@ -203,7 +202,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     }
 }
 
-exports.submitQuery = async (req, res) => {
+const submitQuery = async (req, res) => {
     try {
         const { latitude, longitude, chatId } = req.body;
         const prompt = req.body.prompt??""
@@ -255,3 +254,4 @@ exports.submitQuery = async (req, res) => {
     }
 };
 
+export default submitQuery

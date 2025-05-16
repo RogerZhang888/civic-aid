@@ -1,5 +1,5 @@
-const cron = require('node-cron');
-const pgsql = require('../config/db');
+import cron from 'node-cron'
+import pgsql from '../config/db'
 
 cron.schedule('55 23 28-31 * *', async () => {
    const today = new Date();
