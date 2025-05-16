@@ -9,14 +9,14 @@ import { useNavigate } from "react-router";
 import useTranslation from "../language/useTranslation";
 import ChatsButtonColumn from "./ChatButtonsColumn";
 
-export default function ChatSidebar() {
+export default function ChatSidebarDesktop() {
    const [isExpanded, setIsExpanded] = useState(false);
    const navigate = useNavigate();
    const { t } = useTranslation();
 
    return (
       <motion.div
-         className="bg-primary flex flex-col py-4 px-2 space-y-4"
+         className="bg-primary lg:flex flex-col py-4 px-2 space-y-4 hidden"
          animate={{ width: isExpanded ? "16rem" : "4rem" }}
          transition={{ ease: "easeInOut" }}
       >

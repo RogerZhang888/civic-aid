@@ -5,14 +5,15 @@ import { Chat, FormState, GetChatRes, GetQueriesForChatRes, Query } from "../typ
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import chatReducer from "./chatReducer";
 import { BookMarked } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import useUser from "../auth/useUser";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
-export default function ChatProvider({ children, currChatId, }: { children: React.ReactNode; currChatId: string | undefined; }) {
+export default function ChatProvider({ children }: { children: React.ReactNode }) {
 
    const [chats, chatsDispatch] = useReducer(chatReducer, []);
    const [areChatsFetchedInitially, setAreChatsFetchedInitially] = useState<boolean>(false);
@@ -25,6 +26,10 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
    const queryClient = useQueryClient();
 
    const navigate = useNavigate();
+
+   const { data: user } = useUser();
+
+   const { currChatId } = useParams<{ currChatId: string }>();
 
    const ReportJSX = useCallback((id: string, agency: string) => {
       return (
@@ -131,6 +136,8 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
 
    useEffect(() => {
 
+      if (!user) return;
+
       if (chats.length === 0 && !areChatsFetchedInitially) {
          fetchAllChats().then(() => {
             setAreChatsFetchedInitially(true);
@@ -140,7 +147,7 @@ export default function ChatProvider({ children, currChatId, }: { children: Reac
          fetchQueriesForThisChat(currChatId)
       }
 
-   }, [currChatId, chats, navigate, areChatsFetchedInitially, ReportJSX, fetchQueriesForThisChat]);
+   }, [currChatId, chats, navigate, areChatsFetchedInitially, ReportJSX, fetchQueriesForThisChat, user]);
 
    // get user's coordinates
    // browser will ask for permission

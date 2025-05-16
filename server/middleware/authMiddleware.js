@@ -43,6 +43,7 @@ const authMiddleware = (req, res, next) => {
     *   id: (some number),
     *   email: (some email),
     *   username: (some name),
+    *   permissions: array of permissions,
     *   iat: (issued at time),
     *   exp: (expiration time),
     * }
