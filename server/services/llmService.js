@@ -1,5 +1,3 @@
-const { exec } = require('child_process');
-const path = require('path');
 const debug = false
 
 /**
@@ -79,6 +77,7 @@ exports.callModel = async ({ query, prompt, model, imagePath = null }) => {
     }).then((res) => {
         return res.json()
     }).then((res) => {
+        if (res.used_rag) console.log("!! RAG USED !!")
         return res.answer
     })
 };

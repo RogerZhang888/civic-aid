@@ -69,13 +69,14 @@ router.post("/login", async (req, res) => {
          return res.status(401).json({ error: "invalid credentials" });
       }
 
-      const { id, name: resUsername, email: resEmail } = pgsqlLoginRes[0];
+      const { id, name: resUsername, email: resEmail, permissions: resPermissions } = pgsqlLoginRes[0];
 
       const token = jwt.sign(
          { 
             id,
             username: resUsername,
-            email: resEmail
+            email: resEmail,
+            permissions: resPermissions
          },
          process.env.JWT_SECRET,
          { expiresIn: 60 * 60 * 24 * 30 }
@@ -88,7 +89,7 @@ router.post("/login", async (req, res) => {
          secure: process.env.NODE_ENV === "production",
          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
       });
-      res.json({ id, username: resUsername, email: resEmail });
+      res.json({ id, username: resUsername, email: resEmail, permissions: resPermissions });
 
    } catch (error) {
       console.log(error);
