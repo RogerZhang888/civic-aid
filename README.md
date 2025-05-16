@@ -157,7 +157,8 @@ Request {
 Response {
     id: number,
     username: string,
-    email: string
+    email: string,
+    permissions: Array<string>
 } | {
     error: string
 }
@@ -179,6 +180,7 @@ Response {
     id: number,
     username: string,
     email: string,
+    permissions: Array<string>,
     iat: string,
     exp: string
 } | {
@@ -302,14 +304,17 @@ Response {
     report_confidence: number,
     status: 'pending' | 'in progress' | 'resolved' | 'rejected',
     created_at: string,
-    resolved_at: string
+    resolved_at: string | null,
+    is_public: boolean,
+    upvote_count: number,
+    remarks: string
 } | {
     error: string
 }
 ```
 `GET /reports`
 ```ts
-Response {
+Response Array<{
     id: string,
     user_id: number,
     chat_id: string,
@@ -324,15 +329,44 @@ Response {
     report_confidence: number,
     status: 'pending' | 'in progress' | 'resolved' | 'rejected',
     created_at: string,
-    resolved_at: string
-} | {
+    resolved_at: string | null,
+    is_public: boolean,
+    upvote_count: number,
+    remarks: string
+}> | {
+    error: string
+}
+```
+`GET /reports/public`
+```ts
+Response Array<{
+    id: string,
+    user_id: number,
+    chat_id: string,
+    title: string,
+    description: string,
+    media_url: Array<string>,
+    longitude: string,
+    latitude: string,
+    agency: string,
+    recommended_steps: string,
+    urgency: number,
+    report_confidence: number,
+    status: 'pending' | 'in progress' | 'resolved' | 'rejected',
+    created_at: string,
+    resolved_at: string | null,
+    is_public: boolean,
+    upvote_count: number,
+    remarks: string
+}> | {
     error: string
 }
 ```
 `PATCH /reports/:id`,
 ```ts
 Request {
-    newStatus: 'pending' | 'in progress' | 'resolved' | 'rejected'
+    newStatus: 'pending' | 'in progress' | 'resolved' | 'rejected',
+    remarks: string
 }
 
 Response {
@@ -349,7 +383,10 @@ Response {
     report_confidence: number,
     status: 'pending' | 'in progress' | 'resolved' | 'rejected',
     created_at: string,
-    resolved_at: string
+    resolved_at: string | null,
+    is_public: boolean,
+    upvote_count: number,
+    remarks: string
 } | {
     error: string
 }
@@ -373,6 +410,80 @@ Response Array<
         valid: false
     }
 > | {
+    error: string
+}
+```
+`POST /reports/set_is_public/:id`
+```ts
+Request {
+    is_public: boolean
+}
+
+Response {
+    success: boolean,
+    error: undefined | string
+}
+```
+
+### Government routes
+`GET /gov/reports`
+```ts
+Request {
+    include_resolved: undefined | 1
+}
+
+Response Array<
+    {
+        id: string,
+        user_id: number,
+        chat_id: string,
+        title: string,
+        description: string,
+        media_url: Array<string>,
+        incident_location: string,
+        agency: string,
+        recommended_steps: string,
+        urgency: number,
+        report_confidence: number,
+        status: 'pending' | 'in progress' | 'resolved' | 'rejected',
+        created_at: string,
+        resolved_at: string | null,
+        is_public: boolean,
+        upvote_count: number,
+        remarks: string
+    } | {
+        valid: false
+    }
+> | {
+    error: string
+}
+```
+
+`PATCH /gov/reports/:id`
+```ts
+Request {
+    newStatus: "pending" | "in progress" | "resolved" | "rejected",
+}
+
+Response {
+    id: string,
+    user_id: number,
+    chat_id: string,
+    title: string,
+    description: string,
+    media_url: Array<string>,
+    incident_location: string,
+    agency: string,
+    recommended_steps: string,
+    urgency: number,
+    report_confidence: number,
+    status: 'pending' | 'in progress' | 'resolved' | 'rejected',
+    created_at: string,
+    resolved_at: string | null,
+    is_public: boolean,
+    upvote_count: number,
+    remarks: string
+} | {
     error: string
 }
 ```

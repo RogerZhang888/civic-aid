@@ -37,6 +37,7 @@ const authMiddleware = (req, res, next) => {
 
    req.user = decoded;
 
+//    TODO: Add admin auth things
    /**
     * req.user will be 
     * {
@@ -46,6 +47,7 @@ const authMiddleware = (req, res, next) => {
     *   permissions: array of permissions,
     *   iat: (issued at time),
     *   exp: (expiration time),
+    *   permissions: (Array<string>)
     * }
     */
 
