@@ -12,7 +12,7 @@ const specifier = "Politely refuse to answer questions irrevelant to the Singapo
 
 const template = (instructions, output, userprompt, chatHistory = []) => {
     let processedChatHistory = chatHistory.map((q) => {
-        if ((q.isValid || q.is_valid)) return `Prompt: ${(q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
+        if (q.isValid || q.is_valid) return `Prompt: ${(q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
         else return ''
     }).join("\n")
     // console.log("CHAT HISTORY joined", processedChatHistory)
@@ -37,7 +37,7 @@ export const systempromptTemplates = {
 `Format your response as a JSON object with the fields 'type', 'confidence' and 'title'. \
 Type should be reported as either 'report' or 'question'. \
 Confidence should be a decimal, to 2 decimal places, between 0 and 1 exclusive. \
-Title should be a string of 10 words or less, in the language of the query. 
+Title should be a string of 10 words or less, in the language of the user's query. 
 For example:
 {
     \"type\": \"report\",
@@ -71,7 +71,7 @@ Your output is sent to the reviewing team, not the citizen reporting. \
 Your summary should be in english and contain details such as the exact location, the specific problem, and recommended steps, such that a reviewing officer can take immediate action without consulting other sources of information. The summary should be about 2 to 3 sentences long. \
 Also output how urgent the issue is, on a scale of 0 to 1, to 2 decimal places, with a higher score representing greater urgency. \
 
-Output 'confidence' as the level of detail in the user's report, such as whether the exact absolute geographical location of the incident is provided, on a scale of 0 to 1, to 2 decimal places, with a higher score representing more completeness of details provided by the user. Be as stringent as necessary with the scoring, avoiding unnecessarily high score above 0.8 unless you are completely certain of the detailedness of the report. \
+Output 'confidence' as the level of detail in the user's report, such as whether the location of the incident is provided, on a scale of 0 to 1, to 2 decimal places, with a higher score representing more completeness of details provided by the user. Be as stringent as necessary with the scoring, avoiding unnecessarily high score above 0.8 unless you are completely certain of the detailedness of the report. \
 Also indicate which sources you used, both from the context provided and otherwise. You should report a single incident only, if multiple incidents are present, request the user to create a new chat. `,
 
 
@@ -100,10 +100,8 @@ For example:
     clarifyReportTemplateLow: (userprompt, chatHistory) => {
         return debug?"3":template(
             preface+reportpreface+"Earlier, the citizen submitted a report, \
-however, your confidence on your understanding was low. Provide a short follow-up response to seek clarification \
-from the user on the infomation required to be more confident of the report. You should report a single incident only, if multiple incidents are present, request the user to create a new chat. ",
-
-
+however, your confidence on your understanding was low. Provide a short follow-up response in the language of the user's query to seek clarification \
+from the user on the infomation required to be more confident of the report. You should report a single incident only, if multiple incidents are present, request the user to create a new chat.",
             "A single short paragraph of plaintext only. DO NOT use any markdown syntax. DO NOT send your response as a JSON. DO NOT preface the response with headers such as 'RESPONSE'. ",
             userprompt,
             chatHistory
@@ -112,10 +110,9 @@ from the user on the infomation required to be more confident of the report. You
     clarifyReportTemplateMed: (userprompt, chatHistory) => {
         return debug?"4":template(
             preface+reportpreface+"Earlier, the citizen submitted a report, \
-however, your confidence on your understanding was low. Provide a short follow-up response to summarise what you already know, and seek clarification \
+however, your confidence on your understanding was low. Provide a short follow-up response in the language of the user's query to summarise what you already know, and seek clarification \
 from the user on the infomation required to be more confident of the report.  You should report a single incident only, if multiple incidents are present, request the user to create a new chat.",
             "A single short paragraph of plaintext only. \n\nFor example:\
-\
 Thank you for the information, this is what I have gathered so far: <summary>. \
 However I can provide a better report with some additional information. <Follow up questions>\n\nYou are not expected to follow this format strictly.\n\nDO NOT use any markdown syntax. DO NOT send your response as a JSON. DO NOT preface the response with headers such as 'RESPONSE'.",
             userprompt,
@@ -159,9 +156,9 @@ from the user on the infomation required to be more confident of your answer. ",
             preface+reportpreface+"Earlier, the citizen submitted a question, \
 however, your confidence on the answer was low. Provide a short follow-up response in the language of the query to summarise your current answer, and seek clarification \
 from the user on the infomation required to be more confident of your answer. ",
-            "A single short paragraph of plaintext only.\n\nFor example:\
+            "A single short paragraph of plaintext only. DO NOT use any markdown syntax. DO NOT send your response as a JSON. DO NOT preface the response with headers such as 'RESPONSE'.\n\nFor example:\
 Thank you for the information, this is what I have gathered so far: <summary of answer>. \
-However I can provide a better answer with some additional information. <Follow up questions>\n\nYou are not expected to follow this format strictly.\n\nDO NOT use any markdown syntax. DO NOT send your response as a JSON. DO NOT preface the response with headers such as 'RESPONSE'.",
+However I can provide a better answer with some additional information. <Follow up questions>\n\nYou are not expected to follow this format strictly.",
             userprompt,
             chatHistory
         )
@@ -171,7 +168,7 @@ However I can provide a better answer with some additional information. <Follow 
             preface+genericpreface+`A list of similar reports were identified from users where identified. Verify which these reports are indeed of the same issue, and summarise them into a single report if they are. `,
             `Format your response as a JSON object with the fields 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. Only generate a single report summarising all the reports that are of the same issue. \
 Agency should contain the full name of a government agency only. \
-Urgency and confidence should be a decimal, to 2 decimal places, between 0 and 1 exclusive. \
+Urgency and confidence should be a decimal between 0 and 1 exclusive. \
 Sources should be an array of URL links. 
 For example:
 {
