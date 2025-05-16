@@ -46,7 +46,7 @@ const authMiddleware = (req, res, next) => {
     *   username: (some name),
     *   iat: (issued at time),
     *   exp: (expiration time),
-    *   permissions: ('USER' or 'ADMIN')
+    *   permissions: (Array<string>)
     * }
     */
 

@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { createReport, getReport, getUserReports, updateReportStatus, getReportSummaries, getDoesUserHaveReward } = require('../controllers/reportController');
+const { createReport, getReport, getUserReports, updateReportStatus, getReportSummaries, getDoesUserHaveReward, setIsPublic, getPublicReports } = require('../controllers/reportController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 // create a report (TODO: DEPRECATE??)
 router.post('/reports', authMiddleware, createReport);
+
+// Get public reports
+router.get('/reports/public', authMiddleware, getPublicReports)
 
 // get a specific report based on its id
 router.get('/reports/:id', authMiddleware, getReport);
@@ -20,5 +23,8 @@ router.get('/reports_summary', authMiddleware, getReportSummaries);
 
 // check if user is eligible for reward this month
 router.get('/reports_reward', authMiddleware, getDoesUserHaveReward);
+
+// Set report is_public
+router.post('/reports/set_is_public/:id', authMiddleware, setIsPublic)
 
 module.exports = router;

@@ -63,6 +63,8 @@ export const updateReportsDB = async (params) => {
 // or remove the authMiddleware from the route
 export async function createReport(req, res) {
     console.log("MAKING REPORT MANUALLY");
+    res.status(400).json({error: "Route deprecated"})
+    return
 
     try {
         const { chat_id } = req.body;
@@ -144,9 +146,10 @@ export async function getReport(req, res) {
 
     try {
         const reportId = req.params.id;
+        const userId = req.user.id
         const result = await pgsql.query(
-            "SELECT * FROM reports WHERE id = $1",
-            [reportId]
+            "SELECT * FROM reports WHERE id = $1 AND user_id = $2",
+            [reportId, userId]
         );
 
         if (result.length === 0) {
@@ -250,9 +253,10 @@ export async function updateReportStatus(req, res) {
 }
 
 export async function getReportSummaries(req, res) {
-    const userId = req.user.id;
-
-    if (userId > 0) res.status(401).json({error:"Only admins may request report summaries"})
+    if (!req.user.permissions.includes('ADMIN')) {
+        res.status(401).json({error:"Only admins may request report summaries"})
+        return
+    }
 
     const reportParquetSchema = new parquet.ParquetSchema({
         id: { type: "UTF8" },
@@ -392,4 +396,41 @@ export async function getDoesUserHaveReward(req, res) {
    } catch (error) {
        res.status(500).json({ error: error.message });
    }
+}
+
+export async function setIsPublic(req, res) {
+    try {
+        const userId = req.user.id;
+        const reportId = req.params.id;
+        const isPublic = req.body.is_public;
+
+        if (!reportId) {
+            res.status(400).json({error: "Report ID not provided"})
+            return
+        } 
+        if (isPublic === undefined) {
+            res.status(400).json({error: "is_public not provided"})
+            return
+        }
+
+        pgsql.query(`UPDATE reports SET is_public = $1 WHERE id = $2 AND user_id = $3 RETURNING *`, [isPublic, reportId, userId]).then((qr) => {
+            if (qr.length === 0) {
+                res.status(500).json({error: "No matching report found in database"})
+                return
+            } 
+            res.json({success:true})
+        })
+    } catch(e) {
+        res.status(500).json({error: e})
+    }
+}
+
+export async function getPublicReports(req, res) {
+    try {
+        pgsql.query("SELECT * FROM reports WHERE is_public = TRUE").then((qr) => {
+            res.json(qr)
+        })
+    } catch (e) {
+        return res.status(500).json({error: e})
+    }
 }
