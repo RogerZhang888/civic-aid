@@ -1,9 +1,9 @@
-const express = require("express");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const authMiddleware = require("../middleware/authMiddleware");
-const { NeonDbError } = require("@neondatabase/serverless");
-const pgsql = require("../config/db");
+import express from 'express';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import authMiddleware from '../middleware/authMiddleware.js';
+import { NeonDbError } from '@neondatabase/serverless';
+import pgsql from '../config/db.js';
 
 const router = express.Router();
 const saltRounds = 10;
@@ -132,4 +132,4 @@ router.get("/protected", authMiddleware, (req, res) => {
    res.json(req.user);
 });
 
-module.exports = router;
+export default router;

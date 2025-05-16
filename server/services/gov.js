@@ -1,4 +1,4 @@
-exports.parsePermissios = (permissionsList) => {
+export const parsePermissions = (permissionsList) => {
     let res = []
     for (let permission of permissionsList) {
         let parsedPerms = permission.split("-")

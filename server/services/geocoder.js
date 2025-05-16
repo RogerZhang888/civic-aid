@@ -7,7 +7,7 @@ const geocoder = NodeGeocoder({
   provider: 'openstreetmap'
 });
 
-exports.geocodeAddress = async (address) => {
+export const geocodeAddress = async (address) => {
   try {
     const res = await geocoder.geocode(address);
     return {
