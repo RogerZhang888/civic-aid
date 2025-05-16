@@ -1,9 +1,10 @@
-import * as deepl from 'deepl-node';
+import { callModel } from "./llmService.js";
+import { systempromptTemplates } from "./promptbook.js";
 
-const authKey = process.env.DEEPL_KEY;
-const translator = new deepl.Translator(authKey);
-
-export const translate = async (text, sourceLang=null, targetLang='en') => {
-    const result = await translator.translateText(text, sourceLang, targetLang);
-    return result
+export const translate = async (text, targetLang='ENGLISH') => {
+    return callModel({
+        query: text,
+        prompt: systempromptTemplates.translateTemplate(targetLang),
+        model: "basic"
+    })
 };
