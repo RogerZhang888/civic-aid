@@ -49,13 +49,13 @@ clip_processor = CLIPProcessor.from_pretrained(MODEL_PATH, local_files_only=True
 clip_model = CLIPModel.from_pretrained(MODEL_PATH, local_files_only=True).to(device)
 
 # DeepSeek API configuration
-DEEPSEEK_API_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEEPSEEK_API_KEYS = []
+
+Sealion_API_KEYS = []
 
 for file in os.listdir("."):
-    if file.startswith('dskey'):
+    if file.startswith('sealionkey'):
         with open(file, 'r') as f:
-                DEEPSEEK_API_KEYS.append(f.read().strip())
+                Sealion_API_KEYS.append(f.read().strip())
 
 class HybridRetriever:
     def __init__(self, database):
@@ -263,17 +263,18 @@ def call_sealion_api(prompt: str, max_tokens: int = 400) -> str:
         "max_tokens": max_tokens,
         "top_p": 0.9
     }
-    try:
-        headers = {
-        "accept": "text/plain",
-        "Authorization": "Bearer sk-Aq6wov_DAqLQ_kXfE7fwKA",
-        "Content-Type": "application/json"
-        }
-        response = requests.post("https://api.sea-lion.ai/v1/chat/completions", headers=headers, json=payload)
-        response.raise_for_status()
-        return response.json()["choices"][0]["message"]["content"]
-    except:
-        pass
+    for key in Sealion_API_KEYS:
+        try:
+            headers = {
+            "accept": "text/plain",
+            "Authorization": f"Bearer {key}",
+            "Content-Type": "application/json"
+            }
+            response = requests.post("https://api.sea-lion.ai/v1/chat/completions", headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()["choices"][0]["message"]["content"]
+        except:
+            pass
     return "Sorry, I couldn't process your request at this time."
     
     # except requests.exceptions.RequestException as e:

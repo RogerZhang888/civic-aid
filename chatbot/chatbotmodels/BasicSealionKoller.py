@@ -1,4 +1,12 @@
 import requests
+import os
+
+Sealion_API_KEYS = []
+
+for file in os.listdir("."):
+    if file.startswith('sealionkey'):
+        with open(file, 'r') as f:
+                Sealion_API_KEYS.append(f.read().strip())
 
 def call_sealion_api(prompt: str, max_tokens: int = 400) -> str:
 
@@ -12,16 +20,16 @@ def call_sealion_api(prompt: str, max_tokens: int = 400) -> str:
         "max_tokens": max_tokens,
         "top_p": 0.9
     }
-    try:
-        headers = {
-        "accept": "text/plain",
-        "Authorization": "Bearer sk-Aq6wov_DAqLQ_kXfE7fwKA",
-        "Content-Type": "application/json"
-        }
-        response = requests.post("https://api.sea-lion.ai/v1/chat/completions", headers=headers, json=payload)
-        response.raise_for_status()
-        return response.json()["choices"][0]["message"]["content"]
-    except:
-        pass
+    for key in Sealion_API_KEYS:
+        try:
+            headers = {
+            "accept": "text/plain",
+            "Authorization": f"Bearer {key}",
+            "Content-Type": "application/json"
+            }
+            response = requests.post("https://api.sea-lion.ai/v1/chat/completions", headers=headers, json=payload)
+            response.raise_for_status()
+            return response.json()["choices"][0]["message"]["content"]
+        except:
+            pass
     return "Sorry, I couldn't process your request at this time."
-
