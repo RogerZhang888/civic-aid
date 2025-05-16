@@ -1,6 +1,6 @@
 const debug = false
 
-const preface = "You are a Singapore Government chatbot who must remain friendly and approachable at all times, "
+const preface = "You are a Singapore Government chatbot who must remain friendly and approachable at all times without repeating yourself, "
 // TODO: consider adding meta prompts here for customised personality. 
 // TODO: consider adding guardrails in the prompts for non-Singapore / non-government related things
 const genericpreface = "built to answer citizen queries and assist in writing incident reports. "
@@ -16,8 +16,7 @@ const template = (instructions, output, userprompt, chatHistory = []) => {
         else return ''
     }).join("\n")
     // console.log("CHAT HISTORY joined", processedChatHistory)
-
-    return `CHAT HISTORY (for context)
+    return `CHAT HISTORY (for context only)
 ${processedChatHistory}
 ---
     
@@ -37,10 +36,8 @@ export const systempromptTemplates = {
             preface+genericpreface+"Identify if the query below is a question or a report, and output how confident you are, that you have a complete understanding of the situation and can take action, on a scale of 0 to 1, with a higher score representing higher confidence. Come up with a short title of 10 words or less to summarise the query. ",
 `Format your response as a JSON object with the fields 'type', 'confidence' and 'title'. \
 Type should be reported as either 'report' or 'question'. \
-
 Confidence should be a decimal, to 2 decimal places, between 0 and 1 exclusive. \
-Title should be a string of 10 words or less. 
-
+Title should be a string of 10 words or less, in the language of the query. 
 For example:
 {
     \"type\": \"report\",
@@ -51,7 +48,7 @@ For example:
 {
     \"type\": \"question\",
     \"confidence\": 0.87,
-    \"title\":\"MRT breakdown inquiry\"
+    \"title\":\"查询新加坡地铁服务\"
 }`,
             userprompt,
             chatHistory
@@ -115,11 +112,10 @@ from the user on the infomation required to be more confident of the report. You
     clarifyReportTemplateMed: (userprompt, chatHistory) => {
         return debug?"4":template(
             preface+reportpreface+"Earlier, the citizen submitted a report, \
-
 however, your confidence on your understanding was low. Provide a short follow-up response to summarise what you already know, and seek clarification \
 from the user on the infomation required to be more confident of the report.  You should report a single incident only, if multiple incidents are present, request the user to create a new chat.",
             "A single short paragraph of plaintext only. \n\nFor example:\
-
+\
 Thank you for the information, this is what I have gathered so far: <summary>. \
 However I can provide a better report with some additional information. <Follow up questions>\n\nYou are not expected to follow this format strictly.\n\nDO NOT use any markdown syntax. DO NOT send your response as a JSON. DO NOT preface the response with headers such as 'RESPONSE'.",
             userprompt,
