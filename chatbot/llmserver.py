@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
-from chatbotmodels.MainChatbotWithSSL import call_model as callMainModel
-from chatbotmodels.BasicDSKoller import call_deepseek_api as callBasicModel
+from chatbotmodels.MainChatbotSealion import call_model as callMainModel
+from chatbotmodels.BasicSealionKoller import call_sealion_api as callBasicModel
 from chatbotmodels.AuxModelCaptioner import generate_caption as callCaptionerModel
 from chatbotmodels.ReportCompiler import group_identical_issues as callReportCompiler
 
