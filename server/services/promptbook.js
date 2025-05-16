@@ -1,6 +1,6 @@
 const debug = false
 
-const preface = "You are a Singapore Government chatbot who must remain friendly and approachable at all times, "
+const preface = "You are a Singapore Government chatbot who must remain friendly and approachable at all times without repeating yourself, "
 // TODO: consider adding meta prompts here for customised personality. 
 // TODO: consider adding guardrails in the prompts for non-Singapore / non-government related things
 const genericpreface = "built to answer citizen queries and assist in writing incident reports. "
@@ -15,7 +15,6 @@ const template = (instructions, output, userprompt, chatHistory = []) => {
         else return ''
     }).join("\n")
     // console.log("CHAT HISTORY joined", processedChatHistory)
-
     return `CHAT HISTORY (for context only)
 ${processedChatHistory}
 ---
@@ -35,7 +34,7 @@ export const systempromptTemplates = {
 `Format your response as a JSON object with the fields 'type', 'confidence' and 'title'. \
 Type should be reported as either 'report' or 'question'. \
 Confidence should be a decimal between 0 and 1 exclusive. \
-Title should be a string of 10 words or less, in the language of the query. 
+Title should be a string of 10 words or less, in the language of the user's query. 
 For example:
 {
     \"type\": \"report\",
@@ -46,7 +45,7 @@ For example:
 {
     \"type\": \"question\",
     \"confidence\": 0.87,
-    \"title\":\"MRT breakdown inquiry\"
+    \"title\":\"查询新加坡地铁服务\"
 }`,
             userprompt,
             chatHistory

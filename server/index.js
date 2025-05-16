@@ -48,6 +48,23 @@ app.use('/api', queryRoutes);
 app.use('/api', reportRoutes);
 app.use('/api', chatRoutes);
 
-app.listen(process.env.PORT, () => {
+const server = app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
+});
+// Stop the server
+function stopServer(callback) {
+  if (server) {
+    server.close(() => {
+      console.log('Server closed.');
+      callback();
+    });
+  } else {
+    callback();
+  }
+}
+process.on('exit', () => stopServer(() => {}));
+process.on('SIGINT', () => stopServer(() => process.exit(0)));
+process.on('uncaughtException', err => {
+  console.error('Uncaught Exception:', err);
+  stopServer(() => process.exit(1));
 });
