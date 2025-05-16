@@ -133,7 +133,7 @@ _model.safetensors file available upon request._
 <details>
 <summary>Click to expand routes details</summary>
 
-### Authentication
+### Authentication routes
 `POST /register`
 ```ts
 Request {
@@ -391,28 +391,6 @@ Response {
     error: string
 }
 ```
-`GET /reports_summary`
-```ts
-Request {
-    newStatus: 'pending' | 'in progress' | 'resolved' | 'rejected'
-}
-
-Response Array<
-    {
-        summary: string,
-        description: string,
-        agency: string,
-        recommendedSteps: string,
-        urgency: number,
-        confidence: number,
-        valid: true
-    } | {
-        valid: false
-    }
-> | {
-    error: string
-}
-```
 `POST /reports/set_is_public/:id`
 ```ts
 Request {
@@ -485,6 +463,42 @@ Response {
     remarks: string
 } | {
     error: string
+}
+```
+
+`GET /gov/reports_summary`
+```ts
+Request {
+    newStatus: 'pending' | 'in progress' | 'resolved' | 'rejected'
+}
+
+Response Array<
+    {
+        summary: string,
+        description: string,
+        agency: string,
+        recommendedSteps: string,
+        urgency: number,
+        confidence: number,
+        valid: true
+    } | {
+        valid: false
+    }
+> | {
+    error: string
+}
+```
+
+### Miscellaneous routes
+`POST /translate`
+```ts
+Request {
+    text: string,
+    target:"ENGLISH" | "CHINESE" | "MALAY" | "TAMIL" | undefined
+}
+
+Response {
+    text: string
 }
 ```
 

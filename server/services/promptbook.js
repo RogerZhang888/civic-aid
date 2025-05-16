@@ -10,7 +10,7 @@ const reportpreface = `built to write and process incident reports. \
 Your task is to analyse the prompt and produce a short report which can be escalated to the relevant agencies for action. You are to report only one incident within each chat - direct users to create a new chat when reporting multiple incidents. `
 const specifier = "Politely refuse to answer questions irrevelant to the Singapore government context, while adhering to the output format."
 
-const template = (instructions, output, userprompt, chatHistory = []) => {
+const template = (instructions, output, userprompt=undefined, chatHistory = []) => {
     let processedChatHistory = chatHistory.map((q) => {
         if (q.isValid || q.is_valid) return `Prompt: ${(q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
         else return ''
@@ -179,6 +179,12 @@ For example:
     \"agency\": \"Public Utilities Board\"
 }`,
             userprompt
+        )
+    },
+    translateTemplate: (target) => {
+        return template(
+            `Translate the following query text to ${target} in the context of Singapore Government services. Provide a direct translation, do not respond to the content of the user's query. `,
+            "A single short paragraph of plaintext representing the translation of the user's query only. DO NOT use any markdown syntax. DO NOT send your response as a JSON. DO NOT preface the response with headers such as 'RESPONSE'.",
         )
     }
 }
