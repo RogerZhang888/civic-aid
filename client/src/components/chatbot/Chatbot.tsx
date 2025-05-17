@@ -40,7 +40,7 @@ export default function Chatbot() {
 
          <div className="mt-auto w-full max-w-3xl pt-3 static">
             <ChatbotForm/>
-            <div className="hidden sm:block text-xs text-center m-2 text-gray-500">
+            <div className="text-xs text-center m-2 text-gray-500">
                {!coords && 
                   <div className="font-semibold flex flex-row items-center justify-center gap-1">
                      <Info size={15} strokeWidth="3"/>{t('location')}
