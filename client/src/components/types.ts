@@ -65,6 +65,7 @@ export type Report = {
    urgency: number;
    reportConfidence: number;
    status: ReportStatusTypes;
+   isPublic: boolean;
    createdAt: Date;
    resolvedAt: Date | null;
 }

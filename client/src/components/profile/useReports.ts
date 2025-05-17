@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { AllowedAgencies, Report, ReportStatusTypes } from "../types";
+import { AllowedAgencies, Report, ReportStatusTypes, ReportVisibilityTypes } from "../types";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -27,6 +27,7 @@ async function queryFn(): Promise<Report[]> {
             urgency: number;
             report_confidence: number;
             status: string;
+            visibility: string;
             created_at: string;
             resolved_at: string;
          }) => {
@@ -62,6 +63,7 @@ async function queryFn(): Promise<Report[]> {
                urgency: report.urgency,
                reportConfidence: report.report_confidence,
                status: report.status as ReportStatusTypes, // Type assertion
+               visibility: report.visibility as ReportVisibilityTypes, // Type assertion
                createdAt: new Date(report.created_at),
                resolvedAt: report.resolved_at
                   ? new Date(report.resolved_at)

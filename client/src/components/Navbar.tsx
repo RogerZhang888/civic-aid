@@ -110,6 +110,16 @@ export default function Navbar() {
                      </li>
                      <li>
                         <Link
+                           to="/community"
+                           className={`hover:text-white transition ${
+                              pathname === "/community" ? "text-primary-content" : ""
+                           }`}
+                        >
+                           {t('Community')}
+                        </Link>
+                     </li>
+                     <li>
+                        <Link
                            to="/chatbot"
                            className={`hover:text-white transition ${
                               pathname === "/chatbot" ? "text-primary-content" : ""

@@ -16,6 +16,8 @@ import About from "./components/about/About";
 import ProfileReportPage from "./components/profile/ProfileReportPage";
 import AdminPage from "./components/admin/AdminPage";
 import ChatProvider from "./components/chatbot/ChatProvider";
+import CommunityPage from "./components/community/CommunityPage";
+import CommunityReportPage from "./components/community/CommunityReportPage";
 
 export default function App() {
    return (
@@ -44,6 +46,14 @@ export default function App() {
                                  <Route index element={<ProfilePage/>}/>
 
                                  <Route path=":reportId" element={<ProfileReportPage/>}/>
+                              
+                              </Route>
+
+                              <Route path="/community">
+
+                                 <Route index element={<CommunityPage/>}/>
+
+                                 <Route path=":reportId" element={<CommunityReportPage/>}/>
                               
                               </Route>
 
