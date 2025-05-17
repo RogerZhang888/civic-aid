@@ -97,7 +97,7 @@ export default function ChatSidebarDesktop() {
                      x: -500,
                      transition: { ease: "easeInOut" },
                   }}
-                  className="flex h-full flex-col overflow-y-auto space-y-3"
+                  className="flex h-full flex-col overflow-y-auto space-y-2"
                >
                   <ChatsButtonColumn />
                </motion.div>
