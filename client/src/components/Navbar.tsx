@@ -12,8 +12,6 @@ export default function Navbar() {
    const { t } = useTranslation();
    const { data: user, isLoading } = useUser();
 
-   console.log(user);
-
    if (isLoading) {
       return (
          <div className="navbar shadow-[4px_4px_12px_2px_rgba(0,0,0,0.3)] bg-primary text-primary-content px-4 
@@ -88,16 +86,18 @@ export default function Navbar() {
             {user && (
                <div className="hidden lg:flex">
                   <ul className="menu menu-horizontal pl-4 space-x-4">
-                     <li>
-                        <Link
-                           to="/admin"
-                           className={`hover:text-white transition ${
-                              pathname === "/admin" ? "text-primary-content" : ""
-                           }`}
-                        >
-                           Admin Panel
-                        </Link>
-                     </li>
+                     {user.permissions.length !== 0 &&
+                        <li>
+                           <Link
+                              to="/admin"
+                              className={`hover:text-white transition ${
+                                 pathname === "/admin" ? "text-primary-content" : ""
+                              }`}
+                           >
+                              Admin Panel
+                           </Link>
+                        </li>
+                     }
                      <li>
                         <Link
                            to="/profile"
@@ -159,7 +159,7 @@ export default function Navbar() {
 }
 
 
-function LanguagesDropDown() {
+export function LanguagesDropDown() {
 
    const { t } = useTranslation();
    const { language, toggleLanguage } = useLanguageContext();

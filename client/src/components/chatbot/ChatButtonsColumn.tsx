@@ -59,11 +59,11 @@ export default function ChatsButtonColumn() {
                   onChange={(e) => setEditedTitle(e.target.value)}
                   onKeyDown={handleKeyDown}
                   onClick={(e) => e.stopPropagation()}
-                  className="w-full input input-ghost border-0"
+                  className="w-full input input-ghost border-0 bg-secondary"
                   autoFocus
                />
             :  <button
-                  className={`btn px-1 w-full btn-outline btn-primary text-white text-nowrap overflow-hidden flex justify-start items-center ${
+                  className={`btn w-full btn-outline btn-secondary text-white text-nowrap overflow-hidden flex justify-start items-center ${
                      currChatId === thisChat.id ? "btn-active" : ""
                   }`}
                   onClick={() => navigate(`/chatbot/${thisChat.id}`)}
@@ -80,7 +80,7 @@ export default function ChatsButtonColumn() {
                      openMenuId === thisChat.id ? null : thisChat.id
                   );
                }}
-               className="bg-secondary absolute right-2 top-1/2 -translate-y-1/2 rounded-full text-black p-1 transition duration-200 ease-in-out
+               className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full text-black p-1 transition duration-300 ease-in-out
                hover:cursor-pointer hover:bg-white opacity-0 group-hover:opacity-100"
             >
                <MoreHorizontal size={15} />

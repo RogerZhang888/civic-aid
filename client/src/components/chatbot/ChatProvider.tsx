@@ -5,7 +5,7 @@ import { Chat, FormState, GetChatRes, GetQueriesForChatRes, Query } from "../typ
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useNavigate, useParams } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import chatReducer from "./chatReducer";
 import { BookMarked } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -29,7 +29,9 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
 
    const { data: user } = useUser();
 
-   const { currChatId } = useParams<{ currChatId: string }>();
+   const currUrl = useLocation();
+
+   const currChatId = currUrl.pathname.includes("/chatbot/") ? currUrl.pathname.split("/").at(-1) : "";
 
    const ReportJSX = useCallback((id: string, agency: string) => {
       return (
