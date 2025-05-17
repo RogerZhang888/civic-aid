@@ -19,7 +19,7 @@ export default function Chatbot() {
    )
 
    return (
-      <div className="h-full flex flex-1 flex-col items-center mx-4 relative">
+      <div className="h-full flex flex-1 flex-col items-center mx-4 static">
 
          {currChat
             ?  <>

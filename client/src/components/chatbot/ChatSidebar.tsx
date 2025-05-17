@@ -16,7 +16,7 @@ export default function ChatSidebar() {
 
    return (
       <motion.div
-         className="bg-primary flex flex-col py-4 px-2 space-y-4"
+         className="bg-primary flex flex-col py-4 px-4 space-y-4 absolute z-10"
          animate={{ width: isExpanded ? "16rem" : "4rem" }}
          transition={{ ease: "easeInOut" }}
       >
