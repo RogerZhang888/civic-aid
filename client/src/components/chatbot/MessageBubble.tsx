@@ -34,7 +34,7 @@ function MessageBubble({
          </div>
          <div className="chat chat-start tracking-wide">
             <div className="chat-image avatar relative top-6">
-               <div className="w-15 rounded-full">
+               <div className="w-15 rounded-full hidden sm:block">
                   <img src="/mascot.png" alt="logo" />
                </div>
             </div>
