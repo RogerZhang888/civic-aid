@@ -1,17 +1,12 @@
-import { useParams } from "react-router";
-import ChatSidebar from "./ChatSidebar";
+import ChatSidebarDesktop from "./ChatSidebarDesktop";
 import Chatbot from "./Chatbot";
-import ChatProvider from "./ChatProvider";
 
 export default function ChatbotWrapper() {
-   const { currChatId } = useParams<{ currChatId: string }>();
 
    return (
-      <div className=" flex flex-row h-[calc(100vh-5rem)]" id="chatbot">
-         <ChatProvider currChatId={currChatId}>
-            <ChatSidebar/>
-            <Chatbot/>
-         </ChatProvider>
+      <div className="flex flex-row h-full" id="chatbot">
+         <ChatSidebarDesktop/>
+         <Chatbot/>
       </div>
    );
 }

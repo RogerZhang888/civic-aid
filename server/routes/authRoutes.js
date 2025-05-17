@@ -61,6 +61,8 @@ router.post("/login", async (req, res) => {
 
    try {
 
+      console.log(req.body)
+
       const { username: reqUsername, password } = req.body;
       const pgsqlLoginRes = await pgsql.query("SELECT * FROM users WHERE name = $1", [reqUsername]);
 
@@ -105,7 +107,7 @@ router.post("/login", async (req, res) => {
  */
 router.post('/logout', authMiddleware, (req, res) => {
 
-   const { email } = req.user;
+   const { username } = req.user;
 
    console.log("RUNNING LOGOUT HANDLER");
 
@@ -115,7 +117,7 @@ router.post('/logout', authMiddleware, (req, res) => {
      sameSite: 'strict',
    });
 
-   console.log(`User ${email} logged out successfully`);
+   console.log(`User ${username} logged out successfully`);
  
    res.json({ success: true });
 });
@@ -127,8 +129,8 @@ router.post('/logout', authMiddleware, (req, res) => {
  * @returns 200 with user data if authenticated
  */
 router.get("/protected", authMiddleware, (req, res) => {
-   const { email } = req.user;
-   console.log(`User ${email} accessed protected route`);
+   const { username } = req.user;
+   console.log(`User ${username} accessed protected route`);
    res.json(req.user);
 });
 
