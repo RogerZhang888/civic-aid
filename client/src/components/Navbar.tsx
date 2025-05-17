@@ -26,7 +26,7 @@ export default function Navbar() {
 
    return (
       <div className="navbar shadow-[0_0_5px_2px_rgba(0,0,0,0.3)] bg-primary text-primary-content px-4 
-      z-1 sticky top-0 h-4"
+      z-20 sticky top-0 h-10"
       >
          <div className="navbar-start">
             

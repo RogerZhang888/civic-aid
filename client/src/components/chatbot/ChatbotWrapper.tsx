@@ -7,7 +7,7 @@ export default function ChatbotWrapper() {
    const { currChatId } = useParams<{ currChatId: string }>();
 
    return (
-      <div className="flex flex-row h-[calc(100vh-4rem)]" id="chatbot">
+      <div className=" flex flex-row h-[calc(100vh-5rem)]" id="chatbot">
          <ChatProvider currChatId={currChatId}>
             <ChatSidebar/>
             <Chatbot/>

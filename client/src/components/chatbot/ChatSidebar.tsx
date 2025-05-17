@@ -16,8 +16,11 @@ export default function ChatSidebar() {
 
    return (
       <motion.div
-         className="bg-primary flex flex-col py-4 px-4 space-y-4 absolute z-10"
-         animate={{ width: isExpanded ? "16rem" : "4rem" }}
+         className="bg-transparent flex flex-col py-4 px-4 space-y-4 absolute z-10 h-[calc(100vh-4rem)]"
+         animate={{
+             width: isExpanded ? "16rem" : "4rem", 
+             backgroundColor: isExpanded ? "rgba(140, 3, 39, 1)" : "transparent"
+            }}
          transition={{ ease: "easeInOut" }}
       >
          <AnimatePresence mode="popLayout">
@@ -97,7 +100,7 @@ export default function ChatSidebar() {
                      x: -500,
                      transition: { ease: "easeInOut" },
                   }}
-                  className="flex h-full flex-col overflow-y-auto space-y-3"
+                  className="flex h-full flex-col overflow-y-auto space-y-2"
                >
                   <ChatsButtonColumn />
                </motion.div>
