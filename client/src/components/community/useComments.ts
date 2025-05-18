@@ -18,7 +18,7 @@ async function queryFn(path: string): Promise<Comment[]> {
             report_id: string;
             parent_id: string;
             upvote_count: string;
-            content: string;
+            text: string;
             created_at: string;
          }) => {
 
@@ -27,7 +27,7 @@ async function queryFn(path: string): Promise<Comment[]> {
                reportId: comment.report_id,
                parentId: comment.parent_id,
                upvoteCount: comment.upvote_count,
-               content: comment.content,
+               content: comment.text,
                createdAt: new Date(comment.created_at),
             };
          }
