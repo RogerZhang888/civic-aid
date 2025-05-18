@@ -1,5 +1,6 @@
 import { useParams } from 'react-router';
 import useReports from '../profile/useReports';
+import ReportStats from './ReportStats';
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -31,6 +32,23 @@ export default function CommunityReportPage() {
 
             <h1 className="card-title text-3xl">{thisReport.title}</h1>
 
+            <div>
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {thisReport.mediaUrl.length > 0
+                     ?  thisReport.mediaUrl.map((url, index) => (
+                           <div key={index} className="aspect-square bg-base-200 rounded-lg overflow-hidden">
+                              <img
+                                 src={`${SERVER_API_URL}/api/files/${url}`}
+                                 alt={`Report media ${index + 1}`}
+                                 className="w-full h-full object-cover"
+                              />
+                           </div>
+                        ))
+                     :  "You did not upload any media for this report."
+                  }
+               </div>
+            </div>
+
             <div className="divider"/>
 
             <div className="max-w-100">
@@ -38,19 +56,19 @@ export default function CommunityReportPage() {
                <h2 className="text-xl font-semibold mb-2">Details</h2>
                <div className="space-y-3">
                   <div className="flex justify-between">
-                     <span className="font-medium">Status:</span>
+                     <span className="font-medium">Status</span>
                      <span className={`badge ${statusColor} p-3`}>{capitalize(thisReport.status)}</span>
                   </div>
                   <div className="flex justify-between">
-                     <span className="font-medium">Created:</span>
+                     <span className="font-medium">Created</span>
                      <span>{createdAt}</span>
                   </div>
                   <div className="flex justify-between">
-                     <span className="font-medium">Resolved:</span>
+                     <span className="font-medium">Resolved</span>
                      <span>{resolvedAt}</span>
                   </div>
                   <div className="flex justify-between">
-                     <span className="font-medium">Agency:</span>
+                     <span className="font-medium">Agency</span>
                      <span>{thisReport.agency}</span>
                   </div>
                </div>
@@ -86,25 +104,10 @@ export default function CommunityReportPage() {
                   </div>
                </>
             )}
-
-            <div className="divider"/>
             <div>
-               <h2 className="text-xl font-semibold mb-2">Attached Media</h2>
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {thisReport.mediaUrl.length > 0
-                     ?  thisReport.mediaUrl.map((url, index) => (
-                           <div key={index} className="aspect-square bg-base-200 rounded-lg overflow-hidden">
-                              <img
-                                 src={`${SERVER_API_URL}/api/files/${url}`}
-                                 alt={`Report media ${index + 1}`}
-                                 className="w-full h-full object-cover"
-                              />
-                           </div>
-                        ))
-                     :  "You did not upload any media for this report."
-                  }
-               </div>
+               <ReportStats /> 
             </div>
+
 
          </div>
       </div>
