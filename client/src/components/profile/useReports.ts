@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { AllowedAgencies, Report, ReportStatusTypes, ReportVisibilityTypes } from "../types";
+import { AllowedAgencies, Report, ReportStatusTypes } from "../types";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
-async function queryFn(): Promise<Report[]> {
-   console.log("invoking useReports...");
+async function queryFn(path: string): Promise<Report[]> {
+   console.log(`Fetching from ${path}...`);
 
    try {
-      const res = await axios.get(`${SERVER_API_URL}/api/reports`, {
+      const res = await axios.get(`${SERVER_API_URL}/api${path}`, {
          withCredentials: true,
       });
 
@@ -27,11 +27,10 @@ async function queryFn(): Promise<Report[]> {
             urgency: number;
             report_confidence: number;
             status: string;
-            visibility: string;
+            is_public: boolean;
             created_at: string;
             resolved_at: string;
          }) => {
-            // Create GeolocationCoordinates object if coordinates exist
             const incidentLocation =
                report.longitude && report.latitude
                   ? {
@@ -42,7 +41,6 @@ async function queryFn(): Promise<Report[]> {
                        altitudeAccuracy: null,
                        heading: null,
                        speed: null,
-                       // To match the GeolocationCoordinates interface completely
                        toJSON() {
                           return this;
                        },
@@ -52,38 +50,35 @@ async function queryFn(): Promise<Report[]> {
 
             return {
                id: report.id,
-               userId: report.user_id.toString(), // Convert to string to match your type
+               userId: report.user_id.toString(),
                chatId: report.chat_id,
                title: report.title,
                description: report.description,
                mediaUrl: report.media_url,
                incidentLocation,
-               agency: report.agency as AllowedAgencies, // Type assertion
+               agency: report.agency as AllowedAgencies,
                recommendedSteps: report.recommended_steps,
                urgency: report.urgency,
                reportConfidence: report.report_confidence,
-               status: report.status as ReportStatusTypes, // Type assertion
-               visibility: report.visibility as ReportVisibilityTypes, // Type assertion
+               status: report.status as ReportStatusTypes,
+               isPublic: report.is_public,
                createdAt: new Date(report.created_at),
-               resolvedAt: report.resolved_at
-                  ? new Date(report.resolved_at)
-                  : null,
+               resolvedAt: report.resolved_at ? new Date(report.resolved_at) : null,
             };
          }
       );
 
       return reports;
    } catch (error) {
-      console.log(`Unable to fetch reports due to ${error}`);
-
+      console.log(`Unable to fetch reports from ${path} due to`, error);
       throw error;
    }
 }
 
-export default function useReports() {
+export default function useReports(path: string = "/reports") {
    return useQuery<Report[], AxiosError>({
-      queryKey: ["current-user-reports"],
-      queryFn,
+      queryKey: ["reports", path],
+      queryFn: () => queryFn(path),
       staleTime: 5 * 60 * 1000,
       retry: false,
    });

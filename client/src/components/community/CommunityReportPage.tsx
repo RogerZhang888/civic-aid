@@ -3,7 +3,7 @@ import useReports from '../profile/useReports';
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
-export default function ProfileReportPage() {
+export default function CommunityReportPage() {
    const { reportId } = useParams() as { reportId: string };
    const { data: reports, isLoading: isReportsLoading } = useReports();
 
