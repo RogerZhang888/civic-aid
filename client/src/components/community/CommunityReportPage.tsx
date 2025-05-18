@@ -1,52 +1,7 @@
 import { useParams } from 'react-router';
-import useReports from './useReports';
-import { useState } from 'react';
+import useReports from '../profile/useReports';
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
-
-type ReportVisibilityToggleProps = {
-   reportId: string;
-   initialPublic: boolean;
- };
- 
- function ReportVisibilityToggle({ reportId, initialPublic }: ReportVisibilityToggleProps) {
-   const [isPublic, setIsPublic] = useState(initialPublic);
-   const [loading, setLoading] = useState(false);
- 
-   const handleToggle = async () => {
-     const newStatus = !isPublic;
-     setLoading(true);
-     try {
-       const res = await fetch(`/api/reports/set_is_public/${reportId}`, {
-         method: 'POST',
-         headers: {
-           'Content-Type': 'application/json',
-         },
-         body: JSON.stringify({ is_public: newStatus }),
-       });
-       if (!res.ok) throw new Error('Failed to update visibility');
-       setIsPublic(newStatus);
-     } catch (err) {
-       console.error(err);
-       // Optionally show error to user
-     } finally {
-       setLoading(false);
-     }
-   };
- 
-   return (
-     <div className="flex items-center gap-2">
-       <input
-         type="checkbox"
-         checked={isPublic}
-         onChange={handleToggle}
-         disabled={loading}
-         className="toggle border-indigo-600 bg-indigo-500 checked:border-orange-500 checked:bg-orange-400"
-       />
-       <span className="text-sm font-medium">{isPublic ? 'Public' : 'Private'}</span>
-     </div>
-   );
- }
 
 export default function ProfileReportPage() {
    const { reportId } = useParams() as { reportId: string };
@@ -80,29 +35,22 @@ export default function ProfileReportPage() {
 
             <div className="max-w-100">
                
-               <h2 className="text-2xl font-semibold mb-2">Details</h2>
+               <h2 className="text-xl font-semibold mb-2">Details</h2>
                <div className="space-y-3">
                   <div className="flex justify-between">
-                     <span className="font-medium">Status</span>
+                     <span className="font-medium">Status:</span>
                      <span className={`badge ${statusColor} p-3`}>{capitalize(thisReport.status)}</span>
                   </div>
                   <div className="flex justify-between">
-                     <span className="font-medium">Visibility</span>
-                     <ReportVisibilityToggle
-                     reportId={thisReport.id}
-                     initialPublic={thisReport.isPublic}
-                     />
-                  </div>
-                  <div className="flex justify-between">
-                     <span className="font-medium">Created at</span>
+                     <span className="font-medium">Created:</span>
                      <span>{createdAt}</span>
                   </div>
                   <div className="flex justify-between">
-                     <span className="font-medium">Resolved at</span>
+                     <span className="font-medium">Resolved:</span>
                      <span>{resolvedAt}</span>
                   </div>
                   <div className="flex justify-between">
-                     <span className="font-medium">Agency</span>
+                     <span className="font-medium">Agency:</span>
                      <span>{thisReport.agency}</span>
                   </div>
                </div>
@@ -163,20 +111,3 @@ export default function ProfileReportPage() {
    );
 }
 
-/**
- * 
- *                   {/* <div className="flex justify-between items-center">
-                     <span className="font-medium">Urgency:</span>
-                     <div className="flex items-center gap-2">
-                        <progress className="progress progress-info w-30" value={thisReport.urgency} max="1"></progress>
-                        <span>{thisReport.urgency.toFixed(2)} / 1</span>
-                     </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                     <span className="font-medium">Confidence:</span>
-                     <div className="flex items-center gap-2">
-                        <progress className="progress progress-primary w-30" value={thisReport.reportConfidence} max="1"></progress>
-                        <span>{thisReport.reportConfidence.toFixed(2)} / 1</span>
-                     </div>
-                  </div>
- */
