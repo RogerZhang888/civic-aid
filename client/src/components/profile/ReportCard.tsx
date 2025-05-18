@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { Report } from "../types";
 import { useState } from "react";
 
@@ -7,6 +7,9 @@ const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 export default function ReportCard({ report }: { report: Report }) {
 
    const navigate = useNavigate();
+   const location = useLocation();
+   const currentPath = location.pathname;
+   const prefix = currentPath.startsWith("/community") ? "/community" : "/profile";
 
    const [imageError, setImageError] = useState(false);
 
@@ -17,6 +20,7 @@ export default function ReportCard({ report }: { report: Report }) {
       id,
       createdAt,
       status,
+      isPublic
       // urgency
    } = report;
 
@@ -50,6 +54,9 @@ export default function ReportCard({ report }: { report: Report }) {
             <span className={`badge ${statusColor} p-3 font-semibold shadow-[0_0_2px_1px_rgba(0,0,0,0.3)]`}>
                {capitalize(status)}
             </span>
+            <span className={`${isPublic === true ? "" : "hidden"} badge badge-primary p-3 font-semibold shadow-[0_0_2px_1px_rgba(0,0,0,0.3)]`}>
+               Public
+            </span>
             {/* {isUrgent &&
                <span className="badge badge-error p-3 font-semibold shadow-[0_0_2px_1px_rgba(0,0,0,0.3)]">
                   Urgent
@@ -82,7 +89,7 @@ export default function ReportCard({ report }: { report: Report }) {
             </p>
             <div className="card-actions">
                <button
-                  onClick={() => navigate(`/profile/${id}`)}
+                  onClick={() => navigate(`${prefix}/${id}`)}
                   className="btn btn-secondary w-full"
                >
                   View Report

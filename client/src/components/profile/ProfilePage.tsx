@@ -3,7 +3,7 @@ import useReports from "./useReports";
 import useRewards from "./useRewards";
 
 export default function ProfilePage() {
-   const { data: reports, isLoading: isReportsLoading } = useReports();
+   const { data: reports, isLoading: isReportsLoading } = useReports("/reports");
    const { data: hasReward, isLoading: isRewardsLoading } = useRewards();
 
    const resolvedCount = reports?.filter(report => report.status === 'resolved').length || 0;

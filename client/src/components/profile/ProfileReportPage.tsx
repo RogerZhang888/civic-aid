@@ -1,6 +1,7 @@
 import { useParams } from 'react-router';
 import useReports from './useReports';
 import { useState } from 'react';
+import axios from "axios";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -9,44 +10,7 @@ type ReportVisibilityToggleProps = {
    initialPublic: boolean;
  };
  
- function ReportVisibilityToggle({ reportId, initialPublic }: ReportVisibilityToggleProps) {
-   const [isPublic, setIsPublic] = useState(initialPublic);
-   const [loading, setLoading] = useState(false);
  
-   const handleToggle = async () => {
-     const newStatus = !isPublic;
-     setLoading(true);
-     try {
-       const res = await fetch(`/api/reports/set_is_public/${reportId}`, {
-         method: 'POST',
-         headers: {
-           'Content-Type': 'application/json',
-         },
-         body: JSON.stringify({ is_public: newStatus }),
-       });
-       if (!res.ok) throw new Error('Failed to update visibility');
-       setIsPublic(newStatus);
-     } catch (err) {
-       console.error(err);
-       // Optionally show error to user
-     } finally {
-       setLoading(false);
-     }
-   };
- 
-   return (
-     <div className="flex items-center gap-2">
-       <input
-         type="checkbox"
-         checked={isPublic}
-         onChange={handleToggle}
-         disabled={loading}
-         className="toggle border-indigo-600 bg-indigo-500 checked:border-orange-500 checked:bg-orange-400"
-       />
-       <span className="text-sm font-medium">{isPublic ? 'Public' : 'Private'}</span>
-     </div>
-   );
- }
 
 export default function ProfileReportPage() {
    const { reportId } = useParams() as { reportId: string };
@@ -70,11 +34,63 @@ export default function ProfileReportPage() {
       return word.charAt(0).toUpperCase() + word.slice(1);
    }
 
+   function ReportVisibilityToggle({ reportId, initialPublic }: ReportVisibilityToggleProps) {
+   const [isPublic, setIsPublic] = useState(initialPublic);
+   const [loading, setLoading] = useState(false);
+ 
+   const handleToggle = async () => {
+     const newStatus = !isPublic;
+     setLoading(true);
+     try {
+      console.log(`Attempting to set report ${reportId} to ${newStatus ? 'public' : 'private'}...`);
+      await axios.post(`${SERVER_API_URL}/api/reports/set_is_public/${reportId}`, 
+         { is_public: newStatus },
+         { withCredentials: true }
+      );
+      setIsPublic(newStatus); // Update UI only after success
+    } catch (err) {
+      console.error('Error updating visibility:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+ 
+   return (
+     <div className="flex items-center gap-2">
+       <input
+         type="checkbox"
+         checked={isPublic}
+         onChange={handleToggle}
+         disabled={loading}
+         className="toggle border-indigo-600 bg-indigo-500 checked:border-orange-500 checked:bg-orange-400"
+       />
+       <span className="text-sm font-medium">{isPublic ? 'Public' : 'Private'}</span>
+     </div>
+   );
+ }
+
    return (
       <div className="card bg-base-100 m-10 shadow-[0_0_10px_1px_rgba(0,0,0,0.2)]">
          <div className="card-body text-base">
 
             <h1 className="card-title text-3xl">{thisReport.title}</h1>
+
+            <div>
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {thisReport.mediaUrl.length > 0
+                     ?  thisReport.mediaUrl.map((url, index) => (
+                           <div key={index} className="aspect-square bg-base-200 rounded-lg overflow-hidden">
+                              <img
+                                 src={`${SERVER_API_URL}/api/files/${url}`}
+                                 alt={`Report media ${index + 1}`}
+                                 className="w-full h-full object-cover"
+                              />
+                           </div>
+                        ))
+                     :  "You did not upload any media for this report."
+                  }
+               </div>
+            </div>
 
             <div className="divider"/>
 
@@ -90,7 +106,7 @@ export default function ProfileReportPage() {
                      <span className="font-medium">Visibility</span>
                      <ReportVisibilityToggle
                      reportId={thisReport.id}
-                     initialPublic={thisReport.isPublic}
+                     initialPublic={thisReport.isPublic ?? false}
                      />
                   </div>
                   <div className="flex justify-between">
@@ -139,24 +155,7 @@ export default function ProfileReportPage() {
                </>
             )}
 
-            <div className="divider"/>
-            <div>
-               <h2 className="text-xl font-semibold mb-2">Attached Media</h2>
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {thisReport.mediaUrl.length > 0
-                     ?  thisReport.mediaUrl.map((url, index) => (
-                           <div key={index} className="aspect-square bg-base-200 rounded-lg overflow-hidden">
-                              <img
-                                 src={`${SERVER_API_URL}/api/files/${url}`}
-                                 alt={`Report media ${index + 1}`}
-                                 className="w-full h-full object-cover"
-                              />
-                           </div>
-                        ))
-                     :  "You did not upload any media for this report."
-                  }
-               </div>
-            </div>
+
 
          </div>
       </div>

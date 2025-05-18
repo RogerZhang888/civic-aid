@@ -16,7 +16,7 @@ export default function ChatSidebarDesktop() {
 
    return (
       <motion.div
-         className="bg-primary lg:flex flex-col py-4 px-2 space-y-4 hidden"
+         className="bg-primary lg:flex flex-col py-4 px-2 space-y-4 hidden z-10"
          animate={{ width: isExpanded ? "16rem" : "4rem" }}
          transition={{ ease: "easeInOut" }}
       >

@@ -182,7 +182,10 @@ export async function getUserReports(req, res) {
                report_confidence,
                status,
                created_at,
-               resolved_at
+               resolved_at,
+               remarks,
+               is_public,
+               upvote_count
             FROM
                reports
             WHERE 
