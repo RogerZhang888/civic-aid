@@ -27,10 +27,10 @@ export default function CommunityReportPage() {
    }
 
    return (
-      <div className="card bg-base-100 m-10 shadow-[0_0_10px_1px_rgba(0,0,0,0.2)]">
+      <div className="card max-w-3xl bg-base-100 m-10 shadow-[0_0_10px_1px_rgba(0,0,0,0.2)]">
          <div className="card-body text-base">
 
-            <h1 className="card-title text-3xl">{thisReport.title}</h1>
+            <h1 className="mb-3 card-title text-3xl">{thisReport.title}</h1>
 
             <div>
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
