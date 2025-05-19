@@ -1,5 +1,5 @@
 import { useParams } from 'react-router';
-import useReports from '../profile/useReports';
+import useReports from '../../hooks/useReports';
 import ReportStats from './ReportStats';
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;

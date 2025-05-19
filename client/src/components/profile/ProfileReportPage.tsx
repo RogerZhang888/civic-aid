@@ -1,5 +1,5 @@
 import { useParams } from 'react-router';
-import useReports from './useReports';
+import useReports from '../../hooks/useReports';
 import { useState } from 'react';
 import axios from "axios";
 

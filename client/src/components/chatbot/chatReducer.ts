@@ -8,7 +8,8 @@ type Action =
    | { type: "DELETE_QUERY"; payload: { chatId: string } }
    | { type: "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA"; payload: { answer: string | React.ReactNode, sources: string[], media?: string, title: string, chatId: string } }
    | { type: "DELETE_CHAT"; payload: { chatId: string } }
-   | { type: "UPDATE_CHAT_TITLE"; payload: { chatId: string, newTitle: string } };
+   | { type: "UPDATE_CHAT_TITLE"; payload: { chatId: string, newTitle: string } }
+   | { type: "DELETE_ALL_CHATS"; payload: null };
 
 export default function chatReducer(state: Chat[], action: Action): Chat[] {
    switch (action.type) {
@@ -73,6 +74,9 @@ export default function chatReducer(state: Chat[], action: Action): Chat[] {
       
       case "DELETE_CHAT":
          return state.filter(chat => chat.id !== action.payload.chatId);
+      
+      case "DELETE_ALL_CHATS":
+         return [];
 
       default:
          throw new Error('Unknown action');

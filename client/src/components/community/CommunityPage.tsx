@@ -1,5 +1,5 @@
 import ReportCard from "../profile/ReportCard";
-import useReports from "../profile/useReports";
+import useReports from "../../hooks/useReports";
 
 export default function CommunityPage() {
    const { data: reports, isLoading: isReportsLoading } = useReports("/reports/public");

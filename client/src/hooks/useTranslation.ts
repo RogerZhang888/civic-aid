@@ -1,9 +1,9 @@
-import { useLanguageContext } from "./LanguageContext";
-import en from "./translations/en";
-import zh from "./translations/zh";
-import ms from "./translations/ms";
-import ta from "./translations/ta";
-import { SiteLanguages } from "../types";
+import { useLanguageContext } from "../components/language/LanguageContext";
+import en from "../components/language/translations/en";
+import zh from "../components/language/translations/zh";
+import ms from "../components/language/translations/ms";
+import ta from "../components/language/translations/ta";
+import { SiteLanguages } from "../components/types";
 import React from "react";
 
 const translations: Record<SiteLanguages, Record<string, string | React.ReactNode>> = {

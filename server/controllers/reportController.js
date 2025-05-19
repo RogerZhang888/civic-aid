@@ -268,6 +268,7 @@ export async function getDoesUserHaveReward(req, res) {
        res.json(result[0].rewarded_users.includes(userId));
 
    } catch (error) {
+      console.log("Failed to check if user is eligible for reward: " + error);
        res.status(500).json({ error: error.message });
    }
 }

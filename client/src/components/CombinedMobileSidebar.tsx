@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router";
-import useUser from "./auth/useUser";
-import useTranslation from "./language/useTranslation";
+import useUser from "../hooks/useUser";
+import useTranslation from "../hooks/useTranslation";
 import LogoutButton from "./auth/LogoutButton";
 import { SquareChevronDown } from "lucide-react";
 import { LanguagesDropDown } from "./Navbar";
@@ -13,7 +13,7 @@ export default function CombinedMobileSidebar() {
    const navigate = useNavigate();
 
    return (
-      <div className="drawer-side z-20">
+      <div className="drawer-side z-20 w-full" id="combined-mobile-sidebar">
          <label htmlFor="mobile-sidebar" aria-label="close sidebar" className="drawer-overlay" />
          <div className="bg-primary text-white min-h-full w-80 p-4 flex flex-col">
 
@@ -70,10 +70,12 @@ export default function CombinedMobileSidebar() {
             </div>
 
             <div className="flex h-full flex-col overflow-y-auto space-y-2" id="sidebar-middle">
-               <div className="font-semibold mb-2">Your chats:</div>
                {user
-                  ?  <ChatsButtonColumn/>
-                  :  <div className="text-center text-sm font-semibold">Log in to start chatting!</div>
+                  ?  <>
+                        <div className="font-semibold mb-2">Your chats:</div>
+                        <ChatsButtonColumn/>
+                     </>  
+                  :  <div className="text-center text-sm">Log in to start chatting!</div>
                }
             </div>
 

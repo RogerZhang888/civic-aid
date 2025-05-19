@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import useTranslation from "../language/useTranslation";
+import useTranslation from "../../hooks/useTranslation";
 import ChatsButtonColumn from "./ChatButtonsColumn";
 
 export default function ChatSidebarDesktop() {

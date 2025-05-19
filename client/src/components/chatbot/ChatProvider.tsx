@@ -9,7 +9,7 @@ import { useLocation, useNavigate } from "react-router";
 import chatReducer from "./chatReducer";
 import { BookMarked } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import useUser from "../auth/useUser";
+import useUser from "../../hooks/useUser";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -138,7 +138,11 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
 
    useEffect(() => {
 
-      if (!user) return;
+      if (!user) {
+         if (chats.length !== 0) chatsDispatch({ type: "DELETE_ALL_CHATS", payload: null });
+         setAreChatsFetchedInitially(false);
+         return;
+      }
 
       if (chats.length === 0 && !areChatsFetchedInitially) {
          fetchAllChats().then(() => {

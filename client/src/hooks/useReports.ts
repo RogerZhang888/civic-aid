@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { AllowedAgencies, Report, ReportStatusTypes } from "../types";
+import { AllowedAgencies, Report, ReportStatusTypes } from "../components/types";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 async function queryFn(path: string): Promise<Report[]> {
-   console.log(`Fetching from ${path}...`);
+   console.log(`Fetching reports using ${path}...`);
 
    try {
       const res = await axios.get(`${SERVER_API_URL}/api${path}`, {
@@ -57,7 +57,7 @@ async function queryFn(path: string): Promise<Report[]> {
                mediaUrl: report.media_url,
                incidentLocation,
                agency: report.agency as AllowedAgencies,
-               recommendedSteps: report.recommended_steps,
+               recommended_steps: report.recommended_steps,
                urgency: report.urgency,
                reportConfidence: report.report_confidence,
                status: report.status as ReportStatusTypes,

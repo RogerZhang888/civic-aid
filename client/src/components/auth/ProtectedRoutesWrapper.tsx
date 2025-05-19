@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
-import useUser from "./useUser";
+import useUser from "../../hooks/useUser";
+import LoadingSpinner from "./LoadingSpinner";
 
 export default function ProtectedRoutesWrapper() {
    
@@ -7,7 +8,7 @@ export default function ProtectedRoutesWrapper() {
 
    console.log("Trying to access a protected route...")
 
-   if (isLoading) return <div>LOADING....</div>;
+   if (isLoading) return <LoadingSpinner/>;
 
    if (isError) {
       console.log("User is not logged in, cannot access protected routes");

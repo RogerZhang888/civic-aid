@@ -9,7 +9,7 @@ export default function MainLayout() {
          <input id="mobile-sidebar" type="checkbox" className="drawer-toggle" />
          {/* Navbar only shown on >=lg */}
          <Navbar />
-         <article className="flex-1 overflow-y-auto drawer-content relative" id="main-outlet">
+         <article className="flex-1 overflow-y-auto overflow-x-hidden drawer-content relative" id="main-outlet">
             <label htmlFor="mobile-sidebar" className="btn btn-ghost lg:hidden absolute top-3 left-1 z-10">
                <SquareMenu/>
             </label>

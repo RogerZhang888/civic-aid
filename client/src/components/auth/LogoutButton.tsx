@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import useTranslation from "../language/useTranslation";
+import useTranslation from "../../hooks/useTranslation";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -22,6 +22,7 @@ export default function LogoutButton() {
          );
 
          queryClient.removeQueries({ queryKey: ["current-user"] });
+         queryClient.removeQueries({ queryKey: ["current-user-reports"] });
 
          console.log("Log out successful");
 

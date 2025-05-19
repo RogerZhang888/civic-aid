@@ -1,9 +1,9 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import useUser from "./auth/useUser";
+import useUser from "../hooks/useUser";
 import { AlignJustify } from "lucide-react";
 import { useLanguageContext } from "./language/LanguageContext";
 import { Languages } from "./types";
-import useTranslation from "./language/useTranslation";
+import useTranslation from "../hooks/useTranslation";
 import LogoutButton from "./auth/LogoutButton";
 
 export default function Navbar() {

@@ -5,7 +5,7 @@ const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 async function queryFn(): Promise<boolean> {
 
-   console.log("invoking useRewards...");
+   console.log("fetching user's reward status...");
 
    try {
       
