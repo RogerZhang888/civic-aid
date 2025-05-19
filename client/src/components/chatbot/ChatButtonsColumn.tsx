@@ -62,29 +62,28 @@ export default function ChatsButtonColumn() {
                   className="w-full input input-ghost border-0 bg-secondary"
                   autoFocus
                />
-            :  <button
-                  className={`btn w-full btn-outline btn-secondary text-white text-nowrap overflow-hidden flex justify-start items-center ${
-                     currChatId === thisChat.id ? "btn-active" : ""
-                  }`}
-                  onClick={() => navigate(`/chatbot/${thisChat.id}`)}
-               >
-                  {thisChat.title.slice(0, 25) + (thisChat.title.length > 25 ? "..." : "")}
-               </button>
-         }
-
-         {editingChatId !== thisChat.id &&
-            <button
-               onClick={(e) => {
-                  e.stopPropagation();
-                  setOpenMenuId(
-                     openMenuId === thisChat.id ? null : thisChat.id
-                  );
-               }}
-               className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full text-black p-1 transition duration-300 ease-in-out
-               hover:cursor-pointer hover:bg-white opacity-0 group-hover:opacity-100"
-            >
-               <MoreHorizontal size={15} />
-            </button>
+            :  <>
+                  <button
+                     className={`btn w-full btn-outline btn-secondary text-white text-nowrap overflow-hidden flex justify-start items-center ${
+                        currChatId === thisChat.id ? "btn-active" : ""
+                     }`}
+                     onClick={() => navigate(`/chatbot/${thisChat.id}`)}
+                  >
+                     {thisChat.title.slice(0, 25) + (thisChat.title.length > 25 ? "..." : "")}
+                  </button>
+                  <button
+                     onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenMenuId(
+                           openMenuId === thisChat.id ? null : thisChat.id
+                        );
+                     }}
+                     className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full text-black p-1 transition duration-300 ease-in-out
+                     hover:cursor-pointer hover:bg-white opacity-0 group-hover:opacity-100"
+                  >
+                     <MoreHorizontal size={15} />
+                  </button>
+               </>
          }
 
          {openMenuId === thisChat.id &&

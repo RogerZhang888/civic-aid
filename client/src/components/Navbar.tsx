@@ -1,9 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import useUser from "./auth/useUser";
-import { AlignJustify } from "lucide-react";
+import useUser from "../hooks/useUser";
 import { useLanguageContext } from "./language/LanguageContext";
 import { Languages } from "./types";
-import useTranslation from "./language/useTranslation";
+import useTranslation from "../hooks/useTranslation";
 import LogoutButton from "./auth/LogoutButton";
 
 export default function Navbar() {
@@ -30,7 +29,7 @@ export default function Navbar() {
       >
          <div className="navbar-start">
             
-            <div className="dropdown">
+            {/* <div className="dropdown">
                <button
                   tabIndex={0}
                   className="btn btn-square btn-sm lg:hidden me-4"
@@ -77,15 +76,15 @@ export default function Navbar() {
                      <LanguagesDropDown/>
                   </li>
                </ul>
-            </div>
+            </div> */}
 
             <Link to="/" className="text-2xl font-bold">
                CivicAId
             </Link>
 
-            {user && (
-               <div className="hidden lg:flex">
-                  <ul className="menu menu-horizontal pl-4 space-x-4">
+            <ul className="menu menu-horizontal pl-4 hidden lg:flex">
+               {user && (
+                  <>
                      {user.permissions.length !== 0 &&
                         <li>
                            <Link
@@ -128,25 +127,21 @@ export default function Navbar() {
                            {t('chatbot')}
                         </Link>
                      </li>
-                  </ul>
-               </div>
-            )}
+                     <li>
+                        <Link
+                           to="/about"
+                           className={`hover:text-white transition ${pathname === "/about" ? "text-primary-content" : ""}`}
+                        >
+                           {t('about')}
+                        </Link>
+                     </li>
+                     <li>
+                        <LanguagesDropDown/>
+                     </li>
+                  </>
+               )}
+            </ul>
 
-            <div className="hidden lg:flex">
-               <ul className={`menu menu-horizontal space-x-4 ${user ? "" : "px-4"}`}>
-                  <li>
-                     <Link
-                        to="/about"
-                        className={`hover:text-white transition ${pathname === "/about" ? "text-primary-content" : ""}`}
-                     >
-                        {t('about')}
-                     </Link>
-                  </li>
-                  <li>
-                     <LanguagesDropDown/>
-                  </li>
-               </ul>
-            </div>
          </div>
 
          <div className="navbar-end">

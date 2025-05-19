@@ -6,7 +6,9 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import useTranslation from "../language/useTranslation";
+import useTranslation from "../../hooks/useTranslation";
+import { useLanguageContext } from "../language/LanguageContext";
+import { Languages } from "../types";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -14,6 +16,7 @@ export default function Login() {
 
    const navigate = useNavigate();
    const { t } = useTranslation();
+   const { language, toggleLanguage } = useLanguageContext();
 
    // form handler
    const {
@@ -125,6 +128,17 @@ export default function Login() {
             </button>
             <div>
                {t('noAccount')}{' '}<Link to="/auth/reg" className="link link-info">{t('register')}</Link>
+            </div>
+            <div className="join join-horizontal">
+               {Languages.map(lang =>
+                  <button
+                     key={lang.code}
+                     className={`join-item btn btn-secondary btn-outline ${lang.code === language ? "btn-active" : ""}`}
+                     onClick={() => toggleLanguage(lang.code)}
+                  >
+                     {lang.display}
+                  </button>
+               )}
             </div>
          </div>
 

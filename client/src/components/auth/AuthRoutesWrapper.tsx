@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import useUser from "./useUser";
+import useUser from "../../hooks/useUser";
 
 export default function AuthRoutesWrapper() {
 

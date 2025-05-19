@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
-import useUser from "../auth/useUser";
-import useTranslation from "../language/useTranslation";
+import useUser from "../../hooks/useUser";
+import useTranslation from "../../hooks/useTranslation";
 import AboutCard from "./AboutCard";
 
 import mascot from "/mascot.png";

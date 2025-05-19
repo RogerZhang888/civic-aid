@@ -21,7 +21,7 @@ function MessageBubble({
 
    return (
       <React.Fragment key={message.question.slice(0, 5)}>         
-         <div className="chat chat-end tracking-wide mt-3">
+         <div className="chat chat-end tracking-wide">
             <div className="chat-bubble space-y-1 whitespace-pre-wrap">
                {message.question && <div>{message.question}</div>}
                {message.media &&
@@ -32,9 +32,9 @@ function MessageBubble({
                }
             </div>
          </div>
-         <div className="chat chat-start tracking-wide">
-            <div className="chat-image avatar relative top-6">
-               <div className="w-15 rounded-full hidden sm:block">
+         <div className="chat chat-start tracking-wide sm:mb-3">
+            <div className="chat-image avatar relative top-6 hidden sm:block">
+               <div className="w-15 rounded-full">
                   <img src="/mascot.png" alt="logo" />
                </div>
             </div>

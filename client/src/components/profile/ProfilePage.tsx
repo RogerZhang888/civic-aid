@@ -1,6 +1,6 @@
 import ReportCard from "./ReportCard";
-import useReports from "./useReports";
-import useRewards from "./useRewards";
+import useReports from "../../hooks/useReports";
+import useRewards from "../../hooks/useRewards";
 
 export default function ProfilePage() {
    const { data: reports, isLoading: isReportsLoading } = useReports("/reports");
@@ -21,7 +21,7 @@ export default function ProfilePage() {
    ].join('-');
 
    return (
-      <section className="w-full h-full flex flex-col items-center space-y-4 p-4">
+      <section className="w-full h-full flex flex-col items-center space-y-4 p-4" id="profile-page">
          <div className="text-2xl font-semibold">Your Reports</div>
 
          {isReportsLoading ? (
