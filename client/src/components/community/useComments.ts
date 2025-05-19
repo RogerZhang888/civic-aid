@@ -40,7 +40,7 @@ async function queryFn(path: string): Promise<Comment[]> {
    }
 }
 
-export default function useReports(path: string = "/reports") {
+export default function useComments(path: string = "/reports") {
    return useQuery<Comment[], AxiosError>({
       queryKey: ["reports", path],
       queryFn: () => queryFn(path),

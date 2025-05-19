@@ -55,6 +55,7 @@ const reportColumns: GridColDef<Report>[] = [
       field: 'status',
       headerName: 'Status',
       width: 120,
+      type: 'string',
       renderCell: (params) => (
          <span className={`px-2 py-1 rounded-full text-sm ${params.value === 'resolved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
             }`}>
@@ -66,8 +67,9 @@ const reportColumns: GridColDef<Report>[] = [
       field: 'urgency',
       headerName: 'Urgency',
       width: 100,
+      type: 'number',
       renderCell: (params) => (
-         <span className={`px-2 py-1 rounded-full text-xs ${params.value >= 8 ? 'bg-red-100 text-red-800' :
+         <span className={`px-2 py-1 rounded-full text-sm ${params.value >= 8 ? 'bg-red-100 text-red-800' :
             params.value >= 0.5 ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'
             }`}>
             {params.value}
@@ -78,8 +80,9 @@ const reportColumns: GridColDef<Report>[] = [
       field: 'reportConfidence',
       headerName: 'Report Confidence',
       width: 100,
+      type: 'number',
       renderCell: (params) => (
-         <span className={`px-2 py-1 rounded-full text-xs ${params.value >= 8 ? 'bg-red-100 text-red-800' :
+         <span className={`px-2 py-1 rounded-full text-sm ${params.value >= 8 ? 'bg-red-100 text-red-800' :
             params.value < 0.5 ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'
             }`}>
             {params.value}
@@ -100,13 +103,30 @@ const reportColumns: GridColDef<Report>[] = [
       width: 150,
       type: 'dateTime',
       valueFormatter: (v: Date | null) =>
-         v?.toLocaleString() || 'Pending'
+         v?.toLocaleString() || 'N/A'
    },
    {
       field: 'isPublic',
       headerName: 'Public Report',
       width: 80,
       type: 'boolean',
+   },
+
+   // ACTIONS
+   {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 150,
+      sortable: false,
+      filterable: false,
+      hideable: false,
+      type: 'actions',
+      renderCell: () => (
+         <div className="flex space-x-2">
+            <button className="text-blue-500 hover:text-blue-700">View</button>
+            <button className="text-red-500 hover:text-red-700">Delete</button>
+         </div>
+      )
    }
 ];
 
