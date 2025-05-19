@@ -6,7 +6,10 @@ import {
   updateReportStatus,
   getDoesUserHaveReward,
   setIsPublic,
-  getPublicReports
+  getPublicReports,
+  upvote,
+  undoUpvote,
+  getUpvoteStatus
 } from '../controllers/reportController.js';
 import authMiddleware from '../middleware/authMiddleware.js';
 const router = express.Router();
@@ -16,6 +19,9 @@ router.post('/reports', authMiddleware, createReport);
 
 // Get public reports
 router.get('/reports/public', authMiddleware, getPublicReports)
+
+// Check upvotes
+router.get('/reports/upvote_status', authMiddleware, getUpvoteStatus)
 
 // get a specific report based on its id
 router.get('/reports/:id', authMiddleware, getReport);
@@ -31,5 +37,11 @@ router.get('/reports_reward', authMiddleware, getDoesUserHaveReward);
 
 // Set report is_public
 router.post('/reports/set_is_public/:id', authMiddleware, setIsPublic)
+
+// Upvote
+router.post('/reports/upvote/:id', authMiddleware, upvote)
+
+// Unupvote
+router.post('/reports/undo_upvote/:id', authMiddleware, undoUpvote)
 
 export default router

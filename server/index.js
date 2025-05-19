@@ -12,6 +12,7 @@ import reportRoutes from './routes/reportRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import govRoutes from './routes/govRoutes.js';
 import translatorRoutes from './routes/translatorRoutes.js';
+import commentRoutes from './routes/commentRoutes.js'
 
 const app = express();
 
@@ -54,6 +55,7 @@ app.use('/api', reportRoutes);
 app.use('/api', chatRoutes);
 app.use('/api', govRoutes);
 app.use('/api', translatorRoutes);
+app.use('/api', commentRoutes);
 
 const server = app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);

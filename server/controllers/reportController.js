@@ -144,14 +144,18 @@ export async function getReport(req, res) {
         const reportId = req.params.id;
         const userId = req.user.id
         const result = await pgsql.query(
-            "SELECT * FROM reports WHERE id = $1 AND user_id = $2",
-            [reportId, userId]
+            "SELECT *, ST_X(incident_location::geometry) as longitude, ST_Y(incident_location::geometry) as latitude FROM reports WHERE id = $1",
+            [reportId]
         );
 
+        console.log("REPORT", result)
         if (result.length === 0) {
             return res
                 .status(404)
                 .json({ error: `Report ${reportId} not found` });
+        }
+        if ((!result[0].is_public) && result[0].user_id != userId) {
+            return res.status(403).json({error:"Unauthorised"})
         }
 
         res.json(result[0]);
@@ -168,24 +172,7 @@ export async function getUserReports(req, res) {
         const userId = req.user.id;
         const result = await pgsql.query(`
             SELECT
-               id,
-               user_id,
-               chat_id,
-               title,
-               description,
-               media_url,
-               ST_X(incident_location::geometry) as longitude,
-               ST_Y(incident_location::geometry) as latitude,
-               agency,
-               recommended_steps,
-               urgency,
-               report_confidence,
-               status,
-               created_at,
-               resolved_at,
-               remarks,
-               is_public,
-               upvote_count
+               *, ST_X(incident_location::geometry) as longitude, ST_Y(incident_location::geometry) as latitude
             FROM
                reports
             WHERE 
@@ -320,4 +307,88 @@ export async function getPublicReports(req, res) {
     } catch (e) {
         return res.status(500).json({error: e})
     }
+}
+
+const updateUpvoteCount = async (reportId) => {
+    return pgsql.query(`
+        WITH upvote_cte AS (
+            SELECT report_id, COUNT(*) AS cnt
+            FROM upvotes
+            WHERE report_id = $1
+            GROUP BY report_id
+        )
+        UPDATE reports
+        SET upvote_count = upvote_cte.cnt
+        FROM upvote_cte
+        WHERE reports.id = upvote_cte.report_id
+        RETURNING reports.upvote_count;    
+    `, [reportId])
+}
+
+export async function upvote(req, res) {
+    const userId = req.user.id;
+    const reportId = req.params.id;
+
+    if (!reportId) {
+        res.status(400).json({error: "Report ID not provided"})
+        return
+    }
+
+    try {
+        pgsql.query(`SELECT * FROM upvotes WHERE report_id = $1 AND user_id = $2`, [reportId, userId]).then((qr) => {
+            if (qr.length !== 0) {
+                res.status(400).json({error: "Report already upvoted"})
+                return
+            } else {
+                return pgsql.query(`INSERT INTO upvotes (report_id, user_id) VALUES ($1, $2)`, [reportId, userId])
+            }
+        }).then((qr) => {
+            if (!qr) return
+            return updateUpvoteCount(reportId)
+        }).then((qr) => {
+            if (!qr) return
+            res.json(qr[0])
+        }).catch((e) => {
+            res.status(500).json({error: e})
+        })
+    } catch (e) {
+        res.status(500).json({error: e})
+    }
+}
+
+export async function undoUpvote(req, res) {
+    const userId = req.user.id;
+    const reportId = req.params.id;
+
+    if (!reportId) {
+        res.status(400).json({error: "Report ID not provided"})
+        return
+    }
+
+    try {
+        pgsql.query(`DELETE FROM upvotes WHERE report_id = $1 AND user_id = $2`, [reportId, userId]).then((qr) => {
+            if (qr === 0) {
+                res.status(400).json({error: "No upvote to undo"})
+                return
+            } else {
+                return updateUpvoteCount(reportId)
+            }
+        }).then((qr) => {
+            if (!qr) return
+            res.json(qr[0])
+        }).catch((e) => {
+            res.status(500).json({error: e})
+        })
+    } catch (e) {
+        res.status(500).json({error: e})
+    }
+}
+
+export async function getUpvoteStatus(req, res) {
+    const userId = req.user.id;
+    pgsql.query("SELECT report_id FROM upvotes WHERE user_id = $1", [userId]).then((qr) => {
+        res.json(qr.map(e => e.report_id))
+    }).catch((e) => {
+        res.status(500).json({error: e})
+    })
 }

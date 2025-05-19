@@ -402,6 +402,82 @@ Response {
     error: undefined | string
 }
 ```
+`GET /reports/upvote_status`
+```ts
+Response Array<string> | {
+    error: string
+}
+```
+`POST /reports/upvote/:id`
+```ts
+Request {
+}
+
+Response {
+    upvote_count: number
+} | {
+    error: string
+}
+```
+`POST /reports/undo_upvote/:id`
+```ts
+Request {
+}
+
+Response {
+    upvote_count: number
+} | {
+    error: string
+}
+```
+
+### Commenting routes
+`POST /comments`
+```ts
+Request {
+    text: string,
+    report_id: string,
+    parent_id: undefined | number
+}
+
+Response {
+    success: boolean,
+    error: undefined | string
+}
+```
+`GET /comments/:id`
+```ts
+Response Array<Comment>
+
+Comment: {
+    id: number,
+    report_id: string,
+    text: null | string,
+    upvote_count: number,
+    parent_id: null | number,
+    created_at: string,
+    deleted: boolean,
+    children: Array<Comment>
+}
+```
+`PATCH /comment/:id`
+```ts
+Request {
+    text: string
+}
+
+Response {
+    success: boolean,
+    error: undefined | string
+}
+```
+`DELETE /comment/:id`
+```ts
+Response {
+    success: boolean,
+    error: undefined | string
+}
+```
 
 ### Government routes
 `GET /gov/reports`
