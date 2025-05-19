@@ -62,6 +62,12 @@ export default {
    ),
    about5: (
       <>
+         🏡 Check out the <b>Community Tab</b> where you can "like" reports you find helpful and leave your thoughts in the comments. It’s a great way to connect, share feedback, and support each other. Dive in and join the conversation!
+
+      </>
+   ),
+   about6: (
+      <>
          Ready when you are — just type away! 💬
       </>
    )

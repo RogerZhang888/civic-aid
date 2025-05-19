@@ -45,9 +45,11 @@ export default function About() {
          <AboutCard imageSrc={mascot2} imageAlt="Leo celebrating" reverse>
             {t('about4')}
          </AboutCard>
-
          <AboutCard imageSrc={mascot} imageAlt="Leo ready to help">
             {t('about5')}
+         </AboutCard>
+         <AboutCard imageSrc={mascot} imageAlt="Leo ready to help" reverse>
+            {t('about6')}
          </AboutCard>
 
          {!user &&
