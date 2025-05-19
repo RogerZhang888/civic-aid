@@ -122,3 +122,12 @@ export type LanguageContextType = {
    language: SiteLanguages;
    toggleLanguage: (x: SiteLanguages) => void;
 }
+
+export type Comment = {
+   id: string;
+   reportId: string;
+   parentId: string;
+   upvoteCount: number;
+   text: string;
+   createdAt: Date;
+}

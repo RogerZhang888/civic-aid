@@ -1,10 +1,12 @@
 import { useState } from "react";
 import axios from "axios";
 import { ArrowUp, ArrowDown, MessageCircle } from "lucide-react";
+import { useParams } from 'react-router';
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL;
 
 export default function ReportStats() {
+   const { reportId } = useParams() as { reportId: string };
    const [votes, setVotes] = useState(133);
    const [voteStatus, setVoteStatus] = useState<"upvoted" | "downvoted" | "none">("none");
    
