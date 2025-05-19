@@ -65,6 +65,7 @@ export type Report = {
    urgency: number;
    reportConfidence: number;
    status: ReportStatusTypes;
+   isPublic: boolean;
    createdAt: Date;
    resolvedAt: Date | null;
 }
@@ -93,6 +94,7 @@ export type User = {
    id: number;
    email: string;
    username: string;
+   permissions: Array<string>;
 }
 
 export type LoginFields = {

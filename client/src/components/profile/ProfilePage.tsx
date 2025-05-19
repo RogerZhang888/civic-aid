@@ -3,7 +3,7 @@ import useReports from "./useReports";
 import useRewards from "./useRewards";
 
 export default function ProfilePage() {
-   const { data: reports, isLoading: isReportsLoading } = useReports();
+   const { data: reports, isLoading: isReportsLoading } = useReports("/reports");
    const { data: hasReward, isLoading: isRewardsLoading } = useRewards();
 
    const resolvedCount = reports?.filter(report => report.status === 'resolved').length || 0;
@@ -43,7 +43,7 @@ export default function ProfilePage() {
 
          )}
 
-         <div className="text-2xl font-semibold">Your Badges</div>
+         <div className="mt-10 text-2xl font-semibold">Your Badges</div>
 
          <div className="flex flex-wrap justify-center gap-4 w-full max-w-4xl">
             {earnedBadges.length > 0
@@ -87,7 +87,7 @@ export default function ProfilePage() {
             }
          </div>
 
-         <div className="text-2xl font-semibold">Your Rewards</div>
+         <div className="mt-10 text-2xl font-semibold">Your Rewards</div>
 
          <div className="flex justify-center w-full max-w-4xl">
             {isRewardsLoading ? (

@@ -19,11 +19,11 @@ export default function Chatbot() {
    )
 
    return (
-      <div className="h-full flex flex-1 flex-col items-center mx-4 relative">
+      <div className="h-full flex flex-1 flex-col items-center mx-4 static">
 
          {currChat
             ?  <>
-                  <div className="text-lg font-semibold p-2">
+                  <div className="hidden sm:block text-lg font-semibold p-2">
                      {currChat.title}
                   </div>
 
@@ -38,7 +38,7 @@ export default function Chatbot() {
                </div>
          }
 
-         <div className="mt-auto w-full max-w-3xl pt-3">
+         <div className="mt-auto w-full max-w-3xl pt-3 static">
             <ChatbotForm/>
             <div className="text-xs text-center m-2 text-gray-500">
                {!coords && 
@@ -46,7 +46,7 @@ export default function Chatbot() {
                      <Info size={15} strokeWidth="3"/>{t('location')}
                   </div>
                }
-               <div>{t("disclaimer")}</div>
+               <div className="">{t("disclaimer")}</div>
             </div>
          </div>
       </div>
