@@ -34,7 +34,7 @@ def callmodel():
             print(issues)
             if (detected_language == "ms") or (detected_language == "id"):
                 return jsonify({"answer":"Maaf, saya tidak dapat memproses pertanyaan ini. Sila hubungi pembangun jika anda percaya ini adalah satu kesilapan."})
-            elif detected_language == "zh":
+            elif detected_language == "cn":
                 return jsonify({"answer":"抱歉，我无法处理此咨询。若您认为这是错误，请联系开发人员。"})
             elif detected_language == "ta":
                 return jsonify({"answer":"மன்னிக்கவும், இந்த வினவலை என்னால் செயல்படுத்த முடியவில்லை. இது ஒரு தவறு என்று நீங்கள் நம்பினால், டெவலப்பர்களைத் தொடர்பு கொள்ளவும்."})
