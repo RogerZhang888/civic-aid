@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { AllowedAgencies, Report, ReportStatusTypes } from "../components/types";
+import { Report, ReportStatusTypes } from "../components/types";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -30,17 +30,19 @@ async function queryFn(path: string): Promise<Report[]> {
             is_public: boolean;
             created_at: string;
             resolved_at: string;
+            remarks: string;
+            upvote_count: number;
          }) => {
             const incidentLocation =
                report.longitude && report.latitude
                   ? {
                        latitude: report.latitude,
                        longitude: report.longitude,
-                       altitude: null,
-                       accuracy: null,
-                       altitudeAccuracy: null,
-                       heading: null,
-                       speed: null,
+                       altitude: 0,
+                       accuracy: 0,
+                       altitudeAccuracy: 0,
+                       heading: 0,
+                       speed: 0,
                        toJSON() {
                           return this;
                        },
@@ -56,7 +58,7 @@ async function queryFn(path: string): Promise<Report[]> {
                description: report.description,
                mediaUrl: report.media_url,
                incidentLocation,
-               agency: report.agency as AllowedAgencies,
+               agency: report.agency,
                recommended_steps: report.recommended_steps,
                urgency: report.urgency,
                reportConfidence: report.report_confidence,
@@ -64,7 +66,9 @@ async function queryFn(path: string): Promise<Report[]> {
                isPublic: report.is_public,
                createdAt: new Date(report.created_at),
                resolvedAt: report.resolved_at ? new Date(report.resolved_at) : null,
-            };
+               remarks: report.remarks,
+               upvoteCount: report.upvote_count,
+            } satisfies Report;
          }
       );
 

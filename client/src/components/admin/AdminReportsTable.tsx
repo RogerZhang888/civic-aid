@@ -100,7 +100,7 @@ function CustomToolbar() {
 
 export default function AdminReportsTable() {
 
-   const { data: reports, isLoading: isReportsLoading, refetch: refetchReports } = useReports("/gov/reports");
+   const { data: reports, isLoading: isReportsLoading } = useReports("/gov/reports");
 
    if (isReportsLoading || !reports) {
       return <div className="w-full h-full flex justify-center items-center">Loading admin panel...</div>;

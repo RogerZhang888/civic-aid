@@ -68,6 +68,8 @@ export type Report = {
    isPublic: boolean;
    createdAt: Date;
    resolvedAt: Date | null;
+   remarks: string | null;
+   upvoteCount: number;
 }
 
 export type FormState = {
