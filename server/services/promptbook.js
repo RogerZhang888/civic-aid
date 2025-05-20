@@ -8,7 +8,7 @@ const questionpreface = "built to answer citizen queries. \
 Your task is to analyse the user's question and answer within the context of Singapore government services. "
 const reportpreface = `built to write and process incident reports or suggestions. \
 Your task is to analyse the prompt and produce a short report which can be escalated to the relevant agencies for action. You are to report only one incident within each chat - direct users to create a new chat when reporting multiple incidents. `
-const specifier = "Interpret all prompts in the Singapore context. Politely refuse to answer questions irrevelant to the Singapore government context, while adhering to the output format."
+const specifier = "Interpret all prompts, especially names and official terms, in the Singapore context only. Politely refuse to answer questions irrevelant to the Singapore government context, while adhering to the output format."
 
 const template = (instructions, output, userprompt=undefined, chatHistory = []) => {
     let processedChatHistory = chatHistory.map((q) => {
@@ -184,7 +184,7 @@ For example:
     translateTemplate: (target) => {
         return template(
             `Translate the following query text to ${target} in the context of Singapore Government services. Provide a direct translation, do not respond to the content of the user's query. `,
-            "A single short paragraph of plaintext representing the translation of the user's query only. DO NOT use any markdown syntax. DO NOT send your response as a JSON. DO NOT preface the response with headers such as 'RESPONSE'.",
+            "A single short paragraph of plaintext representing the translation of the user's query only. DO NOT use any markdown syntax. DO NOT send your response as a JSON. DO NOT preface the response with headers.",
         )
     }
 }

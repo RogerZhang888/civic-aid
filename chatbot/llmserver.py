@@ -3,6 +3,7 @@ from chatbotmodels.MainChatbotSealion import call_model as callMainModel
 from chatbotmodels.BasicSealionKoller import call_sealion_api as callBasicModel
 from chatbotmodels.AuxModelCaptioner import generate_caption as callCaptionerModel
 from chatbotmodels.ReportCompiler import group_identical_issues as callReportCompiler
+from safety import check_input_safety
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -22,6 +23,11 @@ def callmodel():
     print(f"IMAGE FILEPATH {filepath}") 
 
     modelanswer = {"answer":"Default model answer - this response likely indicates an invalid model name supplied. "} 
+
+    issues = check_input_safety(query)
+    if (len(issues) > 0):
+        return jsonify({"answer":"Unable to process input"})
+
     try:
         if model == 'main' or (model == 'basic' and filepath is not None):
             modelanswer = callMainModel(query, prompt, filepath)
@@ -54,4 +60,4 @@ def health_check():
     return jsonify({"status": "healthy"})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=7346 , debug=True)
+    app.run(host='127.0.0.1', port=7346 , debug=True)
