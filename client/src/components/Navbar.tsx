@@ -1,7 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import useUser from "../hooks/useUser";
-import { useLanguageContext } from "./language/LanguageContext";
-import { Languages } from "./types";
 import useTranslation from "../hooks/useTranslation";
 import LogoutButton from "./auth/LogoutButton";
 import LanguagesDropDown from "./language/LanguageDropdown";
