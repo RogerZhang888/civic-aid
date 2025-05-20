@@ -517,7 +517,7 @@ Response Array<
 ```ts
 Request {
     newStatus: "pending" | "in progress" | "resolved" | "rejected",
-    remarks: string ""
+    remarks: string
 }
 
 Response {
@@ -586,6 +586,7 @@ Response {
 - [React.js](https://react.dev/)
 - [Vite](https://vitejs.dev/)
 - [TailwindCSS](https://tailwindcss.com/)
+- [MUI](https://mui.com/)
 - [DaisyUI](https://daisyui.com/)
 - [Express.js](https://expressjs.com/)
 - [Flask](https://flask.palletsprojects.com/)
