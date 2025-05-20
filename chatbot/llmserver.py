@@ -25,6 +25,7 @@ def callmodel():
     modelanswer = {"answer":"Default model answer - this response likely indicates an invalid model name supplied. "} 
 
     issues, detected_language = check_input_safety(query)
+    detected_language = detected_language[0:2]
     accepted_langs = ["en", "cn", "ta", "ms", "id", "und"]
     if detected_language not in accepted_langs:
         return jsonify({"answer":"Sorry, Civic-AId only supports queries in English, Chinese, Malay or Tamil. "})
