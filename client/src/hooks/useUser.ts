@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
-import { User } from "../types";
+import axios from "axios";
+import { User } from "../components/types";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 async function queryFn(): Promise<User> {
 
-   console.log("invoking useUser...");
+   console.log("validating user...");
 
    try {
       
@@ -17,7 +17,7 @@ async function queryFn(): Promise<User> {
          }
       );
    
-      console.log("user validated");
+      console.log(`user ${res.data.username} validated`);
    
       return res.data; 
 
@@ -33,7 +33,7 @@ async function queryFn(): Promise<User> {
 }
 
 export default function useUser() {
-   return useQuery<User, AxiosError>({
+   return useQuery<User, Error>({
       queryKey: ['current-user'],
       queryFn,
       staleTime: 5 * 60 * 1000,

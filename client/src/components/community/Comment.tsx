@@ -1,4 +1,4 @@
-import { MessageCircle, ThumbsDown, ThumbsUp, Trash2, Edit, Plus, Minus } from 'lucide-react';
+import { MessageCircle, Trash2, Edit, Plus, Minus } from 'lucide-react';
 import clsx from 'clsx';
 
 interface CommentProps {
@@ -9,6 +9,7 @@ interface CommentProps {
   isOwner?: boolean;
   isReply?: boolean;
   onReply?: () => void;
+   username: string;
 }
 
 export default function Comment({

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { Comment } from "../types";
+import { Comment } from "../components/types";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -17,7 +17,7 @@ async function queryFn(path: string): Promise<Comment[]> {
             id: string;
             report_id: string;
             parent_id: string;
-            upvote_count: string;
+            upvote_count: number;
             text: string;
             created_at: string;
          }) => {
@@ -27,9 +27,9 @@ async function queryFn(path: string): Promise<Comment[]> {
                reportId: comment.report_id,
                parentId: comment.parent_id,
                upvoteCount: comment.upvote_count,
-               content: comment.text,
+               text: comment.text,
                createdAt: new Date(comment.created_at),
-            };
+            } satisfies Comment;
          }
       );
 

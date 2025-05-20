@@ -100,7 +100,7 @@ function CustomToolbar() {
 
 export default function AdminReportsTable() {
 
-   const { data: reports, isLoading: isReportsLoading, refetch: refetchReports } = useReports("/gov/reports");
+   const { data: reports, isLoading: isReportsLoading } = useReports("/gov/reports");
 
    if (isReportsLoading || !reports) {
       return <div className="w-full h-full flex justify-center items-center">Loading admin panel...</div>;
@@ -120,6 +120,7 @@ export default function AdminReportsTable() {
          sx={{
             '& .MuiDataGrid-cell': {
                borderRight: '1px solid #f3f4f6',
+               fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
             },
             '& .MuiDataGrid-columnHeader': {
                backgroundColor: '#f3f4f6',
@@ -130,7 +131,14 @@ export default function AdminReportsTable() {
             '& .MuiDataGrid-footerContainer': {
                borderTop: '1px solid #f3f4f6',
                backgroundColor: '#f9fafb',
+            },        
+            fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+            '& .MuiDataGrid-columnHeaders': {
+               fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
             },
+            '& .MuiTablePagination-root': {
+               fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+            }
          }}
          slots={{ toolbar: CustomToolbar }}
          showToolbar
