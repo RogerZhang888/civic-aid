@@ -3,12 +3,12 @@ const debug = false
 const preface = "You are a Singapore Government chatbot serving regular Singaporean citizens who must remain friendly at all times and must never repeat yourself, "
 // TODO: consider adding meta prompts here for customised personality. 
 // TODO: consider adding guardrails in the prompts for non-Singapore / non-government related things
-const genericpreface = "built to answer citizen queries and assist in writing incident reports or suggestions. "
+const genericpreface = "built to answer citizen queries and assist in writing incident and suggestion reports. "
 const questionpreface = "built to answer citizen queries. \
 Your task is to analyse the user's question and answer within the context of Singapore government services. "
 const reportpreface = `built to write and process incident reports or suggestions. \
 Your task is to analyse the prompt and produce a short report which can be escalated to the relevant agencies for action. You are to report only one incident within each chat - direct users to create a new chat when reporting multiple incidents. `
-const specifier = "Politely refuse to answer questions irrevelant to the Singapore government context, while adhering to the output format."
+const specifier = "Interpret all prompts in the Singapore context. Politely refuse to answer questions irrevelant to the Singapore government context, while adhering to the output format."
 
 const template = (instructions, output, userprompt=undefined, chatHistory = []) => {
     let processedChatHistory = chatHistory.map((q) => {
@@ -16,7 +16,7 @@ const template = (instructions, output, userprompt=undefined, chatHistory = []) 
         else return ''
     }).join("\n")
     // console.log("CHAT HISTORY joined", processedChatHistory)
-    return `CHAT HISTORY (for context only)
+    return `${processedChatHistory !== ""?"CHAT HISTORY (for context only)":""}
 ${processedChatHistory}
 ---
     
@@ -35,7 +35,7 @@ export const systempromptTemplates = {
         return debug?"0":template(
             preface+genericpreface+"Identify if the query below is a question or a report, and output how confident you are, that you have a complete understanding of the situation and can take action, on a scale of 0 to 1, with a higher score representing higher confidence. Come up with a short title of 10 words or less to summarise the query. ",
 `Format your response as a JSON object with the fields 'type', 'confidence' and 'title'. \
-Type should be reported as either 'report' or 'question'. \
+Type should be reported as either 'report' or 'question' only. Suggestions should be typed as 'report'. \
 Confidence should be a decimal, to 2 decimal places, between 0 and 1 exclusive. \
 Title should be a string of 10 words or less, in the language of the user's query. 
 For example:
