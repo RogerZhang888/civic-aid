@@ -26,6 +26,8 @@ def callmodel():
 
     issues = check_input_safety(query)
     if (len(issues) > 0):
+        print(f"QUERY BLOCKED {query}")
+        print(issues)
         return jsonify({"answer":"Unable to process input"})
 
     try:

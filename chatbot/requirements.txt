@@ -5,6 +5,7 @@ aiosignal==1.3.2
 attrs==25.3.0
 Automat==24.8.1
 beautifulsoup4==4.13.3
+better_profanity==0.7.0
 bitsandbytes==0.45.5
 blinker==1.9.0
 bs4==0.0.2
