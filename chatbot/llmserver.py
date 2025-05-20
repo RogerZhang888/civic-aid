@@ -28,7 +28,7 @@ def callmodel():
     if (len(issues) > 0):
         print(f"QUERY BLOCKED {query}")
         print(issues)
-        return jsonify({"answer":"Unable to process input"})
+        return jsonify({"answer":"Sorry, I am unable to process this query at this moment. Please contact the developers if you believe this is a mistake. "})
 
     try:
         if model == 'main' or (model == 'basic' and filepath is not None):
