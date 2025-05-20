@@ -31,14 +31,14 @@ export default function Chatbot() {
                      <MessagesDisplay messages={currChat.queries} />
                   </div>
                </>
-            :  <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full">
+            :  <div className="h-fill flex flex-1 flex-col justify-center items-center w-full">
                   <img src="/mascot.png" alt="logo" className="w-50 mx-auto" />
                   <div className="text-2xl">{t('newChatTop')}</div>
                   <div>{t('newChatBottom')}</div>
                </div>
          }
 
-         <div className="mt-auto w-full max-w-3xl pt-3 static mb-4 sm:mb-0">
+         <div className="w-full max-w-3xl pt-3 static mb-4 sm:mb-0">
             <ChatbotForm/>
             <div className="hidden sm:block text-xs text-center m-2 text-gray-500">
                {!coords && 
