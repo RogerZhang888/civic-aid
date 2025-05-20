@@ -377,7 +377,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
             { withCredentials: true }
          );
          chatsDispatch({ type: "DELETE_CHAT", payload: { chatId: chatIdToDelete } });
-         toast.success(`Chat ${chatIdToDelete} deleted successfully`);
+         toast.success(`Chat deleted successfully`);
          navigate("/chatbot");
       } catch (error) {
          console.error("Failed to delete chat:", error);
@@ -393,7 +393,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
             { withCredentials: true }
          );
          chatsDispatch({ type: "UPDATE_CHAT_TITLE", payload: { chatId: chatIdToRename, newTitle } });
-         toast.success(`Chat ${chatIdToRename} renamed successfully`);
+         toast.success(`Chat renamed successfully`);
       } catch (error) {
          console.error("Failed to rename chat:", error);
          toast.error("Failed to rename chat");

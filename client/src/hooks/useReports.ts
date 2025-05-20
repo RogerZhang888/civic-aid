@@ -8,9 +8,12 @@ async function queryFn(path: string): Promise<Report[]> {
    console.log(`Fetching reports using ${path}...`);
 
    try {
-      const res = await axios.get(`${SERVER_API_URL}/api${path}`, {
-         withCredentials: true,
-      });
+      const res = await axios.get(
+         `${SERVER_API_URL}/api${path}${path == "/gov/reports" ? "?include_resolved=1" : ""}`, 
+         {
+            withCredentials: true,
+         }
+      );
 
       const reports: Report[] = res.data.map(
          (report: {

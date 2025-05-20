@@ -3,7 +3,7 @@ import useUser from "../hooks/useUser";
 import useTranslation from "../hooks/useTranslation";
 import LogoutButton from "./auth/LogoutButton";
 import { SquareChevronDown } from "lucide-react";
-import { LanguagesDropDown } from "./Navbar";
+import LanguagesDropDown from "./language/LanguageDropdown";
 import ChatsButtonColumn from "./chatbot/ChatButtonsColumn";
 
 export default function CombinedMobileSidebar() {

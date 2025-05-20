@@ -517,6 +517,7 @@ Response Array<
 ```ts
 Request {
     newStatus: "pending" | "in progress" | "resolved" | "rejected",
+    remarks: string ""
 }
 
 Response {
