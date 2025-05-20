@@ -25,9 +25,9 @@ profanity.load_censor_words()
 def translate_to_english(text):
     """Translates text to English using Google Cloud Translation API."""
     if not text.strip():
-        return text
+        return text, 'und'
     result = translate_client.translate(text, target_language='en')
-    return result['translatedText']
+    return result['translatedText'], result['detectedSourceLanguage']
 
 def is_toxic(text, threshold=0.8):
     results = toxicity_classifier(text)[0]
@@ -43,7 +43,7 @@ def contains_prompt_injection(text):
     return any(re.search(pattern, text) for pattern in JAILBREAK_PATTERNS)
 
 def check_input_safety(text):
-    translated_text = translate_to_english(text)
+    translated_text, detected_language = translate_to_english(text)
     issues = []
 
     if contains_profanity(translated_text):
@@ -55,4 +55,4 @@ def check_input_safety(text):
     if contains_prompt_injection(translated_text):
         issues.append("Prompt injection attempt detected")
 
-    return issues
+    return issues, detected_language
