@@ -59,7 +59,13 @@ export default {
          Setiap isu yang anda laporkan membantu menjadikan kejiranan kita lebih baik. Anda akan dapat <b>lencana digital</b> untuk kes yang diselesaikan — dan penyumbang terbaik setiap bulan akan mendapat <b>hadiah istimewa</b>!
       </>
    ),
-   about5: (
+      about5: (
+      <>
+         🏡 Lihat Tab <b>Komuniti</b> di mana anda boleh "menyukai" laporan yang anda rasa berguna dan tinggalkan fikiran anda dalam ulasan.  Ini cara yang bagus untuk berhubung, berkongsi maklum balas dan menyokong satu sama lain.  Menyelam dan sertai perbualan！
+
+      </>
+   ),
+   about6: (
       <>
          Saya sedia bila-bila masa — taip sahaja! 💬
       </>
