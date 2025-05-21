@@ -198,7 +198,7 @@ export async function getReportSummaries(req, res) {
                 title: `Summarised report ${new Date().toISOString()} ${report.agency}`,
                 summary: report.summary,
                 media: [],
-                location: {longitude:null, latitude:null},
+                location: null,
                 agency: report.agency,
                 recommendedSteps: report.recommendedSteps,
                 urgency: report.urgency,
