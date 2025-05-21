@@ -8,15 +8,11 @@ export const updateReportsDB = async (params) => {
         if (res.length == 0 || chatId == null) {
             return pgsql.query(`
                 INSERT INTO reports 
-                (user_id, chat_id, title, description, media_url, incident_location, agency, recommended_steps, urgency, report_confidence)
+                (user_id, chat_id, title, description, media_url, incident_address, agency, recommended_steps, urgency, report_confidence)
                 VALUES (
                     $1, $2, $3, $4, $5, 
-                    CASE
-                        WHEN $6::double precision IS NOT NULL AND $7::double precision IS NOT NULL
-                        THEN ST_SetSRID(ST_MakePoint($6, $7), 4326)
-                        ELSE NULL
-                    END,
-                    $8, $9, $10, $11
+                    $6, $7,
+                    $8, $9, $10
                 )
                 RETURNING id
             `, [
@@ -25,8 +21,7 @@ export const updateReportsDB = async (params) => {
                 title,
                 summary,
                 media,
-                location.latitude,
-                location.longitude,
+                location,
                 agency,
                 recommendedSteps, 
                 urgency,
@@ -144,7 +139,7 @@ export async function getReport(req, res) {
         const reportId = req.params.id;
         const userId = req.user.id
         const result = await pgsql.query(
-            "SELECT *, ST_X(incident_location::geometry) as longitude, ST_Y(incident_location::geometry) as latitude FROM reports WHERE id = $1",
+            "SELECT * FROM reports WHERE id = $1",
             [reportId]
         );
 
@@ -172,7 +167,7 @@ export async function getUserReports(req, res) {
         const userId = req.user.id;
         const result = await pgsql.query(`
             SELECT
-               *, ST_X(incident_location::geometry) as longitude, ST_Y(incident_location::geometry) as latitude
+               *
             FROM
                reports
             WHERE 

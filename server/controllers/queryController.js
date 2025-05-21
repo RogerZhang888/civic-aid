@@ -3,29 +3,24 @@ import { callModel } from '../services/llmService.js';
 import { systempromptTemplates } from '../services/promptbook.js';
 import { responseParsers } from '../services/parsers.js';
 import { updateReportsDB as createReport } from './reportController.js';
+import { reverseGeocode } from '../services/geocoder.js';
 
 const updateQueriesDB = (params)  => {
     let {userId, chatId, userprompt, media, systemprompt, location, response, isValid, toReply, confidence, sources} = params
     // console.log("PRE QUERY CHECK", {userId, chatId, userprompt, media, systemprompt, location, response, isValid, toReply, confidence})
     pgsql.query(
         `INSERT INTO queries
-        (user_id, chat_id, user_prompt, media_url, query_location, system_prompt, response, sources, is_valid, to_reply, query_confidence)
+        (user_id, chat_id, user_prompt, media_url, query_address, system_prompt, response, sources, is_valid, to_reply, query_confidence)
         VALUES (
-          $1, $2, $3, $4,
-          CASE
-            WHEN $5::double precision IS NOT NULL AND $6::double precision IS NOT NULL
-            THEN ST_SetSRID(ST_MakePoint($5, $6), 4326)
-            ELSE NULL
-          END,
-          $7, $8, $9, $10, $11, $12
+          $1, $2, $3, $4, $5, $6,
+          $7, $8, $9, $10, $11
         )`,
         [
             userId,
             chatId,
             userprompt,
             media? [media] : [],
-            location.latitude,
-            location.longitude,
+            location,
             systemprompt,
             response,
             sources??[],
@@ -66,7 +61,6 @@ const getConfidence = (score, count) => {
     else return 'LOW'
 }
 
-// TOOD: media support
 const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     let chatHistory = await getChatHistory(chatId)
     let chatMedia = []
@@ -112,6 +106,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
                     location,
                     media,
                 }
+                // console.log("QUERY", queryParams)
                 updateQueriesDB(queryParams) // For long term record in DB
                 queriesTracker.push(queryParams) // For temporary tracking
                 chatHistory.push(queryParams)
@@ -211,7 +206,7 @@ const submitQuery = async (req, res) => {
 
         // console.log("Received prompt:", prompt);
         // console.log("Location:", latitude, longitude);
-        // console.log("User ID:", userId);
+        // console.log("User ID:", userId);W
         // console.log("Uploaded file:", uploadedFile);
 
         if ((!prompt) && (!uploadedFile)) {
@@ -242,7 +237,13 @@ const submitQuery = async (req, res) => {
         // const queryType = 'query'; // or 'report' — set based on context or user input
         // const imagePath = uploadedFiles.length > 0 ? uploadedFiles[0].path : null;
 
-        if (chat.id) userquery(prompt, userId, chatId, chat, {longitude, latitude}, uploadedFile?.filename).then((r) => {
+        let location = null
+        if (latitude != null && longitude != null) location = await reverseGeocode(latitude, longitude).then((res) => {
+            if (typeof res === "string") return res
+            else if ("error" in res) return `${latitude}, ${longitude}`
+            else throw new Error("Invalid reverse geocoder output")
+        })
+        if (chat.id) userquery(prompt, userId, chatId, chat, location, uploadedFile?.filename).then((r) => {
             res.json(r.response)
         }).catch((err) => {
             console.error("Error handling user query", err);
