@@ -33,7 +33,7 @@ export default function Chatbot() {
                </>
             :  <div className="h-fill flex flex-1 flex-col justify-center items-center w-full">
                   <img src="/mascot.png" alt="logo" className="w-50 mx-auto" />
-                  <div className="text-2xl">{t('newChatTop')}</div>
+                  <div className="text-2xl text-center">{t('newChatTop')}</div>
                   <div>{t('newChatBottom')}</div>
                </div>
          }

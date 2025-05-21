@@ -53,6 +53,20 @@ export default function CombinedMobileSidebar() {
                                  {t('profile')}
                               </Link>
                            </li>
+                           <li>
+                              <Link
+                                 to="/community"
+                              >
+                                 Community
+                              </Link>
+                           </li>
+                           <li>
+                              <Link
+                                 to="/chatbot"
+                              >
+                                 {t('chatbot')}
+                              </Link>
+                           </li>
                         </>
                      }
                      <li>

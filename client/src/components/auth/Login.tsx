@@ -58,6 +58,8 @@ export default function Login() {
 
          const newLoggedInUser = res.data as User;
 
+         const isAdmin = newLoggedInUser.permissions.length > 0;
+
          queryClient.setQueryData(['current-user'], newLoggedInUser);
 
          await queryClient.invalidateQueries({ queryKey: ['current-user']});
@@ -68,7 +70,7 @@ export default function Login() {
 
          console.log(`Log in successful! Details: \n${JSON.stringify(newLoggedInUser)}`);
 
-         navigate("/chatbot");
+         navigate(isAdmin ? "/admin" : "/chatbot");
 
       } catch (error) {
          

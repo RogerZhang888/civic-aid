@@ -82,28 +82,61 @@ export default function Navbar() {
             </Link>
 
             <ul className="menu menu-horizontal pl-4 hidden lg:flex">
-               {user && (
-                  <>
-                     {user.permissions.length !== 0 &&
+               {!user ? null : 
+                  user.permissions.length === 0 ? (
+                     <>
                         <li>
                            <Link
-                              to="/admin"
+                              to="/profile"
                               className={`hover:text-white transition ${
-                                 pathname === "/admin" ? "text-primary-content" : ""
+                                 pathname === "/profile" ? "text-primary-content" : ""
                               }`}
                            >
-                              Admin Panel
+                              {t('profile')}
                            </Link>
                         </li>
-                     }
+                        <li>
+                           <Link
+                              to="/community"
+                              className={`hover:text-white transition ${
+                                 pathname === "/community" ? "text-primary-content" : ""
+                              }`}
+                           >
+                              {t('Community')}
+                           </Link>
+                        </li>
+                        <li>
+                           <Link
+                              to="/chatbot"
+                              className={`hover:text-white transition ${
+                                 pathname === "/chatbot" ? "text-primary-content" : ""
+                              }`}
+                           >
+                              {t('chatbot')}
+                           </Link>
+                        </li>
+                        <li>
+                           <Link
+                              to="/about"
+                              className={`hover:text-white transition ${pathname === "/about" ? "text-primary-content" : ""}`}
+                           >
+                              {t('about')}
+                           </Link>
+                        </li>
+                        <li>
+                           <LanguagesDropDown/>
+                        </li>
+                     </>
+                  ) : (
+                  <>
                      <li>
                         <Link
-                           to="/profile"
+                           to="/admin"
                            className={`hover:text-white transition ${
-                              pathname === "/profile" ? "text-primary-content" : ""
+                              pathname === "/admin" ? "text-primary-content" : ""
                            }`}
                         >
-                           {t('profile')}
+                           Admin Panel
                         </Link>
                      </li>
                      <li>
@@ -114,24 +147,6 @@ export default function Navbar() {
                            }`}
                         >
                            {t('Community')}
-                        </Link>
-                     </li>
-                     <li>
-                        <Link
-                           to="/chatbot"
-                           className={`hover:text-white transition ${
-                              pathname === "/chatbot" ? "text-primary-content" : ""
-                           }`}
-                        >
-                           {t('chatbot')}
-                        </Link>
-                     </li>
-                     <li>
-                        <Link
-                           to="/about"
-                           className={`hover:text-white transition ${pathname === "/about" ? "text-primary-content" : ""}`}
-                        >
-                           {t('about')}
                         </Link>
                      </li>
                      <li>

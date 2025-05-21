@@ -20,6 +20,7 @@ import CommunityPage from "./components/community/CommunityPage";
 import CommunityReportPage from "./components/community/CommunityReportPage";
 import ErrorPage from "./components/ErrorPage";
 import AdminRoutesWrapper from "./components/admin/AdminRoutesWrapper";
+import AdminReportPage from "./components/admin/AdminReportPage";
 
 export default function App() {
    return (
@@ -65,6 +66,8 @@ export default function App() {
                            <Route path="/admin" element={<AdminRoutesWrapper/>}>
 
                               <Route index element={<AdminPage/>} />
+
+                              <Route path="report/:reportId" element={<AdminReportPage/>}/>
 
                            </Route>
 
