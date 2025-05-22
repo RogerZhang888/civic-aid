@@ -12,7 +12,7 @@ const specifier = "Interpret all prompts, especially names and official terms, i
 
 const template = (instructions, output, userprompt=undefined, chatHistory = []) => {
     let processedChatHistory = chatHistory.map((q) => {
-        if (q.isValid || q.is_valid) return `Prompt: ${(q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
+        if (q.toReply || q.to_reply) return `Prompt: ${(q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
         else return ''
     }).join("\n")
     // console.log("CHAT HISTORY joined", processedChatHistory)
@@ -76,12 +76,13 @@ Also indicate which sources you used, both from the context provided and otherwi
 
 
 
-`Format your response as a JSON object with the fields 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. \
+`Format your response as a JSON object with the fields 'title', 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. \
 Agency should contain the full name of a government agency only. \
 Urgency and confidence should be a decimal, to 2 decimal places, between 0 and 1 exclusive. \
 Sources should be an array of URL links. 
 For example:
 {
+    \"title\": \"Burst fire hydrant at Lim Chu Kang road\",
     \"summary\": \"The user reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas. The area has become impassable for vehicles causing traffic hold-up. \",
     \"confidence\": 0.79,
     \"urgency\": 0.94,
