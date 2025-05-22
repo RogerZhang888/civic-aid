@@ -239,6 +239,23 @@ export async function getReportSummaries(req, res) {
         }
         return Promise.all(finalReportPromises)
     }).then((r) => {
+        let masterReportsList = []
+
+        for (let report of r) {
+            for (let source of report.sources) {
+                masterReportsList.push(source)
+            } 
+        }
+
+        for (let report of reports) {
+            if (!masterReportsList.includes(report.id)) {
+                r.push({
+                    ...report,
+                    sources: [report.id]
+                })
+            }
+        }
+        
         res.json(r)
     }).catch((e) => {
         res.status(500).json({error: e})
