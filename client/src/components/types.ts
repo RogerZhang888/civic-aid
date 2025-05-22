@@ -132,4 +132,5 @@ export type Comment = {
    upvoteCount: number;
    text: string;
    createdAt: Date;
+   username: string;
 }
