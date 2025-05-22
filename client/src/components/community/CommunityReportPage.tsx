@@ -1,6 +1,7 @@
 import { useParams } from 'react-router';
 import useReports from '../../hooks/useReports';
 import ReportStats from './ReportStats';
+import CommentSection from "./CommentSection"
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -102,6 +103,9 @@ export default function CommunityReportPage() {
                <ReportStats /> 
             </div>
 
+            <div>
+               <CommentSection reportId={reportId} />
+            </div>
 
          </div>
       </div>

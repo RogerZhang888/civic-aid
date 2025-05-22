@@ -12,7 +12,7 @@ interface CommentProps {
    username: string;
 }
 
-export default function Comment({
+export default function CommentComponent({
   username,
   content,
   timeAgo,
