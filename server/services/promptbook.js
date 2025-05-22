@@ -12,7 +12,7 @@ const specifier = "Interpret all prompts, especially names and official terms, i
 
 const template = (instructions, output, userprompt=undefined, chatHistory = []) => {
     let processedChatHistory = chatHistory.map((q) => {
-        if (q.isValid || q.is_valid) return `Prompt: ${(q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
+        if (q.toReply || q.to_reply) return `Prompt: ${(q.user_prompt??q.userprompt)}\nResponse: ${q.response}\n`
         else return ''
     }).join("\n")
     // console.log("CHAT HISTORY joined", processedChatHistory)
