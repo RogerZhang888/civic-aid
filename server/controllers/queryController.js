@@ -126,7 +126,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     if (userprompt == "") {
         if (media == "") throw new Error("Invalid prompt")
         // MEDIA ONLY
-        userprompt = await queryLLM({query:"", prompt:"", model:"captioner"}, responseParsers.noParser, reply='ALWAYS').then((res) => {
+        userprompt = await queryLLM({query:"", prompt:"", model:"captioner"}, responseParsers.noParser, 'ALWAYS').then((res) => {
             return res.answer
         })
     }
@@ -204,10 +204,10 @@ const submitQuery = async (req, res) => {
         const userId = req.user?.id || null;
         const uploadedFile = req.file;
 
-        console.log("Received prompt:", prompt);
-        console.log("Location:", latitude, longitude);
-        console.log("User ID:", userId);
-        console.log("Uploaded file:", uploadedFile);
+        // console.log("Received prompt:", prompt);
+        // console.log("Location:", latitude, longitude);
+        // console.log("User ID:", userId);
+        // console.log("Uploaded file:", uploadedFile);
 
         if ((!prompt) && (!uploadedFile)) {
             return res.status(400).json({ error: "Prompt is required" });
