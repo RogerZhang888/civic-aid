@@ -3,7 +3,7 @@ import pgsql from "../config/db.js"
 export const getNotifications = async (req, res) => {
     const userId = req.user.id
     Promise.all([
-        pgsql.query("SELECT * FROM notifications WHERE user_id = $1", [userId]),
+        pgsql.query("SELECT * FROM notifications WHERE user_id = $1 OR target = 'ALL'", [userId]),
         pgsql.query("SELECT * FROM notifications_read WHERE user_id = $1", [userId])
     ]).then((qr) => {
         const notifs = qr[0]
@@ -12,6 +12,13 @@ export const getNotifications = async (req, res) => {
         for (let notif of notifs) {
             if (notifsRead.find((e) => e.notification_id === notif.id)) notif.read = true
             else notif.read = false
+
+            try {
+                notif.text = JSON.parse(notif.text)
+            } catch(e) {
+                console.log("Error parsing notification JSON", notif.text)
+                continue
+            }
         }
 
         res.json(notifs)
