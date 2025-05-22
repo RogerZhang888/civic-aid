@@ -21,8 +21,7 @@ export default function LogoutButton() {
             { withCredentials: true }
          );
 
-         queryClient.removeQueries({ queryKey: ["current-user"] });
-         queryClient.removeQueries({ queryKey: ["current-user-reports"] });
+         queryClient.clear();
 
          console.log("Log out successful");
 

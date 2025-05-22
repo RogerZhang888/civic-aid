@@ -17,12 +17,29 @@ export default function AdminReportsTable() {
             pagination: {
                paginationModel: { pageSize: 5, page: 0 },
             },
+            columns: {
+               columnVisibilityModel: {
+                  id: false,
+                  userId: false,
+                  description: false,
+                  recommended_steps: false,
+                  agency: false,
+                  mediaUrl: false,
+                  createdAt: false,
+                  resolvedAt: false,
+                  reportConfidence: false,
+                  isPublic: false,
+                  remarks: false,
+               }
+            }
          }}
          pageSizeOptions={[5, 10, 25, 50, 100]}
          sx={{
             '& .MuiDataGrid-cell': {
                borderRight: '1px solid #f3f4f6',
                fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+               minHeight: '50px',
+               textAlign: 'center'
             },
             '& .MuiDataGrid-columnHeader': {
                backgroundColor: '#f3f4f6',

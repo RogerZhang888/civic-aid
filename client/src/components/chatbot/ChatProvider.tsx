@@ -43,7 +43,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
             <button 
                className="btn flex flex-row justify-center items-center px-5"
                onClick={async () => {
-                  await queryClient.invalidateQueries({ queryKey: ['current-user-reports']});
+                  await queryClient.invalidateQueries({ queryKey: ['reports']});
                   navigate(`/profile/${id}`)
                }}
             >

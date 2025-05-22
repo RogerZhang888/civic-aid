@@ -43,6 +43,8 @@ export default function Login() {
 
       try {
 
+         queryClient.clear();
+
          console.log(`Attempting log in for ${username} ...`);
 
          const res = await axios.post(
@@ -58,9 +60,9 @@ export default function Login() {
 
          const newLoggedInUser = res.data as User;
 
-         queryClient.setQueryData(['current-user'], newLoggedInUser);
+         const isAdmin = newLoggedInUser.permissions.length > 0;
 
-         await queryClient.invalidateQueries({ queryKey: ['current-user']});
+         queryClient.setQueryData(['current-user'], newLoggedInUser);
 
          reset();
 
@@ -68,7 +70,7 @@ export default function Login() {
 
          console.log(`Log in successful! Details: \n${JSON.stringify(newLoggedInUser)}`);
 
-         navigate("/chatbot");
+         navigate(isAdmin ? "/admin" : "/chatbot");
 
       } catch (error) {
          
@@ -133,7 +135,7 @@ export default function Login() {
                {Languages.map(lang =>
                   <button
                      key={lang.code}
-                     className={`join-item btn btn-secondary btn-outline ${lang.code === language ? "btn-active" : ""}`}
+                     className={`join-item btn btn-secondary btn-outline w-20 h-12 ${lang.code === language ? "btn-active" : ""}`}
                      onClick={() => toggleLanguage(lang.code)}
                   >
                      {lang.display}

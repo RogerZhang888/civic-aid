@@ -148,7 +148,7 @@ export default function Register() {
                {Languages.map(lang =>
                   <button
                      key={lang.code}
-                     className={`join-item btn btn-secondary btn-outline ${lang.code === language ? "btn-active" : ""}`}
+                     className={`join-item btn btn-secondary btn-outline w-20 h-12 ${lang.code === language ? "btn-active" : ""}`}
                      onClick={() => toggleLanguage(lang.code)}
                   >
                      {lang.display}

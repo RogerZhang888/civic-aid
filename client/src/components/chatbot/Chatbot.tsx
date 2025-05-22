@@ -12,7 +12,7 @@ export default function Chatbot() {
    const currChat = chats.find(chat => chat.id === currChatId);
 
    if (isFetchingAChat) return (
-      <section className="h-full flex flex-1 flex-col justify-center items-center space-y-2">
+      <section className="h-full flex flex-1 flex-col justify-center items-center space-y-2 text-gray-500">
          <span className="loading loading-spinner loading-xl"/>
          <div className="text-xl">{t('loadingChat')}</div>
       </section>
@@ -33,7 +33,7 @@ export default function Chatbot() {
                </>
             :  <div className="h-fill flex flex-1 flex-col justify-center items-center w-full">
                   <img src="/mascot.png" alt="logo" className="w-50 mx-auto" />
-                  <div className="text-2xl">{t('newChatTop')}</div>
+                  <div className="text-2xl text-center">{t('newChatTop')}</div>
                   <div>{t('newChatBottom')}</div>
                </div>
          }

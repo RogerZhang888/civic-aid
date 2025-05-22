@@ -5,6 +5,7 @@ export default {
    chatbot: "智能助手",
    about: "关于网站",
    language: "语言设置",
+   community: "社区报告",
 
    login: "登录",
    logout: "登出",
@@ -23,6 +24,7 @@ export default {
    psdsMustMatch: "密码须一致",
 
    loadingChat: "加载对话信息中…",
+   yourChats: "您的对话记录",
    newChat: "开启新对话",
    newChatTop: "您好！我是 CivLeo, 您的友好邻里助手。",
    newChatBottom: "今天需要什么帮助？",
@@ -35,6 +37,47 @@ export default {
    maxImage: "最多上传一张照片",
    messageTooLong: "文字不可超过400字符",
    emptyForm: "请输入文字或上传照片",
+
+   yourReports: "您的报告",
+   yourBadges: "您的微章",
+   yourRewards: "您的奖励",
+   loadingReports: "加载报告信息中…",
+   loadingRewards: "加载奖励信息中…",
+   noReports: "您尚未提交任何报告。",
+   noBadges: "尚未获得微章。您的报告被解决后将获得微章。",
+   congrats: "恭喜您！",
+   rewardEarned: "您本月的贡献已获得奖励！",
+   validUntil: "有效期至",
+   noReward: "本月没有奖励",
+   noRewardQualify: "您本月尚未获得奖励。",
+   keepSubmitting: "继续提交报告以获得奖励！",
+   firstResolved: "首个问题已解决！",
+   earnedOn: "获得日期",
+   xResolved: " 个问题已解决！",
+
+   reportCreatedAt: "报告创建于",
+   viewReport: "查看报告",
+
+   backToProfile: "返回用户资料页",
+   details: "报告详情",
+   status: "状态",
+   visibility: "可见性",
+   createdAt: "创建于",
+   resolvedAt: "解决于",
+   agency: "政府机构",
+   incidentLocation: "事件地点",
+   description: "描述",
+   remarks: "备注",
+   public: "公开",
+   private: "私密",
+   noLocation: "没有提供位置数据。",
+   noRemarks: "管理员未提供备注。",
+   noMedia: "此报告未含传任何照片。",
+
+   pending: "待处理",
+   resolved: "已解决",
+   rejected: "已拒绝",
+   "in progress": "处理中",
 
    about1: (
       <>

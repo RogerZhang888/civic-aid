@@ -59,7 +59,7 @@ export type Report = {
    title: string;
    description: string;
    mediaUrl: string[];
-   incidentLocation: GeolocationCoordinates | null;
+   incidentAddress: string | null;
    agency: string;
    recommended_steps: string;
    urgency: number;
