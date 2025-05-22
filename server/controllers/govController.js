@@ -250,12 +250,18 @@ export async function getReportSummaries(req, res) {
         for (let report of reports) {
             if (!masterReportsList.includes(report.id)) {
                 r.push({
-                    ...report,
-                    sources: [report.id]
+                    title: report.title,
+                    summary: report.summary,
+                    agency: report.agency,
+                    recommendedSteps: report.recommended_steps,
+                    urgency: report.urgency,
+                    confidence: report.report_confidence,
+                    sources: [report.id],
+                    valid: true
                 })
             }
         }
-        
+
         res.json(r)
     }).catch((e) => {
         res.status(500).json({error: e})
