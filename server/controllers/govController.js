@@ -227,7 +227,8 @@ export async function getReportSummaries(req, res) {
                             })
                         }
                     }).catch((e) => {
-                        return reject( "Error during report parse")
+                        console.log("ERROR: ", e)
+                        return reject("Error during report parse")
                     })
                 }
                 if (!valid) reject("Error generating new report")
