@@ -217,14 +217,14 @@ export async function getReportSummaries(req, res) {
                     callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}).then((newReport) => {
                         parsedReport = responseParsers.reportParser(newReport)
                         
+                        console.log("PARSING REPORT", newReport)
+
                         if (parsedReport.valid) {
                             valid = true
                             resolve({
                                 compiled: parsedReport,
                                 sources: reportGroup.map((report) => report.id)
                             })
-                        } else {
-                            console.log("INVALID REPORT", newReport)
                         }
                     }).catch((e) => {
                         return reject( "Error during report parse")
