@@ -1,0 +1,49 @@
+import useReports from '../../hooks/useReports';
+import { DataGrid } from '@mui/x-data-grid';
+import { Report } from '../types';
+import reportColumns from './reportColumns';
+import CustomToolbar from './CustomToolbar';
+
+export default function AdminReportsTable() {
+
+   const { data: reports } = useReports("/gov/reports");
+
+   return (
+      <DataGrid<Report>
+         rows={reports}
+         columns={reportColumns}
+         getRowHeight={() => 'auto'}
+         initialState={{
+            pagination: {
+               paginationModel: { pageSize: 5, page: 0 },
+            },
+         }}
+         pageSizeOptions={[5, 10, 25, 50, 100]}
+         sx={{
+            '& .MuiDataGrid-cell': {
+               borderRight: '1px solid #f3f4f6',
+               fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+            },
+            '& .MuiDataGrid-columnHeader': {
+               backgroundColor: '#f3f4f6',
+            },
+            '& .MuiDataGrid-columnHeaderTitle': {
+               fontWeight: '600',
+            },
+            '& .MuiDataGrid-footerContainer': {
+               borderTop: '1px solid #f3f4f6',
+               backgroundColor: '#f9fafb',
+            },        
+            fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+            '& .MuiDataGrid-columnHeaders': {
+               fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+            },
+            '& .MuiTablePagination-root': {
+               fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+            }
+         }}
+         slots={{ toolbar: CustomToolbar }}
+         showToolbar
+      />
+   )
+}

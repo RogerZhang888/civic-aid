@@ -19,6 +19,13 @@ export type Chat = {
    queries: Query[];
 }
 
+export type GetChatRes = {
+   id: string,
+   title: string,
+   type: ChatTypes,
+   created_at: string,
+}
+
 export type GetQueriesForChatRes = {
    // normal reply
    prompt: string,
@@ -42,8 +49,8 @@ export type GetQueriesForChatRes = {
    reportId: string
 }
 
-export type AllowedAgencies = "MSO" | "NEA" | "LTA" | "HDB" | "NParks" | "SP Group" | "Town Councils" | "SPF" | "PUB" | "Others";
-export type ReportStatusTypes = "pending" | "resolved";
+// export type AllowedAgencies = "MSO" | "NEA" | "LTA" | "HDB" | "NParks" | "SP Group" | "Town Councils" | "SPF" | "PUB" | "Others";
+export type ReportStatusTypes = "pending" | "resolved" | "rejected" | "in progress";
 
 export type Report = {
    id: string;
@@ -53,13 +60,16 @@ export type Report = {
    description: string;
    mediaUrl: string[];
    incidentLocation: GeolocationCoordinates | null;
-   agency: AllowedAgencies;
+   agency: string;
    recommended_steps: string;
    urgency: number;
    reportConfidence: number;
    status: ReportStatusTypes;
+   isPublic: boolean;
    createdAt: Date;
    resolvedAt: Date | null;
+   remarks: string | null;
+   upvoteCount: number;
 }
 
 export type FormState = {
@@ -86,6 +96,7 @@ export type User = {
    id: number;
    email: string;
    username: string;
+   permissions: Array<string>;
 }
 
 export type LoginFields = {
@@ -112,4 +123,13 @@ export const Languages: { display: string, code: SiteLanguages }[] = [
 export type LanguageContextType = {
    language: SiteLanguages;
    toggleLanguage: (x: SiteLanguages) => void;
+}
+
+export type Comment = {
+   id: string;
+   reportId: string;
+   parentId: string;
+   upvoteCount: number;
+   text: string;
+   createdAt: Date;
 }

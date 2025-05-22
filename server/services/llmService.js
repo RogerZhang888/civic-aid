@@ -1,12 +1,10 @@
-const { exec } = require('child_process');
-const path = require('path');
 const debug = false
 
 /**
  * Calls the Python model using CLI and returns the output.
  * Assumes the Python script exposes a callable entrypoint like: use_model(query, query_type, image_path)
  */
-exports.callModel = async ({ query, prompt, model, imagePath = null }) => {
+export const callModel = async ({ query, prompt, model, imagePath = null }) => {
     const temporaryResponse = {
         typeDecision:`\`\`\`json
 {
@@ -79,6 +77,7 @@ exports.callModel = async ({ query, prompt, model, imagePath = null }) => {
     }).then((res) => {
         return res.json()
     }).then((res) => {
+        if (res.used_rag) console.log("!! RAG USED !!")
         return res.answer
     })
 };

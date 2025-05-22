@@ -1,7 +1,7 @@
 import { ArrowUp, Image, X } from "lucide-react";
 import { useMemo, useRef } from "react"
 import { useChatContext } from "./ChatContext";
-import useTranslation from "../language/useTranslation";
+import useTranslation from "../../hooks/useTranslation";
 
 export default function ChatbotForm() {
 

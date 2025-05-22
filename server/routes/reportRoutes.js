@@ -1,10 +1,27 @@
-const express = require('express');
+import express from 'express';
+import {
+  createReport,
+  getReport,
+  getUserReports,
+  updateReportStatus,
+  getDoesUserHaveReward,
+  setIsPublic,
+  getPublicReports,
+  upvote,
+  undoUpvote,
+  getUpvoteStatus
+} from '../controllers/reportController.js';
+import authMiddleware from '../middleware/authMiddleware.js';
 const router = express.Router();
-const { createReport, getReport, getUserReports, updateReportStatus, getReportSummaries } = require('../controllers/reportController');
-const authMiddleware = require('../middleware/authMiddleware');
 
 // create a report (TODO: DEPRECATE??)
 router.post('/reports', authMiddleware, createReport);
+
+// Get public reports
+router.get('/reports/public', authMiddleware, getPublicReports)
+
+// Check upvotes
+router.get('/reports/upvote_status', authMiddleware, getUpvoteStatus)
 
 // get a specific report based on its id
 router.get('/reports/:id', authMiddleware, getReport);
@@ -15,7 +32,16 @@ router.get('/reports', authMiddleware, getUserReports);
 // update a specific report based on its id
 router.patch('/reports/:id', authMiddleware, updateReportStatus);
 
-// get summarised reports
-router.get('/reports_summary', authMiddleware, getReportSummaries)
+// check if user is eligible for reward this month
+router.get('/reports_reward', authMiddleware, getDoesUserHaveReward);
 
-module.exports = router;
+// Set report is_public
+router.post('/reports/set_is_public/:id', authMiddleware, setIsPublic)
+
+// Upvote
+router.post('/reports/upvote/:id', authMiddleware, upvote)
+
+// Unupvote
+router.post('/reports/undo_upvote/:id', authMiddleware, undoUpvote)
+
+export default router

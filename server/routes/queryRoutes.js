@@ -1,7 +1,7 @@
-const express = require('express');
-const multer = require('multer');
-const queryController = require('../controllers/queryController');
-const authMiddleware = require('../middleware/authMiddleware');
+import express from 'express';
+import multer from 'multer';
+import queryController from '../controllers/queryController.js';
+import authMiddleware from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -18,6 +18,6 @@ let storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post('/query', authMiddleware, upload.single('image'), queryController.submitQuery);
+router.post('/query', authMiddleware, upload.single('image'), queryController);
 
-module.exports = router;
+export default router

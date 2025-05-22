@@ -1,40 +1,36 @@
-const { v4: uuidv4 } = require('uuid');
-const pgsql = require("../config/db");
-const { callModel } = require('../services/llmService');
-const { systempromptTemplates } = require('../services/promptbook');
-const { responseParsers } = require('../services/parsers');
+import pgsql from '../config/db.js';
+import { callModel } from '../services/llmService.js';
+import { systempromptTemplates } from '../services/promptbook.js';
+import { responseParsers } from '../services/parsers.js';
+import { updateReportsDB as createReport } from './reportController.js';
+import { reverseGeocode } from '../services/geocoder.js';
 
 const updateQueriesDB = (params)  => {
-    let {userId, chatId, userprompt, media, systemprompt, location, response, isValid, toReply, confidence} = params
+    let {userId, chatId, userprompt, media, systemprompt, location, response, isValid, toReply, confidence, sources} = params
     // console.log("PRE QUERY CHECK", {userId, chatId, userprompt, media, systemprompt, location, response, isValid, toReply, confidence})
     pgsql.query(
         `INSERT INTO queries
-        (user_id, chat_id, user_prompt, media_url, query_location, system_prompt, response, sources, is_valid, to_reply, query_confidence)
+        (user_id, chat_id, user_prompt, media_url, query_address, system_prompt, response, sources, is_valid, to_reply, query_confidence)
         VALUES (
-          $1, $2, $3, $4,
-          CASE
-            WHEN $5::double precision IS NOT NULL AND $6::double precision IS NOT NULL
-            THEN ST_SetSRID(ST_MakePoint($5, $6), 4326)
-            ELSE NULL
-          END,
-          $7, $8, $9, $10, $11, $12
+          $1, $2, $3, $4, $5, $6,
+          $7, $8, $9, $10, $11
         )`,
         [
             userId,
             chatId,
             userprompt,
             media? [media] : [],
-            location.latitude,
-            location.longitude,
+            location,
             systemprompt,
             response,
-            [], // TODO: sources?? — will still work as an empty array
+            sources??[],
             isValid,
             toReply,
             confidence
         ]
       ).then(() => {
-        console.log("Updated Queries table", params)
+        return;
+        // console.log("Updated Queries table", params)
     }).catch((err) => {
         console.log("Error updating queries table", err)
     })
@@ -47,74 +43,37 @@ const getChatHistory = async (chatId) => {
 }
 const getChat = async (chatId) => {
     let chat = await pgsql.query("SELECT * FROM chats WHERE id = $1", [chatId])
-    console.log("Extracting chat info", chat)
+    // console.log("Extracting chat info", chat)
     if (chat.length === 0) return {id:null}
     return chat[0]
 }
 const updateChatType = async (chatId, type, title) => {
     return pgsql.query("UPDATE chats SET type = $1, title = $2 WHERE id = $3", [type, title, chatId])
 }
-const createReport = (params) => {
-    let {userId, chatId, title, summary, media, location, agency, recommendedSteps, urgency, confidence} = params
-    return pgsql.query(`SELECT * FROM reports WHERE chat_id = $1`, [chatId]).then((res) => {
-        if (res.length == 0) {
-            return pgsql.query(`
-                INSERT INTO reports 
-                (user_id, chat_id, title, description, media_url, incident_location, agency, recommended_steps, urgency, report_confidence)
-                VALUES (
-                    $1, $2, $3, $4, $5, 
-                    CASE
-                        WHEN $6::double precision IS NOT NULL AND $7::double precision IS NOT NULL
-                        THEN ST_SetSRID(ST_MakePoint($6, $7), 4326)
-                        ELSE NULL
-                    END,
-                    $8, $9, $10, $11
-                )
-                RETURNING id
-            `, [
-                userId,
-                chatId,
-                title,
-                summary,
-                media??[],
-                location.latitude,
-                location.longitude,
-                agency,
-                recommendedSteps, 
-                urgency,
-                confidence
-            ])
-        } else {
-            return pgsql.query(`
-                UPDATE reports 
-                SET description = $1, media_url = $2, agency = $3, recommended_steps = $4, urgency = $5, report_confidence = $6
-                WHERE chat_id = $7
-                RETURNING id
-            `, [
-                summary,
-                media??[],
-                agency,
-                recommendedSteps,
-                urgency,
-                confidence,
-                chatId
-            ])
-        }
-    })
-    
-    
-}
 
 const getConfidence = (score, count) => {
     // TOOD: Confirm boundaries
-    if (score > 0.7 || (score > 0.5 && count > 3) || count > 5) return 'HIGH'
-    else if (score > 0.3 || (score > 0.1 && count > 3)) return 'MED'
+    if (!score) return 'LOW'
+    const adjustedScore = score + (1 - score) * ( 1 / (1 + Math.exp(4 - 0.57 * count)))
+    console.log(`Confidence score adjustments, raw ${score} count ${count}`, adjustedScore)
+    if (adjustedScore > 0.8) return 'HIGH'
+    else if (adjustedScore > 0.3) return 'MED'
     else return 'LOW'
 }
 
-// TOOD: media support
 const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     let chatHistory = await getChatHistory(chatId)
+    let chatMedia = []
+    
+    for (let row of chatHistory) {
+        if (Array.isArray(row.media_url) && row.media_url != 0) {
+            for (let m of row.media_url) chatMedia.push(m)
+        }
+    }
+    if (media) chatMedia.push(media)
+    chatMedia = [...new Set(chatMedia)]
+        
+    // console.log("CHATMEDIA", chatMedia)
     let queriesTracker = []
     let response = {}
 
@@ -123,9 +82,8 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         // NEVER means this output is never used as a reply, 
         // ALWAYS means this output will always be used as a reply, 
         // HIGH means this output will be used as a reply only when the confidence is HIGH
-        console.log("Querying LLM", query)
+        // console.log("Querying LLM", query)
 
-        // TODO: Actually calling the model
         let parsedRes
         let promptcount = 0
         const repromptLimit = 3
@@ -133,8 +91,9 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
             promptcount++
             parsedRes = await callModel({query, prompt, model, imagePath: media, chatHistory}).then((res) => {
                 console.log(`${promptcount}: Received raw LLM response`, res)
-                parsed = parseResponse(res)
-                queryParams = {
+                let parsed = parseResponse(res)
+                console.log(`RESPONSE PARSED VALID? ${parsed.valid}`)
+                let queryParams = {
                     userId, 
                     chatId, 
                     userprompt, 
@@ -147,6 +106,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
                     location,
                     media,
                 }
+                // console.log("QUERY", queryParams)
                 updateQueriesDB(queryParams) // For long term record in DB
                 queriesTracker.push(queryParams) // For temporary tracking
                 chatHistory.push(queryParams)
@@ -159,7 +119,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         }
         // TOOD: better way to reprompt for invalid output format?
 
-        console.log(`Result for query ${query}`, parsedRes)
+        // console.log(`Result for query ${query}`, parsedRes)
         return parsedRes
     }
 
@@ -171,7 +131,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         })
     }
     if (chat.type == 'unknown') {
-        systemprompt = systempromptTemplates.getTypeDecisionTemplate(userprompt, chatHistory)
+        let systemprompt = systempromptTemplates.getTypeDecisionTemplate(userprompt, chatHistory)
         response = await queryLLM({query:userprompt, prompt: systemprompt, model:'basic'}, responseParsers.typeDecisionParser, 'NEVER')
         
         if (getConfidence(response.confidence, chatHistory.length) == 'LOW' || getConfidence(response.confidence, chatHistory.length) == 'MED') {
@@ -205,7 +165,8 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
                 agency: response.agency,
                 recommendedSteps: response.recommendedSteps,
                 urgency: response.urgency,
-                confidence: response.confidence
+                confidence: response.confidence,
+                media: chatMedia
             })
         }
         // ELSE when HIGH - already report - no further action required
@@ -236,17 +197,17 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     }
 }
 
-exports.submitQuery = async (req, res) => {
+const submitQuery = async (req, res) => {
     try {
         const { latitude, longitude, chatId } = req.body;
         const prompt = req.body.prompt??""
         const userId = req.user?.id || null;
         const uploadedFile = req.file;
 
-        console.log("Received prompt:", prompt);
-        console.log("Location:", latitude, longitude);
-        console.log("User ID:", userId);
-        console.log("Uploaded file:", uploadedFile);
+        // console.log("Received prompt:", prompt);
+        // console.log("Location:", latitude, longitude);
+        // console.log("User ID:", userId);W
+        // console.log("Uploaded file:", uploadedFile);
 
         if ((!prompt) && (!uploadedFile)) {
             return res.status(400).json({ error: "Prompt is required" });
@@ -276,7 +237,13 @@ exports.submitQuery = async (req, res) => {
         // const queryType = 'query'; // or 'report' — set based on context or user input
         // const imagePath = uploadedFiles.length > 0 ? uploadedFiles[0].path : null;
 
-        if (chat.id) userquery(prompt, userId, chatId, chat, {longitude, latitude}, uploadedFile?.filename).then((r) => {
+        let location = null
+        if (latitude != null && longitude != null) location = await reverseGeocode(latitude, longitude).then((res) => {
+            if (typeof res === "string") return res
+            else if ("error" in res) return `${latitude}, ${longitude}`
+            else throw new Error("Invalid reverse geocoder output")
+        })
+        if (chat.id) userquery(prompt, userId, chatId, chat, location, uploadedFile?.filename).then((r) => {
             res.json(r.response)
         }).catch((err) => {
             console.error("Error handling user query", err);
@@ -288,3 +255,4 @@ exports.submitQuery = async (req, res) => {
     }
 };
 
+export default submitQuery

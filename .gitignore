@@ -15,3 +15,14 @@ chatbot/env/
 chatbot/tfidf_matrix.npz
 chatbot/tfidf_vectorizer.pkl
 server/parquets/*
+dskey1.txt
+dskey2.txt
+dskey3.txt
+dskey4.txt
+dskey5.txt
+dskey6.txt
+Llama-SEA-LION-v3-70B-4bit/
+clip_lora_finetuned/
+sealionkey.txt
+sealionkey2.txt
+sealionkey3.txt

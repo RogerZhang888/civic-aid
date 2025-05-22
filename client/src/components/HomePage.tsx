@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useUser from "./auth/useUser.ts";
-import useTranslation from "./language/useTranslation.ts";
+import useUser from "../hooks/useUser.ts";
+import useTranslation from "../hooks/useTranslation.ts";
 
 export default function HomePage() {
    const navigate = useNavigate();

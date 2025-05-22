@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import useUser from "./useUser";
+import useUser from "../../hooks/useUser";
 
 export default function AuthRoutesWrapper() {
 
@@ -7,12 +7,17 @@ export default function AuthRoutesWrapper() {
 
    console.log("Trying to access routes under /auth...");
 
-   if (isLoading) return <div>LOADING....</div>;
+   if (isLoading) return (
+      <section className="h-full flex flex-1 flex-col justify-center items-center space-y-2">
+         <span className="loading loading-spinner loading-xl"/>
+         <div className="text-xl">Loading...</div>
+      </section>
+   )
 
    if (isError) {
       console.log("User is not logged in, can access /auth");
       return (
-         <div className="w-full h-[calc(100vh-4rem)] flex items-center justify-center">
+         <div className="h-full flex items-center justify-center">
             <Outlet/>
          </div>
       )

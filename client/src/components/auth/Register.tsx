@@ -1,17 +1,19 @@
 import { useForm } from "react-hook-form";
-import { RegisterFields } from "../types";
+import { Languages, RegisterFields } from "../types";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
-import useTranslation from "../language/useTranslation";
+import useTranslation from "../../hooks/useTranslation";
+import { useLanguageContext } from "../language/LanguageContext";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 export default function Register() {
 
    const { t } = useTranslation();
+   const { language, toggleLanguage } = useLanguageContext();
    
    const {
       register,
@@ -139,8 +141,21 @@ export default function Register() {
                }
             </button>
             <div>
-            {t('haveAccount')}{' '}<Link to="/auth" className="link">{t('login')}</Link>
+            {t('haveAccount')}{' '}<Link to="/auth" className="link link-info">{t('login')}</Link>
             </div>
+
+            <div className="join join-horizontal">
+               {Languages.map(lang =>
+                  <button
+                     key={lang.code}
+                     className={`join-item btn btn-secondary btn-outline ${lang.code === language ? "btn-active" : ""}`}
+                     onClick={() => toggleLanguage(lang.code)}
+                  >
+                     {lang.display}
+                  </button>
+               )}
+            </div>
+
          </div>
 
 

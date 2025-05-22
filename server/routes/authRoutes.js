@@ -1,9 +1,9 @@
-const express = require("express");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const authMiddleware = require("../middleware/authMiddleware");
-const { NeonDbError } = require("@neondatabase/serverless");
-const pgsql = require("../config/db");
+import express from 'express';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import authMiddleware from '../middleware/authMiddleware.js';
+import { NeonDbError } from '@neondatabase/serverless';
+import pgsql from '../config/db.js';
 
 const router = express.Router();
 const saltRounds = 10;
@@ -61,6 +61,8 @@ router.post("/login", async (req, res) => {
 
    try {
 
+      console.log(req.body)
+
       const { username: reqUsername, password } = req.body;
       const pgsqlLoginRes = await pgsql.query("SELECT * FROM users WHERE name = $1", [reqUsername]);
 
@@ -69,16 +71,17 @@ router.post("/login", async (req, res) => {
          return res.status(401).json({ error: "invalid credentials" });
       }
 
-      const { id, name: resUsername, email: resEmail } = pgsqlLoginRes[0];
+      const { id, name: resUsername, email: resEmail, permissions: resPermissions } = pgsqlLoginRes[0];
 
       const token = jwt.sign(
          { 
             id,
             username: resUsername,
-            email: resEmail
+            email: resEmail,
+            permissions: resPermissions
          },
          process.env.JWT_SECRET,
-         { expiresIn: 60 * 60 }
+         { expiresIn: 60 * 60 * 24 * 30 }
       );
 
       console.log(`User ${resUsername} logged in successfully`);
@@ -88,7 +91,7 @@ router.post("/login", async (req, res) => {
          secure: process.env.NODE_ENV === "production",
          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
       });
-      res.json({ id, username: resUsername, email: resEmail });
+      res.json({ id, username: resUsername, email: resEmail, permissions: resPermissions });
 
    } catch (error) {
       console.log(error);
@@ -104,7 +107,7 @@ router.post("/login", async (req, res) => {
  */
 router.post('/logout', authMiddleware, (req, res) => {
 
-   const { email } = req.user;
+   const { username } = req.user;
 
    console.log("RUNNING LOGOUT HANDLER");
 
@@ -114,7 +117,7 @@ router.post('/logout', authMiddleware, (req, res) => {
      sameSite: 'strict',
    });
 
-   console.log(`User ${email} logged out successfully`);
+   console.log(`User ${username} logged out successfully`);
  
    res.json({ success: true });
 });
@@ -126,9 +129,9 @@ router.post('/logout', authMiddleware, (req, res) => {
  * @returns 200 with user data if authenticated
  */
 router.get("/protected", authMiddleware, (req, res) => {
-   const { email } = req.user;
-   console.log(`User ${email} accessed protected route`);
+   const { username } = req.user;
+   console.log(`User ${username} accessed protected route`);
    res.json(req.user);
 });
 
-module.exports = router;
+export default router;

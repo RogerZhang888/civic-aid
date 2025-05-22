@@ -1,7 +1,7 @@
-const pgsql = require("../config/db");
-const { responseParsers } = require("../services/parsers");
+import pgsql from '../config/db.js';
+import { responseParsers } from '../services/parsers.js';
 
-exports.startNewChat = async (req, res) => {
+export const startNewChat = async (req, res) => {
     try {
         const userId = req.user.id; // from auth middleware
 
@@ -24,7 +24,7 @@ exports.startNewChat = async (req, res) => {
     }
 };
 
-exports.updateChatName = async (req, res) => {
+export const updateChatName = async (req, res) => {
     try {
         const userId = req.user.id; // from auth middleware
         const chatId = req.params.chatId; // from request parameters
@@ -42,7 +42,7 @@ exports.updateChatName = async (req, res) => {
     }
 };
 
-exports.getChatHistory = async (req, res) => {
+export const getChatHistory = async (req, res) => {
 
     console.log("GETTING ALL CHAT HISTORY FOR USER");
 
@@ -54,7 +54,7 @@ exports.getChatHistory = async (req, res) => {
             [userId]
         );
 
-        console.log(chatRes);
+      console.log(`${chatRes.length} chats found for user ${userId}`);
 
         res.status(200).json(chatRes);
     } catch (err) {
@@ -64,7 +64,7 @@ exports.getChatHistory = async (req, res) => {
 
 };
 
-exports.getSpecificChatHistory = async (req, res) => {
+export const getSpecificChatHistory = async (req, res) => {
     console.log("GETTING SPECIFIC CHAT HISTORY FOR USER");
 
     try {
@@ -94,7 +94,7 @@ exports.getSpecificChatHistory = async (req, res) => {
                         let parsedRes = responseParsers[parser](q.response)
                         if (parsedRes.valid) {
                             if (parser === "reportParser") {
-                                reports = await pgsql.query("SELECT * FROM reports WHERE chat_id = $1", [chatId])
+                                let reports = await pgsql.query("SELECT * FROM reports WHERE chat_id = $1", [chatId])
                                 return {
                                     prompt: q.prompt,
                                     media: q.media,
@@ -118,13 +118,29 @@ exports.getSpecificChatHistory = async (req, res) => {
 
             res.status(200).json(queries);
         } else {
-            // no queries associated with this chat: delete it
-            console.log(`No queries fetched for chatid ${chatId}: deleting this chat`);
-            await pgsql.query(
-                `DELETE FROM chats WHERE user_id = $1 AND id = $2`,
-                [userId, chatId]
+            // no queries associated with this chat
+            console.log(`No queries fetched for chatid ${chatId}`);
+
+            // don't delete if chat was created recently
+            const chat = await pgsql.query(
+               `SELECT created_at FROM chats WHERE id = $1`,
+               [chatId]
             );
-            res.status(404).json({ error: "No queries for this chat" });
+            const chatAge = Date.now() - new Date(chat[0].created_at).getTime();
+
+            if (chatAge < 60000) { // 60 second grace period
+               console.log(`chat ${chatId} age less than 60 seconds - will not be deleted`);
+               return res.status(200).json([]);
+            } else {
+               // only delete chat if it wasn't created recently
+               console.log(`chat ${chatId} age more than 60 seconds - will be deleted`);
+               await pgsql.query(
+                   `DELETE FROM chats WHERE user_id = $1 AND id = $2`,
+                   [userId, chatId]
+               );
+               return res.status(404).json({ error: "No queries for this chat" });
+            }
+
         }
     } catch (err) {
         console.error("Failed to fetch specific chat history:", err);
@@ -135,7 +151,7 @@ exports.getSpecificChatHistory = async (req, res) => {
 };
 
 
-exports.deleteSpecificChat = async (req, res) => {
+export const deleteSpecificChat = async (req, res) => {
     console.log("DELETING SPECIFIC CHAT FOR USER");
 
     try {
