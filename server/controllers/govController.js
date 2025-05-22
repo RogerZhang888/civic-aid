@@ -4,6 +4,7 @@ import parquet from "parquetjs";
 import { callModel } from "../services/llmService.js";
 import { systempromptTemplates } from "../services/promptbook.js";
 import { responseParsers } from "../services/parsers.js";
+import { createReportNotification } from '../services/notifications.js';
 
 export const getGovReports = async (req, res) => {
     try {
@@ -94,8 +95,9 @@ export const patchReport = async (req, res) => {
                 .json({ error: `Report ${reportId} not found` });
         }
 
+        createReportNotification(result[0].title, result[0].id, result[0].status, result[0].user_id)
+        
         res.json(result[0]);
-        pgsql.query(`UPDATE reports SET status = 'resolved', resolved_at = CURRENT_TIMESTAMP WHERE`)
     } catch(e) {
         console.error("Update error:", e);
         res.status(500).json({ error: e.message });

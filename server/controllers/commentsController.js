@@ -1,4 +1,5 @@
 import pgsql from "../config/db.js"
+import { createCommentNotification } from "../services/notifications.js"
 
 export const addComment = async (req, res) => {
     const userId = req.user.id
@@ -22,7 +23,13 @@ export const addComment = async (req, res) => {
             return
         }
     }
-    pgsql.query(`INSERT INTO comments (report_id, text, parent_id) VALUES ($1, $2, $3)`, [reportId, text, parentId]).then(() => {
+    pgsql.query(`INSERT INTO comments (report_id, text, parent_id, user_id) VALUES ($1, $2, $3, $4)`, [reportId, text, parentId, userId]).then(() => {
+        pgsql.query(`SELECT * FROM reports WHERE id = $1`, [reportId]).then((qr) => {
+            if (qr.length === 0) return;
+            return createCommentNotification(qr[0].title, reportId, qr[0].user_id)
+        }).catch((e) => {
+            console.log("Error creating comment notification", e)
+        })
         res.json({success: true})
     }).catch((e) => {
         res.status(500).json({error: e})

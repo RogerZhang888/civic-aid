@@ -566,6 +566,33 @@ Response Array<
 }
 ```
 
+### Notification routes
+`GET /notifications`
+```ts
+Response Array<{
+    id: number,
+    created_at: string,
+    user_id: number | null,
+    target: 'USER' | 'ADMIN' | 'ALL',
+    text: {
+        en: string,
+        cn: string,
+        ms: string,
+        ta: string
+    },
+    link: string,
+    read: boolean
+}>
+```
+
+`POST /notifications/:id`
+```ts
+Response {
+    success: boolean,
+    error: undefined | string
+}
+```
+
 ### Miscellaneous routes
 `POST /translate`
 ```ts
