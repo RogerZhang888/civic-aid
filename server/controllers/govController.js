@@ -227,10 +227,10 @@ export async function getReportSummaries(req, res) {
                             console.log("INVALID REPORT", newReport)
                         }
                     }).catch((e) => {
-                        reject( "Error during report parse")
+                        return reject( "Error during report parse")
                     })
                 }
-                reject("Error generating new report")
+                if (!valid) reject("Error generating new report")
             })
             finalReportPromises.push(
                 callModelPromise
