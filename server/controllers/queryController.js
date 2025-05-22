@@ -159,7 +159,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
             report = await createReport({
                 userId,
                 chatId,
-                title:chat.title,
+                title:response.title,
                 summary: response.summary,
                 location,
                 agency: response.agency,

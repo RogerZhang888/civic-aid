@@ -206,12 +206,7 @@ export async function getReportSummaries(req, res) {
             }))
         }
 
-        Promise.all(dbUpdatePromises).then((r) => {
-            res.json(reports)
-        }).catch((e) => {
-            console.log("Error updating reports DB", e)
-            res.status(500).json({ error: e.message });
-        })
+        res.json(reports)
     }).catch((e) => {
         res.status(500).json({error: e})
     })

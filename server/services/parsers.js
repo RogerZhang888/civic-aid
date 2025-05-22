@@ -67,11 +67,12 @@ export const responseParsers = {
     },
     reportParser: (res) => {
         // For reports
-        let r = {summary: undefined, agency: undefined, confidence: undefined, sources: undefined, urgency:undefined, recommendedSteps:undefined}
+        let r = {title: undefined, summary: undefined, agency: undefined, confidence: undefined, sources: undefined, urgency:undefined, recommendedSteps:undefined}
         let parsed = extractJson(res)
         if (parsed.invalid) return {valid:false}
 
         if (
+            !(typeof parsed.title === "string") ||
             !(typeof parsed.summary === "string") ||
             !(typeof parsed.agency === "string") ||
             !(typeof parsed.confidence === "number") ||
