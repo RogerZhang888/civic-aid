@@ -6,7 +6,7 @@ const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 export default function CommunityReportPage() {
    const { reportId } = useParams() as { reportId: string };
-   const { data: reports, isLoading: isReportsLoading } = useReports();
+   const { data: reports, isLoading: isReportsLoading } = useReports("/reports/public");
 
    if (isReportsLoading) return <div className="flex justify-center items-center h-64">Loading your report...</div>;
 
