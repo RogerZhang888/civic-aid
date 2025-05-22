@@ -182,7 +182,7 @@ export async function getReportSummaries(req, res) {
                     response: r
                 }
             }).catch((e) => {
-                res.status(500).json({error: e})
+                console.log("Error calling summariser", e)
             })
         )
     }
@@ -223,9 +223,11 @@ export async function getReportSummaries(req, res) {
                                 compiled: parsedReport,
                                 sources: reportGroup.map((report) => report.id)
                             })
+                        } else {
+                            console.log("INVALID REPORT", newReport)
                         }
                     }).catch((e) => {
-                        return res.status(500).json({error: "Error during report parse"})
+                        reject( "Error during report parse")
                     })
                 }
                 reject("Error generating new report")
