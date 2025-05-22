@@ -1,4 +1,4 @@
-import { ReportStatusTypes } from "../types";
+import { ReportStatusTypes } from "../components/types";
 
 export default function getBadgeClass(status: ReportStatusTypes) {
    switch (status) {

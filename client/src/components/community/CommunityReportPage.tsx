@@ -79,13 +79,7 @@ export default function CommunityReportPage() {
 
             <div>
                <h2 className="text-xl font-semibold mb-2">Location</h2>
-               {thisReport.incidentLocation 
-                  ?  <div className="whitespace-pre-line bg-base-200 p-4 rounded-lg">
-                        <p><span className="font-medium">Latitude:</span> {thisReport.incidentLocation.latitude}</p>
-                        <p><span className="font-medium">Longitude:</span> {thisReport.incidentLocation.longitude}</p>
-                     </div>  
-                  :  "No location data for this report."
-               }
+               {thisReport.incidentAddress ?? "No location data for this report."}
             </div>
 
             <div className="divider"/>
