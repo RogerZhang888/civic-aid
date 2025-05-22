@@ -16,19 +16,19 @@ export default function About() {
 
    return (
       <div className="min-h-screen p-8 flex flex-col items-center bg-base-100 relative z-0 space-y-10">
-  <div className="fixed inset-0 z-[-1] opacity-20">
-    <img
-      src="/heartland.avif"
-      alt="background"
-      className="absolute h-full w-full object-cover object-center"
-      style={{
-        minHeight: '100vh',
-        minWidth: '100vw',
-        top: 0,
-        left: 0,
-      }}
-    />
-  </div>
+         <div className="fixed inset-0 z-[-1] opacity-20">
+            <img
+               src="/heartland.avif"
+               alt="background"
+               className="absolute h-full w-full object-cover object-center"
+               style={{
+                  minHeight: '100vh',
+                  minWidth: '100vw',
+                  top: 0,
+                  left: 0,
+               }}
+            />
+         </div>
 
          <AboutCard imageSrc={mascot} imageAlt="Leo waving">
             {t('about1')}

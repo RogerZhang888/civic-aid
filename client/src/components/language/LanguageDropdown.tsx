@@ -1,11 +1,16 @@
 import useTranslation from "../../hooks/useTranslation";
-import { Languages } from "../types";
+import { Languages, SiteLanguages } from "../types";
 import { useLanguageContext } from "./LanguageContext";
 
 export default function LanguagesDropDown() {
 
    const { t } = useTranslation();
    const { language, toggleLanguage } = useLanguageContext();
+
+   const handleLanguageChange = (langCode: SiteLanguages) => {
+      toggleLanguage(langCode);
+      (document.activeElement as HTMLElement)?.blur();
+   };
 
    return (
       <details className="dropdown">
@@ -16,7 +21,7 @@ export default function LanguagesDropDown() {
                   <button
                      key={lang.code}
                      className={`join-item btn btn-secondary btn-outline ${lang.code === language ? "btn-active" : ""}`}
-                     onClick={() => toggleLanguage(lang.code)}
+                     onClick={() => handleLanguageChange(lang.code)}
                   >
                      {lang.display}
                   </button>

@@ -17,7 +17,7 @@ export default function useTranslation() {
    const { language }: { language: keyof typeof translations } = useLanguageContext();
 
    function t(key: string): string | React.ReactNode {
-      return translations[language]?.[key] || key;
+      return translations[language]?.[key] || translations.en?.[key] || key;
    };
 
    return { t };

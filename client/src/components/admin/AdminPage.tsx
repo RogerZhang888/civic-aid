@@ -1,4 +1,5 @@
 import useUser from '../../hooks/useUser';
+import GenericLoading from '../GenericLoading';
 import AdminReportsTable from './AdminReportsTable';
 import AdminSummary from './AdminSummary';
 
@@ -6,7 +7,7 @@ export default function AdminPage() {
    const { data: admin, isLoading: isAdminLoading } = useUser();
 
    if (!admin || isAdminLoading) {
-      return <div className="w-full h-full flex justify-center items-center">Loading admin panel...</div>;
+      return <GenericLoading str="Loading admin panel..."/>;
    }
 
    return (

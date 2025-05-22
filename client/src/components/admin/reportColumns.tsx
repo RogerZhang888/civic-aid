@@ -2,7 +2,7 @@ import { GridColDef } from "@mui/x-data-grid";
 import { Report } from "../types";
 import MediaRenderCell from "./MediaRenderCell";
 import ActionRenderCell from "./ActionRenderCell";
-import getBadgeClass from "./getBadgeClass";
+import getBadgeClass from "../../hooks/getBadgeClass";
 
 const reportColumns: GridColDef<Report>[] = [
    {

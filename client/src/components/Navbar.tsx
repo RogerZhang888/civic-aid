@@ -27,63 +27,27 @@ export default function Navbar() {
       z-20 sticky top-0 h-4 hidden lg:flex"
       >
          <div className="navbar-start">
-            
-            {/* <div className="dropdown">
-               <button
-                  tabIndex={0}
-                  className="btn btn-square btn-sm lg:hidden me-4"
-               >
-                  <AlignJustify size={25}/>
-               </button>
-
-               <ul className="menu dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-black">
-                  {user && 
-                     <>
-                        {user.permissions.length !== 0 &&
-                           <li>
-                              <Link
-                                 to="/admin"
-                              >
-                                 Admin Panel
-                              </Link>
-                           </li>
-                        }
-                        <li>
-                           <Link
-                              to="/profile"
-                           >
-                              {t('profile')}
-                           </Link>
-                        </li>
-                        <li>
-                           <Link
-                              to="/chatbot"
-                           >
-                              {t('chatbot')}
-                           </Link>
-                        </li>
-                     </>
-                  }
-                  <li>
-                     <Link
-                        to="/about"
-                     >
-                        {t('about')}
-                     </Link>
-                  </li>
-                  <li>
-                     <LanguagesDropDown/>
-                  </li>
-               </ul>
-            </div> */}
 
             <Link to="/" className="text-2xl font-bold">
                CivicAId
             </Link>
 
             <ul className="menu menu-horizontal pl-4 hidden lg:flex">
-               {!user ? null : 
-                  user.permissions.length === 0 ? (
+               {!user 
+                  ?  <>
+                        <li>
+                           <Link
+                              to="/about"
+                              className={`hover:text-white transition ${pathname === "/about" ? "text-primary-content" : ""}`}
+                           >
+                              {t('about')}
+                           </Link>
+                        </li>
+                        <li>
+                           <LanguagesDropDown/>
+                        </li>
+                     </>
+                  :  user.permissions.length === 0 ?
                      <>
                         <li>
                            <Link
@@ -102,7 +66,7 @@ export default function Navbar() {
                                  pathname === "/community" ? "text-primary-content" : ""
                               }`}
                            >
-                              {t('Community')}
+                              {t('community')}
                            </Link>
                         </li>
                         <li>
@@ -127,33 +91,32 @@ export default function Navbar() {
                            <LanguagesDropDown/>
                         </li>
                      </>
-                  ) : (
-                  <>
-                     <li>
-                        <Link
-                           to="/admin"
-                           className={`hover:text-white transition ${
-                              pathname === "/admin" ? "text-primary-content" : ""
-                           }`}
-                        >
-                           Admin Panel
-                        </Link>
-                     </li>
-                     <li>
-                        <Link
-                           to="/community"
-                           className={`hover:text-white transition ${
-                              pathname === "/community" ? "text-primary-content" : ""
-                           }`}
-                        >
-                           {t('Community')}
-                        </Link>
-                     </li>
-                     <li>
-                        <LanguagesDropDown/>
-                     </li>
-                  </>
-               )}
+                  :  <>
+                        <li>
+                           <Link
+                              to="/admin"
+                              className={`hover:text-white transition ${
+                                 pathname === "/admin" ? "text-primary-content" : ""
+                              }`}
+                           >
+                              Admin Panel
+                           </Link>
+                        </li>
+                        <li>
+                           <Link
+                              to="/community"
+                              className={`hover:text-white transition ${
+                                 pathname === "/community" ? "text-primary-content" : ""
+                              }`}
+                           >
+                              {t('community')}
+                           </Link>
+                        </li>
+                        <li>
+                           <LanguagesDropDown/>
+                        </li>
+                     </>
+               }
             </ul>
 
          </div>

@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import useUser from "../hooks/useUser";
 import useTranslation from "../hooks/useTranslation";
 import LogoutButton from "./auth/LogoutButton";
@@ -11,6 +11,7 @@ export default function CombinedMobileSidebar() {
    const { data: user, isLoading } = useUser();
    const { t } = useTranslation();
    const navigate = useNavigate();
+   const { pathname } = useLocation();
 
    return (
       <div className="drawer-side z-20 w-full" id="combined-mobile-sidebar">
@@ -35,50 +36,90 @@ export default function CombinedMobileSidebar() {
                   </button>
 
                   <ul className="menu dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow text-black">
-                     {user &&
-                        <>
-                           {user.permissions.length !== 0 &&
+                     {!user 
+                        ?  <>
+                              <li>
+                                 <Link
+                                    to="/about"
+                                    className={`hover:text-white transition ${pathname === "/about" ? "bg-secondary" : ""}`}
+                                 >
+                                    {t('about')}
+                                 </Link>
+                              </li>
+                              <li>
+                                 <LanguagesDropDown/>
+                              </li>
+                           </>
+                        :  user.permissions.length === 0 ?
+                           <>
+                              <li>
+                                 <Link
+                                    to="/profile"
+                                    className={`hover:text-white transition ${
+                                       pathname === "/profile" ? "bg-secondary" : ""
+                                    }`}
+                                 >
+                                    {t('profile')}
+                                 </Link>
+                              </li>
+                              <li>
+                                 <Link
+                                    to="/community"
+                                    className={`hover:text-white transition ${
+                                       pathname === "/community" ? "bg-secondary" : ""
+                                    }`}
+                                 >
+                                    {t('community')}
+                                 </Link>
+                              </li>
+                              <li>
+                                 <Link
+                                    to="/chatbot"
+                                    className={`hover:text-white transition ${
+                                       pathname === "/chatbot" ? "bg-secondary" : ""
+                                    }`}
+                                 >
+                                    {t('chatbot')}
+                                 </Link>
+                              </li>
+                              <li>
+                                 <Link
+                                    to="/about"
+                                    className={`hover:text-white transition ${pathname === "/about" ? "bg-secondary" : ""}`}
+                                 >
+                                    {t('about')}
+                                 </Link>
+                              </li>
+                              <li>
+                                 <LanguagesDropDown/>
+                              </li>
+                           </>
+                        :  <>
                               <li>
                                  <Link
                                     to="/admin"
+                                    className={`hover:text-white transition ${
+                                       pathname === "/admin" ? "bg-secondary" : ""
+                                    }`}
                                  >
                                     Admin Panel
                                  </Link>
                               </li>
-                           }
-                           <li>
-                              <Link
-                                 to="/profile"
-                              >
-                                 {t('profile')}
-                              </Link>
-                           </li>
-                           <li>
-                              <Link
-                                 to="/community"
-                              >
-                                 Community
-                              </Link>
-                           </li>
-                           <li>
-                              <Link
-                                 to="/chatbot"
-                              >
-                                 {t('chatbot')}
-                              </Link>
-                           </li>
-                        </>
+                              <li>
+                                 <Link
+                                    to="/community"
+                                    className={`hover:text-white transition ${
+                                       pathname === "/community" ? "bg-secondary" : ""
+                                    }`}
+                                 >
+                                    {t('community')}
+                                 </Link>
+                              </li>
+                              <li>
+                                 <LanguagesDropDown/>
+                              </li>
+                           </>
                      }
-                     <li>
-                        <Link
-                           to="/about"
-                        >
-                           {t('about')}
-                        </Link>
-                     </li>
-                     <li>
-                        <LanguagesDropDown />
-                     </li>
                   </ul>
                </div>
             </div>
@@ -86,7 +127,7 @@ export default function CombinedMobileSidebar() {
             <div className="flex h-full flex-col overflow-y-auto space-y-2" id="sidebar-middle">
                {user
                   ?  <>
-                        <div className="font-semibold mb-2">Your chats:</div>
+                        <div className="font-semibold mb-2">{t('yourChats')}</div>
                         <ChatsButtonColumn/>
                      </>  
                   :  <div className="text-center text-sm">Log in to start chatting!</div>

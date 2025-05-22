@@ -1,8 +1,8 @@
 import { useNavigate, useParams } from 'react-router';
 import useReports from '../../hooks/useReports';
 import AdminReportPageEdit from './AdminReportPageEdit';
-import { ReportStatusTypes } from '../types';
-import getBadgeClass from './getBadgeClass';
+import getBadgeClass from '../../hooks/getBadgeClass';
+import GenericLoading from '../GenericLoading';
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -12,7 +12,7 @@ export default function AdminReportPage() {
    const navigate = useNavigate();
    const { data: reports, isLoading: isReportsLoading } = useReports("/gov/reports");
 
-   if (isReportsLoading) return <div className="w-full h-full flex justify-center items-center text-lg font-semibold">Loading report...</div>;
+   if (isReportsLoading) return <GenericLoading str="Loading report..." />;
 
    const thisReport = reports!.find(report => report.id === reportId);
 

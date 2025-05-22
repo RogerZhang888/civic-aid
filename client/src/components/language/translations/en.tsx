@@ -5,6 +5,7 @@ export default {
    chatbot: "Chatbot",
    about: "About",
    language: "Language",
+   community: "Community",
 
    login: "Log In",
    logout: "Log Out", 
@@ -23,6 +24,7 @@ export default {
    psdsMustMatch: "Passwords Must Match",
 
    loadingChat: "Loading your chat...",
+   yourChats: "Your Chats",
    newChat: "New Chat",
    newChatTop: "Hi! I'm CivLeo, your friendly neighbourhood assistant.",
    newChatBottom: "How can I help you today?",
@@ -35,6 +37,47 @@ export default {
    maxImage: "Max: 1 image",
    messageTooLong: "Message must be ≤400 characters",
    emptyForm: "Message or image required",
+
+   yourReports: "Your Reports",
+   yourBadges: "Your Badges",
+   yourRewards: "Your Rewards",
+   loadingReports: "Loading your reports...",
+   loadingRewards: "Loading your rewards...",
+   noReports: "You do not have any reports.",
+   noBadges: "No badges yet. You'll earn badges when your reports are resolved.",
+   congrats: "Congratulations!",
+   rewardEarned: "You've earned a reward this month for your contributions!",
+   validUntil: "Valid until",
+   noReward: "No reward this month",
+   noRewardQualify: "You haven't qualified for a reward this month.",
+   keepSubmitting: "Keep submitting reports to earn rewards!",
+   firstResolved: "First Issue Resolved!",
+   earnedOn: "Earned on",
+   xResolved: " Issues Resolved!",
+
+   reportCreatedAt: "Report created at",
+   viewReport: "View Report",
+
+   backToProfile: "Back to Profile Page",
+   details: "Report Details",
+   status: "Status",
+   visibility: "Visibility",
+   createdAt: "Created At",
+   resolvedAt: "Resolved At",
+   agency: "Agency",
+   incidentLocation: "Location",
+   description: "Description",
+   remarks: "Remarks",
+   public: "Public",
+   private: "Private",
+   noLocation: "No location data provided.",
+   noRemarks: "No remarks given by administrator.",
+   noMedia: "You did not upload any media for this report.",
+
+   pending: "pending",
+   resolved: "resolved",
+   rejected: "rejected",
+   "in progress": "in progress",
 
    about1: (
       <>
