@@ -208,15 +208,30 @@ export async function getReportSummaries(req, res) {
                 confidence:report.report_confidence,
                 urgency:report.urgency
             })}\n\`\`\`\n`).join("---\n")
+            let callModelPromise = new Promise((resolve, reject) => {
+                let valid = false
+                let repeatLimit = 3
+                let count = 0
+                while (!valid && count < repeatLimit) {
+                    count++
+                    callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}).then((newReport) => {
+                        parsedReport = responseParsers.reportParser(newReport)
+                        
+                        if (parsedReport.valid) {
+                            valid = true
+                            resolve({
+                                compiled: parsedReport,
+                                sources: reportGroup.map((report) => report.id)
+                            })
+                        }
+                    }).catch((e) => {
+                        return res.status(500).json({error: "Error during report parse"})
+                    })
+                }
+                reject("Error generating new report")
+            })
             finalReportPromises.push(
-                callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}).then((newReport) => {
-                    return {
-                        newReport: responseParsers.reportParser(newReport),
-                        sourceReports: reportGroup.map((report) => report.id)
-                    }
-                }).catch((e) => {
-                    return res.status(500).json({error: "Invalid summarised report"})
-                })
+                callModelPromise
             )
         }
         return Promise.all(finalReportPromises)
