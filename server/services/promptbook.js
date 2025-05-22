@@ -170,7 +170,7 @@ However I can provide a better answer with some additional information. <Follow 
             `Format your response as a JSON object with the fields 'title', 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. Only generate a single report summarising all the reports that are of the same issue. \
 Agency should contain the full name of a government agency only. \
 Urgency and confidence should be a decimal between 0 and 1 exclusive. \
-Sources should be an array of URL links. 
+Sources MUST be an empty array [].
 For example:
 {
     \"title\": \"Burst fire hydrant at Lim Chu Kang road\",
@@ -178,7 +178,8 @@ For example:
     \"confidence\": 0.63,
     \"urgency\": 0.94,
     \"recommendedSteps\": \"Inspect and repair the burst fire hydrant at the reported location.\",
-    \"agency\": \"Public Utilities Board\"
+    \"agency\": \"Public Utilities Board\",
+    \"sources\": []
 }`,
             userprompt
         )

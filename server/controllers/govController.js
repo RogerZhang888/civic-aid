@@ -210,9 +210,9 @@ export async function getReportSummaries(req, res) {
             })}\n\`\`\`\n`).join("---\n")
             let callModelPromise = new Promise((resolve, reject) => {
                 let valid = false
-                let repeatLimit = 3
+                const repeatLimit = 3
                 let count = 0
-                while (!valid && count < repeatLimit) {
+                while ((!valid) && count < repeatLimit) {
                     count++
                     callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}).then((newReport) => {
                         parsedReport = responseParsers.reportParser(newReport)
@@ -222,7 +222,7 @@ export async function getReportSummaries(req, res) {
                         if (parsedReport.valid) {
                             valid = true
                             resolve({
-                                compiled: parsedReport,
+                                ...parsedReport,
                                 sources: reportGroup.map((report) => report.id)
                             })
                         }
