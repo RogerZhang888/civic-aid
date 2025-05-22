@@ -25,7 +25,6 @@ export default function AdminReportsTable() {
                   recommended_steps: false,
                   agency: false,
                   mediaUrl: false,
-                  createdAt: false,
                   resolvedAt: false,
                   reportConfidence: false,
                   isPublic: false,

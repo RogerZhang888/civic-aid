@@ -7,6 +7,7 @@ import getBadgeClass from '../../hooks/getBadgeClass';
 import toast from 'react-hot-toast';
 import GenericLoading from '../GenericLoading';
 import useTranslation from '../../hooks/useTranslation';
+import { useQueryClient } from '@tanstack/react-query';
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -124,6 +125,7 @@ function ReportVisibilityToggle({ reportId, initialPublic }: ReportVisibilityTog
    const [isPublic, setIsPublic] = useState(initialPublic);
    const [loading, setLoading] = useState(false);
    const { t } = useTranslation();
+   const queryClient = useQueryClient();
 
    const handleToggle = async () => {
       const newStatus = !isPublic;
@@ -135,6 +137,7 @@ function ReportVisibilityToggle({ reportId, initialPublic }: ReportVisibilityTog
             { withCredentials: true }
          );
          setIsPublic(newStatus); // Update UI only after success
+         await queryClient.refetchQueries({ queryKey: ['reports'] });
          toast.success(`Your report was updated to be ${newStatus ? 'public' : 'private'}.`);
       } catch (err) {
          console.error('Error updating visibility:', err);

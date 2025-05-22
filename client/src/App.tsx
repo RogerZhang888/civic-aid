@@ -21,68 +21,73 @@ import CommunityReportPage from "./components/community/CommunityReportPage";
 import ErrorPage from "./components/ErrorPage";
 import AdminRoutesWrapper from "./components/admin/AdminRoutesWrapper";
 import AdminReportPage from "./components/admin/AdminReportPage";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 export default function App() {
    return (
-      <BrowserRouter>
-         <Toaster />
-         <ErrorBoundary fallback={<ErrorPage />}>
-            <LanguageProvider>
-               <ChatProvider>
-                  <Routes>
+      <QueryClientProvider client={queryClient}>
+         <BrowserRouter>
+            <Toaster />
+            <ErrorBoundary fallback={<ErrorPage />}>
+               <LanguageProvider>
+                  <ChatProvider>
+                     <Routes>
 
-                     <Route element={<MainLayout />}>
+                        <Route element={<MainLayout />}>
 
-                        <Route element={<UserRoutesWrapper />}>
+                           <Route element={<UserRoutesWrapper />}>
 
-                           <Route path="/chatbot/:currChatId?" element={<ChatbotWrapper />} />
+                              <Route path="/chatbot/:currChatId?" element={<ChatbotWrapper />} />
 
-                           <Route path="/profile">
+                              <Route path="/profile">
 
-                              <Route index element={<ProfilePage />} />
+                                 <Route index element={<ProfilePage />} />
 
-                              <Route path=":reportId" element={<ProfileReportPage />} />
+                                 <Route path=":reportId" element={<ProfileReportPage />} />
+
+                              </Route>
+
+                              <Route path="/community">
+
+                                 <Route index element={<CommunityPage />} />
+
+                                 <Route path=":reportId" element={<CommunityReportPage />} />
+
+                              </Route>
 
                            </Route>
 
-                           <Route path="/community">
+                           <Route path="/auth" element={<AuthRoutesWrapper />}>
 
-                              <Route index element={<CommunityPage />} />
+                              <Route index element={<Login />} />
 
-                              <Route path=":reportId" element={<CommunityReportPage />} />
+                              <Route path="reg" element={<Register />} />
 
                            </Route>
 
-                        </Route>
+                           <Route path="/admin" element={<AdminRoutesWrapper />}>
 
-                        <Route path="/auth" element={<AuthRoutesWrapper />}>
+                              <Route index element={<AdminPage />} />
 
-                           <Route index element={<Login />} />
+                              <Route path="report/:reportId" element={<AdminReportPage />} />
 
-                           <Route path="reg" element={<Register />} />
+                           </Route>
 
-                        </Route>
+                           <Route index element={<HomePage />} />
 
-                        <Route path="/admin" element={<AdminRoutesWrapper />}>
+                           <Route path="/about" element={<About />} />
 
-                           <Route index element={<AdminPage />} />
-
-                           <Route path="report/:reportId" element={<AdminReportPage />} />
+                           <Route path="*" element={<NotFoundPage />} />
 
                         </Route>
 
-                        <Route index element={<HomePage />} />
-
-                        <Route path="/about" element={<About />} />
-
-                        <Route path="*" element={<NotFoundPage />} />
-
-                     </Route>
-
-                  </Routes>
-               </ChatProvider>
-            </LanguageProvider>
-         </ErrorBoundary>
-      </BrowserRouter>
+                     </Routes>
+                  </ChatProvider>
+               </LanguageProvider>
+            </ErrorBoundary>
+         </BrowserRouter>
+      </QueryClientProvider>
    );
 }
