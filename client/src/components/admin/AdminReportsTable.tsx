@@ -22,7 +22,7 @@ export default function AdminReportsTable() {
                   id: false,
                   userId: false,
                   description: false,
-                  recommended_steps: false,
+                  recommendedSteps: false,
                   agency: false,
                   mediaUrl: false,
                   resolvedAt: false,

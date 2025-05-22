@@ -46,7 +46,7 @@ async function queryFn(path: string): Promise<Report[]> {
                mediaUrl: report.media_url,
                incidentAddress: report.incident_address,
                agency: report.agency,
-               recommended_steps: report.recommended_steps,
+               recommendedSteps: report.recommended_steps,
                urgency: report.urgency,
                reportConfidence: report.report_confidence,
                status: report.status as ReportStatusTypes,

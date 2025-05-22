@@ -90,12 +90,12 @@ export default function CommunityReportPage() {
                <p className="whitespace-pre-line bg-base-200 p-4 rounded-lg">{thisReport.description}</p>
             </div>
 
-            {thisReport.recommended_steps && (
+            {thisReport.recommendedSteps && (
                <>
                   <div className="divider"/>
                   <div>
                      <h2 className="text-xl font-semibold mb-2">Recommended Steps</h2>
-                     <p className="whitespace-pre-line bg-base-200 p-4 rounded-lg">{thisReport.recommended_steps}</p>
+                     <p className="whitespace-pre-line bg-base-200 p-4 rounded-lg">{thisReport.recommendedSteps}</p>
                   </div>
                </>
             )}

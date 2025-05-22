@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Report } from "../types";
+import { ReportSummary } from "../types";
 import toast from "react-hot-toast";
 import { useState } from "react";
 
@@ -7,7 +7,7 @@ const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
 export default function AdminSummary() {
 
-   const [summaries, setSummaries] = useState<Report[]>([]);
+   const [summaries, setSummaries] = useState<ReportSummary[]>([]);
    const [isfetching, setIsFetching] = useState(false);
 
    async function fetchSummary() {
@@ -16,7 +16,7 @@ export default function AdminSummary() {
 
       try {
 
-         const res = await axios.get<Report[]>(
+         const res = await axios.get<ReportSummary[]>(
             `${SERVER_API_URL}/api/gov/reports_summary`,
             { withCredentials: true }
          )
@@ -40,7 +40,7 @@ export default function AdminSummary() {
    return (
       <div>
          <button
-            className="btn btn-lg btn-primary"
+            className="btn btn-primary btn-outline"
             onClick={fetchSummary}
          >
             Get Summary
@@ -49,22 +49,24 @@ export default function AdminSummary() {
             <table className="table w-full">
                <tbody>
                   {
-                     !isfetching ? (
-                        summaries.map((summary) => (
-                           <tr key={summary.id}>
-                              <td>{summary.id}</td>
+                     !isfetching ? 
+                        summaries.map((summary, idx) => 
+                           <tr key={idx}>
+                              <td>{idx+1}</td>
                               <td>{summary.title}</td>
-                              <td>{summary.description}</td>
-                              <td>{summary.recommended_steps}</td>
+                              <td>{summary.recommendedSteps}</td>
+                              <td>{summary.urgency}</td>
+                              <td>{summary.confidence}</td>
+                              <td>{summary.sources}</td>
                            </tr>
-                        ))
-                     ) : (
+                        )
+                     : 
                         <tr>
                            <td colSpan={4} className="text-center">
                               Loading...
                            </td>
                         </tr>
-                     )
+                     
                   }
                </tbody>
             </table>
