@@ -173,7 +173,8 @@ Urgency and confidence should be a decimal between 0 and 1 exclusive. \
 Sources should be an array of URL links. 
 For example:
 {
-    \"summary\": \"The user reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas.\",
+    \"title\": \"Burst fire hydrant at Lim Chu Kang road\",
+    \"summary\": \"Users reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas.\",
     \"confidence\": 0.63,
     \"urgency\": 0.94,
     \"recommendedSteps\": \"Inspect and repair the burst fire hydrant at the reported location.\",

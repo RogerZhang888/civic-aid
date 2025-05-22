@@ -208,30 +208,20 @@ export async function getReportSummaries(req, res) {
                 confidence:report.report_confidence,
                 urgency:report.urgency
             })}\n\`\`\`\n`).join("---\n")
-            finalReportPromises.push(callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}))
+            finalReportPromises.push(
+                callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}).then((newReport) => {
+                    return {
+                        newReport: responseParsers.reportParser(newReport),
+                        sourceReports: reportGroup.map((report) => report.id)
+                    }
+                }).catch((e) => {
+                    return res.status(500).json({error: "Invalid summarised report"})
+                })
+            )
         }
         return Promise.all(finalReportPromises)
     }).then((r) => {
-        const reports = r.map((raw) => responseParsers.reportParser(raw))
-
-        let dbUpdatePromises = []
-        for (let report of reports) {
-            if (!report.valid) continue
-            dbUpdatePromises.push(updateReportsDB({
-                userId: -2,
-                chatId: null,
-                title: `Summarised report ${new Date().toISOString()} ${report.agency}`,
-                summary: report.summary,
-                media: [],
-                location: null,
-                agency: report.agency,
-                recommendedSteps: report.recommendedSteps,
-                urgency: report.urgency,
-                confidence: report.confidence
-            }))
-        }
-
-        res.json(reports)
+        res.json(r)
     }).catch((e) => {
         res.status(500).json({error: e})
     })
