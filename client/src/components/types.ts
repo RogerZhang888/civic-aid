@@ -1,9 +1,8 @@
 export type QueryStatusTypes = "pending" | "finished";
 
 export type Query = {
-   id: string;
    question: string;
-   imgUrl: string | null;
+   media: string | null;
    answer: string | React.ReactNode;
    timestamp: Date;
    status: QueryStatusTypes;
@@ -18,6 +17,29 @@ export type Chat = {
    type: ChatTypes;
    createdAt: Date;
    queries: Query[];
+}
+
+export type GetQueriesForChatRes = {
+   // normal reply
+   prompt: string,
+   answer: string,
+   sources: string[],
+   media: string | undefined,
+   valid: true,
+   timestamp: string
+} | {
+   // report reply
+   prompt: string,
+   answer: string,
+   sources: string[],
+   media: string | undefined,
+   summary: string, 
+   urgency: number, 
+   recommendedSteps: string, 
+   agency: string,
+   valid: true,
+   timestamp: string,
+   reportId: string
 }
 
 export type AllowedAgencies = "MSO" | "NEA" | "LTA" | "HDB" | "NParks" | "SP Group" | "Town Councils" | "SPF" | "PUB" | "Others";

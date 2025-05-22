@@ -55,6 +55,13 @@ export default function Navbar() {
                               {t('chatbot')}
                            </Link>
                         </li>
+                        <li>
+                           <Link
+                              to="/about"
+                           >
+                              {t('about')}
+                           </Link>
+                        </li>
                      </>
                   }
                   <li>

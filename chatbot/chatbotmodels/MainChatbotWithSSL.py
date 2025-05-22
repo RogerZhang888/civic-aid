@@ -377,23 +377,23 @@ def call_model(text_query, prompt, image_path=None):
     #     for src in result["sources"]:
     #         print(f"- {src['source_text']}\n  {src['url']}")
     
-    #return result
+    return result
 
-prompt = "INSTRUCTIONS \
-You are a Singapore Government chatbot, built to answer citizen queries. Your task is to analyse the user's question and answer within the context of Singapore government services. With the help of the context provided, answer the question, giving actionable answers as much as possible. Output how confident you are that you have a complete understanding of the user's question on a scale of 0 to 1, with a higher score representing greater understanding. Also indicate which sources you used, both from the context provided and otherwise. \
---- \
-OUTPUT \
-Format your response as a JSON object with the fields 'answer', 'confidence', and 'sources'. Confidence should be a decimal between 0 and 1 exclusive. Sources should be an array of URL links. \
-For example: \
-{ \
-    'answer': <your answer>, \
-    'confidence': 0.6, \
-    'sources':[ \
-        <url 1>, \
-        <url 2>, \
-        ... \
-    ] \
-}"
+# prompt = "INSTRUCTIONS \
+# You are a Singapore Government chatbot, built to answer citizen queries. Your task is to analyse the user's question and answer within the context of Singapore government services. With the help of the context provided, answer the question, giving actionable answers as much as possible. Output how confident you are that you have a complete understanding of the user's question on a scale of 0 to 1, with a higher score representing greater understanding. Also indicate which sources you used, both from the context provided and otherwise. \
+# --- \
+# OUTPUT \
+# Format your response as a JSON object with the fields 'answer', 'confidence', and 'sources'. Confidence should be a decimal between 0 and 1 exclusive. Sources should be an array of URL links. \
+# For example: \
+# { \
+#     'answer': <your answer>, \
+#     'confidence': 0.6, \
+#     'sources':[ \
+#         <url 1>, \
+#         <url 2>, \
+#         ... \
+#     ] \
+# }"
 
 
-call_model("today i am free. no under saf.", prompt)
+# call_model("today i am free. no under saf.", prompt)

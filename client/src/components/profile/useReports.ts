@@ -61,7 +61,7 @@ async function queryFn(): Promise<Report[]> {
 
 }
 
-export default function useUser() {
+export default function useReports() {
    return useQuery<Report[], AxiosError>({
       queryKey: ['current-user-reports'],
       queryFn,
