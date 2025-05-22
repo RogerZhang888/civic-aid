@@ -545,18 +545,16 @@ Response {
 
 `GET /gov/reports_summary`
 ```ts
-Request {
-    newStatus: 'pending' | 'in progress' | 'resolved' | 'rejected'
-}
-
 Response Array<
     {
+        title: string,
         summary: string,
         description: string,
         agency: string,
         recommendedSteps: string,
         urgency: number,
         confidence: number,
+        sources: Array<string>
         valid: true
     } | {
         valid: false
