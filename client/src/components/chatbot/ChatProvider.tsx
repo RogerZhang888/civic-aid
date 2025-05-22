@@ -170,9 +170,15 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
          // case: add file
       
          const isImgFile = param.type.startsWith("image/");
+         const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
    
          if (!isImgFile) {
             toast.error("Please upload only image files");
+            return;
+         }
+
+         if (param.size > maxSizeInBytes) {
+            toast.error("Image size must be less than 5MB");
             return;
          }
    
@@ -281,7 +287,6 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
      
       fd.append('chatId', chatIdToAddQueryTo);
 
-
       /**
        *  fd will contain the following:
        * - prompt: the TEXT input from the user, if it was empty, it will be "" (empty string)
@@ -300,8 +305,6 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
             `${SERVER_API_URL}/api/query`, 
             fd,
             {
-               maxContentLength: 100 * 1024 * 1024,
-               maxBodyLength: 100 * 1024 * 1024,
                headers: { 'Content-Type': 'multipart/form-data' },
                withCredentials: true,
             }
