@@ -325,6 +325,9 @@ export async function upvote(req, res) {
     const userId = req.user.id;
     const reportId = req.params.id;
 
+    console.log("Received vote from userId:", req.body.userId);
+    console.log("Report ID:", req.params.reportId);
+
     if (!reportId) {
         res.status(400).json({error: "Report ID not provided"})
         return
