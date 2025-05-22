@@ -208,13 +208,13 @@ export async function getReportSummaries(req, res) {
                 confidence:report.report_confidence,
                 urgency:report.urgency
             })}\n\`\`\`\n`).join("---\n")
-            let callModelPromise = new Promise((resolve, reject) => {
+            let callModelPromise = new Promise(async (resolve, reject) => {
                 let valid = false
                 const repeatLimit = 3
                 let count = 0
                 while ((!valid) && count < repeatLimit) {
                     count++
-                    callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}).then((newReport) => {
+                    await callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}).then((newReport) => {
                         parsedReport = responseParsers.reportParser(newReport)
                         
                         console.log("PARSING REPORT", newReport)
