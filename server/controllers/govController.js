@@ -103,8 +103,9 @@ export const patchReport = async (req, res) => {
 }
 
 export async function getReportSummaries(req, res) {
-    if (!req.user.permissions.includes('ADMIN')) {
-        res.status(401).json({error:"Only admins may request report summaries"})
+    const permissions = parsePermissions(req.user.permissions)
+    if ((!req.user.permissions.includes('ADMIN')) && permissions.length === 0) {
+        res.status(403).json({ error: "Unauthorised" })
         return
     }
 
@@ -112,7 +113,29 @@ export async function getReportSummaries(req, res) {
         id: { type: "UTF8" },
         description: { type: "UTF8" },
     });
-    const reports = await pgsql.query("SELECT * FROM reports");
+    
+    let reports = []
+    if (req.user.permissions.includes("ADMIN")) {
+        reports = await pgsql.query(`SELECT * FROM reports`).catch((e) => {
+            console.error("DB error:", e);
+            res.status(500).json({ error: e });
+        })
+    } else {
+        const permissions = parsePermissions(req.user.permissions)
+        const qlist = []
+
+        if (permissions.length === 0) {
+            res.status(403).json({error: "Unauthorised"})
+        }
+
+        for (let permission of permissions) {
+            if (permission.role === 'ADMIN') qlist.push(pgsql.query(`SELECT * FROM reports WHERE agency = $1`, [permission.agency]))
+        }
+
+        reports = await Promise.all(qlist).then((r) => {
+            return res.json(r.flat())
+        })
+    }
 
     const groupedReports = Object.entries(
         reports.reduce((acc, report) => {
