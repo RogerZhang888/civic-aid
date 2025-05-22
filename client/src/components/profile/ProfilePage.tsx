@@ -4,7 +4,7 @@ import useRewards from "../../hooks/useRewards";
 import useTranslation from "../../hooks/useTranslation";
 
 export default function ProfilePage() {
-   const { data: reports, isLoading: isReportsLoading } = useReports("/reports");
+   const { data: reports, isLoading: isReportsLoading } = useReports();
    const { data: hasReward, isLoading: isRewardsLoading } = useRewards();
    const { t } = useTranslation();
 

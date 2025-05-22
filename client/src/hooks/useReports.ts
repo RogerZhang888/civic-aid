@@ -68,7 +68,7 @@ async function queryFn(path: string): Promise<Report[]> {
 
 export default function useReports(path: string = "/reports") {
    return useQuery<Report[], AxiosError>({
-      queryKey: ["reports", path],
+      queryKey: ["reports"],
       queryFn: () => queryFn(path),
       staleTime: 5 * 60 * 1000,
       retry: false,

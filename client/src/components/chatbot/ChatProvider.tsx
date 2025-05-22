@@ -7,9 +7,8 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router";
 import chatReducer from "./chatReducer";
-import { BookMarked } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
 import useUser from "../../hooks/useUser";
+import ReportJSX from "./ReportJSX";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -23,8 +22,6 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
    const [isWaiting, setIsWaiting] = useState<boolean>(false);
    const [isFetchingAChat, setIsFetchingAChat] = useState<boolean>(false);
 
-   const queryClient = useQueryClient();
-
    const navigate = useNavigate();
 
    const { data: user } = useUser();
@@ -32,26 +29,6 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
    const currUrl = useLocation();
 
    const currChatId = currUrl.pathname.includes("/chatbot/") ? currUrl.pathname.split("/").at(-1) : "";
-
-   const ReportJSX = useCallback((id: string, agency: string) => {
-      return (
-         <div id="answer-for-report-chat" className="space-y-2">
-            <div className="text-xl font-semibold">Your Report Has Been Created!</div>
-            <p>
-               Thank you for being an active citizen! Your report will be sent to {agency} for them to take a look. I'll keep you posted on whether this issue has been resolved!
-            </p>
-            <button 
-               className="btn flex flex-row justify-center items-center px-5"
-               onClick={async () => {
-                  await queryClient.invalidateQueries({ queryKey: ['reports']});
-                  navigate(`/profile/${id}`)
-               }}
-            >
-               <BookMarked/> View your report
-            </button>
-         </div>
-      )
-   }, [navigate, queryClient])
 
    function fetchAllChats() {
       console.log("fetching all of user's chats...");
@@ -94,7 +71,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
                return {
                   question: rq.prompt,
                   media: rq.media || null,
-                  answer: ReportJSX(rq.reportId, rq.agency),
+                  answer: <ReportJSX id={rq.reportId} agency={rq.agency}/>,
                   timestamp: new Date(rq.timestamp),
                   status: "finished",
                   sources: rq.sources
@@ -134,7 +111,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
          setIsFetchingAChat(false);
       })
 
-   }, [ReportJSX, navigate])
+   }, [navigate])
 
    useEffect(() => {
 
@@ -153,7 +130,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
          fetchQueriesForThisChat(currChatId)
       }
 
-   }, [currChatId, chats, navigate, areChatsFetchedInitially, ReportJSX, fetchQueriesForThisChat, user]);
+   }, [currChatId, chats, navigate, areChatsFetchedInitially, fetchQueriesForThisChat, user]);
 
    // get user's coordinates
    // browser will ask for permission
@@ -336,7 +313,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
 
             toast.success("Your report was successfully created!")
    
-            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA", payload: { chatId: chatIdToAddQueryTo, answer: ReportJSX(reportId, agency), sources, title, media } });
+            chatsDispatch({ type: "UPDATE_QUERY_ANS_SOURCES_TITLE_MEDIA", payload: { chatId: chatIdToAddQueryTo, answer: <ReportJSX id={reportId} agency={agency} />, sources, title, media } });
 
          } else {
 
