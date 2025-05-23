@@ -20,10 +20,9 @@ const ProfilePage = lazy(() => import("./components/profile/ProfilePage"));
 const HomePage = lazy(() => import("./components/HomePage"));
 const NotFoundPage = lazy(() => import("./components/NotFoundPage"));
 const About = lazy(() => import("./components/about/About"));
-const ProfileReportPage = lazy(() => import("./components/profile/ProfileReportPage"));
+const ReportPage = lazy(() => import("./components/profile/ReportPage"));
 const AdminDashboardPage = lazy(() => import("./components/admin/AdminDashboardPage"));
 const CommunityPage = lazy(() => import("./components/community/CommunityPage"));
-const CommunityReportPage = lazy(() => import("./components/community/CommunityReportPage"));
 const AdminReportPage = lazy(() => import("./components/admin/AdminReportPage"));
 const AdminSummaryPage = lazy(() => import("./components/admin/AdminSummaryPage"));
 
@@ -49,7 +48,7 @@ export default function App() {
 
                                     <Route index element={<ProfilePage />} />
 
-                                    <Route path=":reportId" element={<ProfileReportPage />} />
+                                    <Route path=":reportId" element={<ReportPage type="profile"/>}/>
 
                                  </Route>
 
@@ -57,7 +56,7 @@ export default function App() {
 
                                     <Route index element={<CommunityPage />} />
 
-                                    <Route path=":reportId" element={<CommunityReportPage />} />
+                                    <Route path=":reportId" element={<ReportPage type="community"/>} />
 
                                  </Route>
 

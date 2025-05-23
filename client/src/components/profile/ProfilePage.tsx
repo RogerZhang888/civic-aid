@@ -4,7 +4,7 @@ import useRewards from "../../hooks/useRewards";
 import useTranslation from "../../hooks/useTranslation";
 
 export default function ProfilePage() {
-   const { data: reports, isLoading: isReportsLoading } = useReports();
+   const { data: reports, isLoading: isReportsLoading } = useReports("/reports");
    const { data: hasReward, isLoading: isRewardsLoading } = useRewards();
    const { t } = useTranslation();
 
@@ -38,6 +38,7 @@ export default function ProfilePage() {
                   <ReportCard
                      key={report.id}
                      report={report}
+                     loc="/profile"
                   />
                ))}
 
