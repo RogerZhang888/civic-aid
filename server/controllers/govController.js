@@ -182,7 +182,7 @@ export async function getReportSummaries(req, res) {
                     response: r
                 }
             }).catch((e) => {
-                console.log("Error calling summariser", e)
+                return {error:"Failed to call report compiler"}
             })
         )
     }
@@ -191,6 +191,9 @@ export async function getReportSummaries(req, res) {
         console.log("SUMMARY", r)
         let compiledSummary = []
         for (let summary of r) {
+            if ("error" in summary) {
+                throw new Error({error: summary.error})
+            }
             console.log(`Processing summary for ${summary.agency}`, summary.response)
             if (summary.response.length == 0) continue
             for (let subgroup of summary.response) {
