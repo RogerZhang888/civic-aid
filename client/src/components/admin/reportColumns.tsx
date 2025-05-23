@@ -38,7 +38,7 @@ const reportColumns: GridColDef<Report>[] = [
       )
    },
    {
-      field: 'recommended_steps',
+      field: 'recommendedSteps',
       headerName: 'Recommended Steps',
       flex: 2,
       minWidth: 200,

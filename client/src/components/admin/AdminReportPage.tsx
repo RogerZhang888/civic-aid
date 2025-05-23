@@ -95,7 +95,7 @@ export default function AdminReportPage() {
                      </tr>
                      <tr>
                         <th>Recommended Steps</th>
-                        <td>{thisReport.recommended_steps}</td>
+                        <td>{thisReport.recommendedSteps}</td>
                      </tr>
                      <tr>
                         <th>Urgency</th>

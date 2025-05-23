@@ -49,7 +49,6 @@ export type GetQueriesForChatRes = {
    reportId: string
 }
 
-// export type AllowedAgencies = "MSO" | "NEA" | "LTA" | "HDB" | "NParks" | "SP Group" | "Town Councils" | "SPF" | "PUB" | "Others";
 export type ReportStatusTypes = "pending" | "resolved" | "rejected" | "in progress";
 
 export type Report = {
@@ -61,7 +60,7 @@ export type Report = {
    mediaUrl: string[];
    incidentAddress: string | null;
    agency: string;
-   recommended_steps: string;
+   recommendedSteps: string;
    urgency: number;
    reportConfidence: number;
    status: ReportStatusTypes;
@@ -133,4 +132,14 @@ export type Comment = {
    text: string;
    createdAt: Date;
    username: string;
+}
+
+export type ReportSummary = {
+   title: string,
+   agency: string,
+   recommendedSteps: string,
+   urgency: number,
+   confidence: number,
+   sources: Array<string>
+   valid: boolean
 }

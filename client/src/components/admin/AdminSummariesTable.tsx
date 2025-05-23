@@ -1,17 +1,14 @@
-import useReports from '../../hooks/useReports';
 import { DataGrid } from '@mui/x-data-grid';
-import { Report } from '../types';
-import reportColumns from './reportColumns';
+import { ReportSummary } from '../types';
 import CustomToolbar from './CustomToolbar';
+import summaryColumns from './summaryColumns';
 
-export default function AdminReportsTable() {
-
-   const { data: reports } = useReports("/gov/reports");
+export default function AdminSummariesTable({ summaries }: { summaries: ReportSummary[] }) {
 
    return (
-      <DataGrid<Report>
-         rows={reports}
-         columns={reportColumns}
+      <DataGrid<ReportSummary>
+         rows={summaries}
+         columns={summaryColumns}
          getRowHeight={() => 'auto'}
          initialState={{
             pagination: {
@@ -19,16 +16,7 @@ export default function AdminReportsTable() {
             },
             columns: {
                columnVisibilityModel: {
-                  id: false,
-                  userId: false,
-                  description: false,
-                  recommendedSteps: false,
-                  agency: false,
-                  mediaUrl: false,
-                  resolvedAt: false,
-                  reportConfidence: false,
-                  isPublic: false,
-                  remarks: false,
+
                }
             }
          }}
