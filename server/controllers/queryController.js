@@ -126,7 +126,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     if (userprompt == "") {
         if (media == "") throw new Error("Invalid prompt")
         // MEDIA ONLY
-        userprompt = await queryLLM({query:"", prompt:"", model:"captioner"}, responseParsers.noParser, 'ALWAYS').then((res) => {
+        userprompt = await queryLLM({query:"", prompt:"", model:"captioner"}, responseParsers.noParser, 'NEVER').then((res) => {
             return res.answer
         })
     }
