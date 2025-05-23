@@ -82,6 +82,9 @@ export default {
    noPublicReports: "There are no public reports.",
    backToCommunity: "Back to Community Page",
 
+   comments: "Comments",
+   loadingComments: "Loading comments...",
+
    about1: (
       <>
          👋 Hi there! Welcome to <span className="font-bold text-primary">CivicAId</span>. 

@@ -82,6 +82,9 @@ export default {
    noPublicReports: "没有任何社区报告。",
    backToCommunity: "返回社区报告页",
 
+   comments: "评论",
+   loadingComments: "加载评论",
+
    about1: (
       <>
          👋 您好！欢迎来到 <span className="font-bold text-primary">CivicAId</span>. 
