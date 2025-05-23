@@ -102,7 +102,7 @@ export default function CombinedMobileSidebar() {
                                        pathname === "/admin" ? "bg-secondary" : ""
                                     }`}
                                  >
-                                    Admin Panel
+                                    Admin Dashboard
                                  </Link>
                               </li>
                               <li>

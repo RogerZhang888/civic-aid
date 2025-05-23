@@ -1,9 +1,8 @@
-import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
 import { SquareMenu } from "lucide-react";
 import CombinedMobileSidebar from "./CombinedMobileSidebar";
 
-export default function MainLayout() {
+export default function MainLayout({children}: {children: React.ReactNode}) {
    return (
       <section className="h-screen w-screen flex flex-col drawer" data-theme="light" id="main-layout-container">
          <input id="mobile-sidebar" type="checkbox" className="drawer-toggle" />
@@ -13,7 +12,7 @@ export default function MainLayout() {
             <label htmlFor="mobile-sidebar" className="btn btn-ghost lg:hidden absolute top-3 left-1 z-10">
                <SquareMenu/>
             </label>
-            <Outlet />
+            {children}
          </article>
          {/* Combined sidebar only shown on <lg */}
          <CombinedMobileSidebar/>

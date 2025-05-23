@@ -15,6 +15,7 @@ async function queryFn(path: string): Promise<Report[]> {
          }
       );
 
+      console.log("Reports: ");
       console.log(res.data);
 
       const reports: Report[] = res.data.map(
