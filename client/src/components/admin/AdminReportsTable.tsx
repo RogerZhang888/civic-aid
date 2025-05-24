@@ -38,7 +38,8 @@ export default function AdminReportsTable() {
                borderRight: '1px solid #f3f4f6',
                fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
                minHeight: '50px',
-               textAlign: 'center'
+               textAlign: 'center',
+               alignContent: 'center'
             },
             '& .MuiDataGrid-columnHeader': {
                backgroundColor: '#f3f4f6',
