@@ -63,6 +63,7 @@ const reportColumns: GridColDef<Report>[] = [
       headerName: 'Status',
       width: 120,
       type: 'string',
+      headerAlign: "center",
       renderCell: (params) => (
          <span 
             className={
@@ -79,6 +80,7 @@ const reportColumns: GridColDef<Report>[] = [
       headerName: 'Urgency',
       width: 100,
       type: 'number',
+      headerAlign: "center",
       renderCell: (params) => (
          <span className={`px-2 py-1 rounded-full text-sm ${params.value >= 8 ? 'bg-red-100 text-red-800' :
             params.value >= 0.5 ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'
@@ -105,6 +107,7 @@ const reportColumns: GridColDef<Report>[] = [
       headerName: 'Date Created',
       width: 150,
       type: 'dateTime',
+      headerAlign: "center",
       valueFormatter: (v: Date) =>
          v?.toLocaleString() || 'N/A'
    },
@@ -127,6 +130,7 @@ const reportColumns: GridColDef<Report>[] = [
       headerName: 'Upvotes',
       width: 80,
       type: 'number',
+      headerAlign: "center",
    },
    {
       field: 'remarks',

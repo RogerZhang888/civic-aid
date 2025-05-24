@@ -96,7 +96,8 @@ civic-aid/
 │   │   └── translator.js         # Translation prompting functionality
 │   └── index.js                  # Main server entry point
 └── chatbot/                      # Chatbot module
-    ├── llmserver.py              # LLM server entry point
+    ├── llmserver.py              # AI server entry point
+    ├── safety.py                 # LLM input safety filters
     ├── chatbotmodels/
     │   ├── MainChatbotWithSealion.py # SEA-LION caller with RAG and image
     │   │                           capabilities

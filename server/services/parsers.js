@@ -4,7 +4,7 @@ const extractJson = (raw) => {
     try {
         jsonSection = raw.match(jsonRegex)[0]
     } catch {
-        console.log("JSON search failed", jsonSection)
+        console.log("JSON search failed")
         return {invalid:true}
     }
     let obj = {}
@@ -37,7 +37,7 @@ export const responseParsers = {
                 valid: true
             }
         }
-        console.log("Type decision parser validty", r)
+        // console.log("Type decision parser validty", r)
         return r
     },
     defaultParser: (res) => {
