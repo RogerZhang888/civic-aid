@@ -2,15 +2,17 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { ArrowUp, MessageCircle } from "lucide-react";
 import { useParams } from "react-router";
-import useReport from "../../hooks/useReport";
+import useIndividualReport from "../../hooks/useIndividualReport";
+import { useQueryClient } from "@tanstack/react-query";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL;
 
 export default function ReportStats() {
   const { reportId } = useParams() as { reportId: string };
-  const { report, isLoading, error } = useReport(reportId);
+  const { data: report, isLoading, error } = useIndividualReport(reportId);
   const [votes, setVotes] = useState<number>(0);
   const [voteStatus, setVoteStatus] = useState<"upvoted" | "none">("none");
+  const queryClient = useQueryClient();
 
   const userId = report?.userId; // Replace with actual logged-in user ID
 
@@ -52,6 +54,7 @@ export default function ReportStats() {
         setVotes((v) => v + 1);
         setVoteStatus("upvoted");
       }
+      await queryClient.refetchQueries({ queryKey: [reportId] })
     } catch (error) {
       console.error("Vote update failed:", error);
     }

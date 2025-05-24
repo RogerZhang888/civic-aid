@@ -112,9 +112,6 @@ export default function Navbar() {
                               {t('community')}
                            </Link>
                         </li>
-                        <li>
-                           <LanguagesDropDown/>
-                        </li>
                      </>
                }
             </ul>
