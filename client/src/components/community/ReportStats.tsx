@@ -55,7 +55,7 @@ export default function ReportStats() {
    };
 
    return (
-      <div className="flex space-x-4 mt-6">
+      <div className="flex space-x-4">
          {/* Votes Bubble */}
          <div className="flex items-center space-x-2 bg-primary text-neutral-content rounded-full px-4 py-1">
             <button onClick={handleUpvote}>

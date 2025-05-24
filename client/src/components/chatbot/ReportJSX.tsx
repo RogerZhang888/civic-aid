@@ -16,7 +16,7 @@ export default function ReportJSX({ id, agency }: { id: string, agency: string }
          <button
             className="btn flex flex-row justify-center items-center px-5"
             onClick={async () => {
-               await queryClient.refetchQueries({ queryKey: ['reports'] });
+               await queryClient.refetchQueries({ queryKey: ['/reports'] });
                navigate(`/profile/${id}`)
             }}
          >

@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate } from "react-router";
 import { Report } from "../types";
 import { useState } from "react";
 import useTranslation from "../../hooks/useTranslation";
@@ -6,13 +6,10 @@ import getBadgeClass from "../../hooks/getBadgeClass";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
-export default function ReportCard({ report }: { report: Report }) {
+export default function ReportCard({ report, loc }: { report: Report, loc: string }) {
 
    const navigate = useNavigate();
-   const location = useLocation();
    const { t } = useTranslation();
-   const currentPath = location.pathname;
-   const prefix = currentPath.startsWith("/community") ? "/community" : "/profile";
 
    const [imageError, setImageError] = useState(false);
 
@@ -90,7 +87,7 @@ export default function ReportCard({ report }: { report: Report }) {
             </p>
             <div className="card-actions">
                <button
-                  onClick={() => navigate(`${prefix}/${id}`)}
+                  onClick={() => navigate(`${loc}/${id}`)}
                   className="btn btn-secondary w-full"
                >
                   {t('viewReport')}

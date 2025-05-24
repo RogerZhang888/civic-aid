@@ -72,12 +72,18 @@ export default {
    private: "私密",
    noLocation: "没有提供位置数据。",
    noRemarks: "管理员未提供备注。",
-   noMedia: "此报告未含传任何照片。",
+   noMedia: "此报告未含任何照片。",
 
    pending: "待处理",
    resolved: "已解决",
    rejected: "已拒绝",
    "in progress": "处理中",
+
+   noPublicReports: "没有任何社区报告。",
+   backToCommunity: "返回社区报告页",
+
+   comments: "评论",
+   loadingComments: "加载评论",
 
    about1: (
       <>
