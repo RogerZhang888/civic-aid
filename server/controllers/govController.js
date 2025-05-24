@@ -135,7 +135,7 @@ export async function getReportSummaries(req, res) {
         }
 
         reports = await Promise.all(qlist).then((r) => {
-            return res.json(r.flat())
+            return r.flat()
         })
     }
 
