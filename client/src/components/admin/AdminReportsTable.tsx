@@ -15,7 +15,7 @@ export default function AdminReportsTable() {
          getRowHeight={() => 'auto'}
          initialState={{
             pagination: {
-               paginationModel: { pageSize: 5, page: 0 },
+               paginationModel: { pageSize: 20, page: 0 },
             },
             columns: {
                columnVisibilityModel: {
@@ -32,17 +32,19 @@ export default function AdminReportsTable() {
                }
             }
          }}
-         pageSizeOptions={[5, 10, 25, 50, 100]}
+         pageSizeOptions={[20, 50, 100]}
          sx={{
             '& .MuiDataGrid-cell': {
                borderRight: '1px solid #f3f4f6',
                fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
-               minHeight: '50px',
+               minHeight: '60px',
                textAlign: 'center',
-               alignContent: 'center'
+               alignContent: 'center',
+               fontSize: "1rem",
             },
             '& .MuiDataGrid-columnHeader': {
                backgroundColor: '#f3f4f6',
+               fontSize: "1rem",
             },
             '& .MuiDataGrid-columnHeaderTitle': {
                fontWeight: '600',
