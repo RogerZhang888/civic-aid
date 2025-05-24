@@ -38,7 +38,7 @@ function MessageBubble({
                   <img src="/mascot.png" alt="logo" />
                </div>
             </div>
-            <div className="chat-bubble chat-bubble-primary">
+            <div className="chat-bubble chat-bubble-primary whitespace-pre-wrap">
                {message.status === "pending" 
                   ? <span className="loading loading-dots loading-md" />
                   : <div>{message.answer}</div>

@@ -34,7 +34,7 @@ export default function ProfilePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 justify-items-center">
 
-               {reports.map((report) => (
+               {reports.sort((r1, r2) => r2.createdAt.getTime() - r1.createdAt.getTime()).map((report) => (
                   <ReportCard
                      key={report.id}
                      report={report}
@@ -62,7 +62,7 @@ export default function ProfilePage() {
                         <span className="text-sm text-gray-500">
                            {resolvedCount >= threshold && `${t('earnedOn')} ${new Date().toLocaleDateString()}`}
                         </span>
-                     </div>
+                  </div>
                   )}
 
                   {resolvedCount < 100 &&
