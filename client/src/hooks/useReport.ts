@@ -20,7 +20,7 @@ async function queryFn(reportId: string): Promise<Report> {
     mediaUrl: r.media_url,
     incidentAddress: r.incident_address,
     agency: r.agency,
-    recommended_steps: r.recommended_steps,
+    recommendedSteps: r.recommended_steps,
     urgency: r.urgency,
     reportConfidence: r.report_confidence,
     status: r.status as ReportStatusTypes,
