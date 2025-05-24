@@ -74,7 +74,7 @@ export const patchReport = async (req, res) => {
             `SELECT agency FROM reports WHERE id = $1`,
             [reportId]
         ).then((r) => {
-            console.log("FIND BY AGENCY", r)
+            // console.log("FIND BY AGENCY", r)
             if (r.length === 0) return []
             if (permissions.find((e) => e.agency === r[0].agency)) {
                 return pgsql.query(
@@ -188,13 +188,13 @@ export async function getReportSummaries(req, res) {
     }
 
     Promise.all(summaries).then((r) => {
-        console.log("SUMMARY", r)
+        // console.log("SUMMARY", r)
         let compiledSummary = []
         for (let summary of r) {
             if ("error" in summary) {
                 throw new Error({error: summary.error})
             }
-            console.log(`Processing summary for ${summary.agency}`, summary.response)
+            // console.log(`Processing summary for ${summary.agency}`, summary.response)
             if (summary.response.length == 0) continue
             for (let subgroup of summary.response) {
                 compiledSummary.push(subgroup.map((reportId) => reports.find((e) => e.id == reportId)))
@@ -220,7 +220,7 @@ export async function getReportSummaries(req, res) {
                     await callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}).then((newReport) => {
                         let parsedReport = responseParsers.reportParser(newReport)
                         
-                        console.log("PARSING REPORT", newReport)
+                        // console.log("PARSING REPORT", newReport)
 
                         if (parsedReport.valid) {
                             valid = true
@@ -230,7 +230,7 @@ export async function getReportSummaries(req, res) {
                             })
                         }
                     }).catch((e) => {
-                        console.log("ERROR: ", e)
+                        console.log("Report Compiler callModel Error: ", e)
                         return reject("Error during report parse")
                     })
                 }

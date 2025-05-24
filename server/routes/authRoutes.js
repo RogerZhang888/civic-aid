@@ -56,13 +56,8 @@ router.post("/register", async (req, res) => {
  * @returns 200 with user data on success, 401 or 500 with error on failure
  */
 router.post("/login", async (req, res) => {
-
-   console.log("RUNNING LOGIN HANDLER");
-
    try {
-
-      console.log(req.body)
-
+    console.log("RUNNING LOGIN HANDLER", req.body);
       const { username: reqUsername, password } = req.body;
       const pgsqlLoginRes = await pgsql.query("SELECT * FROM users WHERE name = $1", [reqUsername]);
 
