@@ -122,12 +122,13 @@ However I can provide a better report with some additional information. <Follow 
     },
     getQuestionTemplate: (userprompt, chatHistory) => {
         return debug?"5":template(
-            preface+questionpreface+"With the help of the context provided, answer the question in the language of the query, giving actionable answers as much as possible. \
-Be as detailed as possible while maintaining factual accuracy, providing a longer answer if possible. You may ask follow up questions at the end of your answer. \
+            preface+questionpreface+"With the help of the context provided, answer the question in the language of the query, giving detailed, actionable answers. \
+Be as detailed as possible while maintaining factual accuracy, providing a longer answer of multiple paragraphs if possible. You may ask follow up questions at the end of your answer. \
 Output how confident you are that you have a satisfactory answer of the user's question on a scale of 0 to 1, with a higher score representing a more satisfactory answer. \
 Only give confidence scores below 0.80 if you are unable to provide any level of detail at all. \
 Also indicate which sources you used, both from the context provided and otherwise.",
 `Format your response as a JSON object with the fields 'answer', 'confidence', and 'sources'. \
+Answer should contain your answer, with lines breaks made using '\\n' but no further markups or other syntax. \
 Confidence should be a decimal, to 2 decimal places, between 0 and 1 exclusive. \
 Sources should be an array of URL links. 
 For example:
