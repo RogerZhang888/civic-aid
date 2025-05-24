@@ -115,9 +115,6 @@ export default function CombinedMobileSidebar() {
                                     {t('community')}
                                  </Link>
                               </li>
-                              <li>
-                                 <LanguagesDropDown/>
-                              </li>
                            </>
                      }
                   </ul>
