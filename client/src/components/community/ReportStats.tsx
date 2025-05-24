@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { ArrowUp, ArrowDown, MessageCircle } from "lucide-react";
+import { ArrowUp, MessageCircle } from "lucide-react";
 import { useParams } from "react-router";
-import useReport from "../../hooks/useReport"; 
+import useReport from "../../hooks/useReport";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL;
 
@@ -11,22 +11,42 @@ export default function ReportStats() {
   const { report, isLoading, error } = useReport(reportId);
   const [votes, setVotes] = useState<number>(0);
   const [voteStatus, setVoteStatus] = useState<"upvoted" | "none">("none");
-  const userId = report?.userId;
 
-  useEffect(() => {
-    if (report) {
-      setVotes(report.upvoteCount);
-    }
-  }, [report]);
+  const userId = report?.userId; // Replace with actual logged-in user ID
+
+  // Load upvote count and user's upvote status
+useEffect(() => {
+  if (report && userId) {
+    axios
+      .get(`${SERVER_API_URL}/api/reports/upvote_status`, { withCredentials: true })
+      .then((res) => {
+        const upvotedReportIds: string[] = res.data;
+        const hasUpvoted = upvotedReportIds.includes(reportId);
+        setVoteStatus(hasUpvoted ? "upvoted" : "none");
+      })
+      .catch((err) => {
+        console.error("Failed to fetch vote status:", err);
+      });
+  }
+}, [report, userId, reportId]);
+
 
   const handleUpvote = async () => {
     try {
       if (voteStatus === "upvoted") {
-        await axios.post(`${SERVER_API_URL}/api/reports/undo_upvote/${reportId}`, { userId, reportId }, { withCredentials: true });
+        await axios.post(
+          `${SERVER_API_URL}/api/reports/undo_upvote/${reportId}`,
+          { userId, reportId },
+          { withCredentials: true }
+        );
         setVotes((v) => v - 1);
         setVoteStatus("none");
       } else {
-        await axios.post(`${SERVER_API_URL}/api/reports/upvote/${reportId}`, { userId, reportId }, { withCredentials: true });
+        await axios.post(
+          `${SERVER_API_URL}/api/reports/upvote/${reportId}`,
+          { userId, reportId },
+          { withCredentials: true }
+        );
         setVotes((v) => v + 1);
         setVoteStatus("upvoted");
       }
