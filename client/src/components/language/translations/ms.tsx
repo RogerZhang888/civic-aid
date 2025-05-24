@@ -79,6 +79,12 @@ export default {
    rejected: "ditolak",
    "in progress": "sedang diproses",
 
+   noPublicReports: "Tiada laporan awam.",
+   backToCommunity: "Kembali ke Halaman Komuniti",
+
+   comments: "Komen",
+   loadingComments: "Memuatkan komen...",
+
    about1: (
       <>
          👋 Hai! Selamat datang ke <span className="font-bold text-primary">CivicAId</span>. 

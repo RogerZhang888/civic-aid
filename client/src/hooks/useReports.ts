@@ -15,6 +15,7 @@ async function queryFn(path: string): Promise<Report[]> {
          }
       );
 
+      console.log("Reports: ");
       console.log(res.data);
 
       const reports: Report[] = res.data.map(
@@ -46,7 +47,7 @@ async function queryFn(path: string): Promise<Report[]> {
                mediaUrl: report.media_url,
                incidentAddress: report.incident_address,
                agency: report.agency,
-               recommended_steps: report.recommended_steps,
+               recommendedSteps: report.recommended_steps,
                urgency: report.urgency,
                reportConfidence: report.report_confidence,
                status: report.status as ReportStatusTypes,
@@ -66,9 +67,9 @@ async function queryFn(path: string): Promise<Report[]> {
    }
 }
 
-export default function useReports(path: string = "/reports") {
+export default function useReports(path: string) {
    return useQuery<Report[], AxiosError>({
-      queryKey: ["reports", path],
+      queryKey: [path],
       queryFn: () => queryFn(path),
       staleTime: 5 * 60 * 1000,
       retry: false,

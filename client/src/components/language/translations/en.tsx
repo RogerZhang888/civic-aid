@@ -72,12 +72,18 @@ export default {
    private: "Private",
    noLocation: "No location data provided.",
    noRemarks: "No remarks given by administrator.",
-   noMedia: "You did not upload any media for this report.",
+   noMedia: "No media available for this report.",
 
    pending: "pending",
    resolved: "resolved",
    rejected: "rejected",
    "in progress": "in progress",
+
+   noPublicReports: "There are no public reports.",
+   backToCommunity: "Back to Community Page",
+
+   comments: "Comments",
+   loadingComments: "Loading comments...",
 
    about1: (
       <>

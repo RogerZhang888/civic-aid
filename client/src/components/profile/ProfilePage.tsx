@@ -38,6 +38,7 @@ export default function ProfilePage() {
                   <ReportCard
                      key={report.id}
                      report={report}
+                     loc="/profile"
                   />
                ))}
 

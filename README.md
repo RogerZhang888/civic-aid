@@ -51,12 +51,12 @@ npm start
 
 Backend available at [http://localhost:3000](http://localhost:3000).
 
-**Note:** The development server connects directly to the live PostgreSQL database if `.env` is correctly configured.
+**Note:** The development server connects directly to the live PostgreSQL database once `.env` is correctly configured.
 
 ### 3. Flask AI / LLM Server
 
 Please contact the developers to run the LLM server locally because the custom model.safetensors file used in RAG is too large to upload to this repo.
-Additionally, files containing API keys to call Deepseek via openrouter.ai are not provided in this repo. Please contact the developers for the format of the file and how to obtain the API keys.
+Additionally, files containing API keys to call SEA-LION are not provided in this repo. Please contact the developers for the format of the file and how to obtain the API keys.
 
 ## Architecture Overview
 
@@ -75,25 +75,32 @@ civic-aid/
 │   ├── controllers/
 │   │   ├── chatController.js     # Handles chat creation, fetching
 │   │   │                           modifying, deleting
+│   │   ├── commentsController.js # Handles comments
+│   │   ├── govController.js      # Handles admin functionality
+│   │   ├── notificationsController.js # Handles notifications
 │   │   ├── queryController.js    # Handles query submissions
-│   │   └── reportController.js   # Handles fetching, modifying, and
-│   │                               summarizing reports
+│   │   ├── reportController.js   # Handles fetching, modifying, and
+│   │   │                           summarizing reports
+│   │   └── translatorController.js    # Handles translation functionality            
 │   ├── middleware/
 │   │   └── authMiddleware.js     # JWT authentication 
 │   ├── routes/                   # API route definitions
 │   ├── services/
 │   │   ├── cron.js               # Monthly rewards system updates
 │   │   ├── geocoder.js           # Address geocoding
+│   │   ├── gov.js                # Admin auxiliary functions
 │   │   ├── llmservice.js         # LLM interactions
+│   │   ├── notifications.js      # Notifications handler
 │   │   ├── parsers.js            # Parses LLM responses
 │   │   └── promptbook.js         # LLM system prompts
+│   │   └── translator.js         # Translation prompting functionality
 │   └── index.js                  # Main server entry point
 └── chatbot/                      # Chatbot module
     ├── llmserver.py              # LLM server entry point
     ├── chatbotmodels/
-    │   ├── MainChatbotWithSSL.py # Deepseek with RAG and image
+    │   ├── MainChatbotWithSealion.py # SEA-LION caller with RAG and image
     │   │                           capabilities
-    │   ├── BasicDSKoller.py      # Basic deepseek instance for 
+    │   ├── BasicSealionKoller.py # Basic SEA-LION caller for 
     │   │                           performance optimisation
     │   ├── AuxModelCaptioner.py  # Auxiliary image recognition and 
     │   │                           captioning model
@@ -108,13 +115,13 @@ civic-aid/
 <summary>Click to expand deployment details</summary>
 
 - **Frontend**  
-  Built using `npm run build` and served via Nginx.
+  Built with `npm run build` and served via Nginx.
 
 - **Backend**  
   Hosted with `pm2` and reverse proxied by Nginx (`/server/*` routes).
 
 - **LLM Server**  
-  Flask server hosted locally. Optional Docker support available.
+  Flask server hosted on the cloud server. Optional Docker support available.
 
 - **Database**  
   PostgreSQL database hosted on NeonDB.
@@ -545,18 +552,16 @@ Response {
 
 `GET /gov/reports_summary`
 ```ts
-Request {
-    newStatus: 'pending' | 'in progress' | 'resolved' | 'rejected'
-}
-
 Response Array<
     {
+        title: string,
         summary: string,
         description: string,
         agency: string,
         recommendedSteps: string,
         urgency: number,
         confidence: number,
+        sources: Array<string>
         valid: true
     } | {
         valid: false
@@ -610,6 +615,7 @@ Response {
 
 ## Acknowledgments
 
+- [SEA-LION](https://sea-lion.ai/)
 - [React.js](https://react.dev/)
 - [Vite](https://vitejs.dev/)
 - [TailwindCSS](https://tailwindcss.com/)
@@ -617,7 +623,6 @@ Response {
 - [DaisyUI](https://daisyui.com/)
 - [Express.js](https://expressjs.com/)
 - [Flask](https://flask.palletsprojects.com/)
-- [OpenRouter.ai](https://openrouter.ai/)
 - [NeonDB](https://neon.tech/)
 - [Huawei Cloud](https://www.huaweicloud.com/)
 - [Transformers (HuggingFace)](https://huggingface.co/docs/transformers) 

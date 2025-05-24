@@ -105,8 +105,9 @@ export const patchReport = async (req, res) => {
 }
 
 export async function getReportSummaries(req, res) {
-    if (!req.user.permissions.includes('ADMIN')) {
-        res.status(401).json({error:"Only admins may request report summaries"})
+    const permissions = parsePermissions(req.user.permissions)
+    if ((!req.user.permissions.includes('ADMIN')) && permissions.length === 0) {
+        res.status(403).json({ error: "Unauthorised" })
         return
     }
 
@@ -114,7 +115,29 @@ export async function getReportSummaries(req, res) {
         id: { type: "UTF8" },
         description: { type: "UTF8" },
     });
-    const reports = await pgsql.query("SELECT * FROM reports");
+    
+    let reports = []
+    if (req.user.permissions.includes("ADMIN")) {
+        reports = await pgsql.query(`SELECT * FROM reports`).catch((e) => {
+            console.error("DB error:", e);
+            res.status(500).json({ error: e });
+        })
+    } else {
+        const permissions = parsePermissions(req.user.permissions)
+        const qlist = []
+
+        if (permissions.length === 0) {
+            res.status(403).json({error: "Unauthorised"})
+        }
+
+        for (let permission of permissions) {
+            if (permission.role === 'ADMIN') qlist.push(pgsql.query(`SELECT * FROM reports WHERE agency = $1`, [permission.agency]))
+        }
+
+        reports = await Promise.all(qlist).then((r) => {
+            return res.json(r.flat())
+        })
+    }
 
     const groupedReports = Object.entries(
         reports.reduce((acc, report) => {
@@ -159,7 +182,7 @@ export async function getReportSummaries(req, res) {
                     response: r
                 }
             }).catch((e) => {
-                res.status(500).json({error: e})
+                return {error:"Failed to call report compiler"}
             })
         )
     }
@@ -168,6 +191,9 @@ export async function getReportSummaries(req, res) {
         console.log("SUMMARY", r)
         let compiledSummary = []
         for (let summary of r) {
+            if ("error" in summary) {
+                throw new Error({error: summary.error})
+            }
             console.log(`Processing summary for ${summary.agency}`, summary.response)
             if (summary.response.length == 0) continue
             for (let subgroup of summary.response) {
@@ -185,30 +211,61 @@ export async function getReportSummaries(req, res) {
                 confidence:report.report_confidence,
                 urgency:report.urgency
             })}\n\`\`\`\n`).join("---\n")
-            finalReportPromises.push(callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}))
+            let callModelPromise = new Promise(async (resolve, reject) => {
+                let valid = false
+                const repeatLimit = 3
+                let count = 0
+                while ((!valid) && count < repeatLimit) {
+                    count++
+                    await callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}).then((newReport) => {
+                        let parsedReport = responseParsers.reportParser(newReport)
+                        
+                        console.log("PARSING REPORT", newReport)
+
+                        if (parsedReport.valid) {
+                            valid = true
+                            resolve({
+                                ...parsedReport,
+                                sources: reportGroup.map((report) => report.id)
+                            })
+                        }
+                    }).catch((e) => {
+                        console.log("ERROR: ", e)
+                        return reject("Error during report parse")
+                    })
+                }
+                if (!valid) reject("Error generating new report")
+            })
+            finalReportPromises.push(
+                callModelPromise
+            )
         }
         return Promise.all(finalReportPromises)
     }).then((r) => {
-        const reports = r.map((raw) => responseParsers.reportParser(raw))
+        let masterReportsList = []
 
-        let dbUpdatePromises = []
-        for (let report of reports) {
-            if (!report.valid) continue
-            dbUpdatePromises.push(updateReportsDB({
-                userId: -2,
-                chatId: null,
-                title: `Summarised report ${new Date().toISOString()} ${report.agency}`,
-                summary: report.summary,
-                media: [],
-                location: null,
-                agency: report.agency,
-                recommendedSteps: report.recommendedSteps,
-                urgency: report.urgency,
-                confidence: report.confidence
-            }))
+        for (let report of r) {
+            for (let source of report.sources) {
+                masterReportsList.push(source)
+            } 
         }
 
-        res.json(reports)
+        for (let report of reports) {
+            if (!masterReportsList.includes(report.id)) {
+                r.push({
+                    title: report.title,
+                    summary: report.summary,
+                    agency: report.agency,
+                    recommendedSteps: report.recommended_steps,
+                    urgency: report.urgency,
+                    confidence: report.report_confidence,
+                    sources: [report.id],
+                    valid: true
+                })
+            }
+        }
+
+        res.json(r)
     }).catch((e) => {
         res.status(500).json({error: e})
     })

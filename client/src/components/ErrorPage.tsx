@@ -5,7 +5,7 @@ export default function ErrorPage() {
    const navigate = useNavigate();
 
    return (
-      <section className="w-full h-full flex flex-col justify-center items-center gap-6" id="error-page">
+      <section className="w-screen h-screen flex flex-col justify-center items-center gap-6" id="error-page">
          <div className="flex flex-col items-center gap-4">
             <AlertCircle className="w-16 h-16 text-red-400" />
             <h1 className="text-4xl font-bold text-gray-700">Oops!</h1>

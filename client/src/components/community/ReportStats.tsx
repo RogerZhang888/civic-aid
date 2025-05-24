@@ -68,6 +68,7 @@ useEffect(() => {
         <span>{votes}</span>
       </div>
 
+
       {/* Comments Bubble (static for now) */}
       <div className="flex items-center space-x-2 bg-primary text-neutral-content rounded-full px-4 py-1">
         <MessageCircle size={16} />

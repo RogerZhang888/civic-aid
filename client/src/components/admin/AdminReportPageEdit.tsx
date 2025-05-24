@@ -29,7 +29,7 @@ export default function AdminReportPageEdit({
             { withCredentials: true }
          );
 
-         queryClient.refetchQueries({ queryKey: ['reports', "/gov/reports"] });
+         await queryClient.refetchQueries({ queryKey: ['/gov/reports'] });
          toast.success('Report updated successfully');
    
       } catch (error) {

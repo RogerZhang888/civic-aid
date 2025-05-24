@@ -99,7 +99,7 @@ export default function Navbar() {
                                  pathname === "/admin" ? "text-primary-content" : ""
                               }`}
                            >
-                              Admin Panel
+                              Admin Dashboard
                            </Link>
                         </li>
                         <li>

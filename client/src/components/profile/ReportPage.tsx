@@ -1,32 +1,27 @@
 import { useNavigate, useParams } from 'react-router';
 import useReports from '../../hooks/useReports';
-import { useState } from 'react';
-import axios from "axios";
 import NotFoundPage from '../NotFoundPage';
 import getBadgeClass from '../../hooks/getBadgeClass';
-import toast from 'react-hot-toast';
 import GenericLoading from '../GenericLoading';
 import useTranslation from '../../hooks/useTranslation';
+import ReportStats from '../community/ReportStats';
+import CommentSection from '../community/CommentSection';
+import ReportVisToggle from './ReportVisToggle';
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
-
-type ReportVisibilityToggleProps = {
-   reportId: string;
-   initialPublic: boolean;
-};
 
 function capitalize(word: string) {
    if (!word) return '';
    return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
-export default function ProfileReportPage() {
+export default function ReportPage({ type }: { type: "profile" | "community" }) {
    const { reportId } = useParams() as { reportId: string };
-   const { data: reports, isLoading: isReportsLoading } = useReports();
+   const { data: reports, isLoading: isReportsLoading } = useReports(type === "profile" ? "/reports" : "/reports/public");
    const navigate = useNavigate();
    const { t } = useTranslation();
 
-   if (isReportsLoading) return <GenericLoading str='Loading your report...'/>;
+   if (isReportsLoading) return <GenericLoading str='Loading report...'/>;
 
    const thisReport = reports!.find(report => report.id === reportId);
 
@@ -37,10 +32,10 @@ export default function ProfileReportPage() {
    const resolvedAt = thisReport.resolvedAt ? new Date(thisReport.resolvedAt).toLocaleString() : 'Not resolved yet';
 
    return (
-      <div className='m-10'>
+      <div className='p-6 max-w-250 mx-auto'>
 
-         <button className='btn btn-primary mb-5' onClick={() => navigate("/profile")}>
-            {t("backToProfile")}
+         <button className='btn btn-primary mb-5' onClick={() => navigate(type === "profile" ? "/profile" : "/community")}>
+            {type === "profile" ? t("backToProfile") : t("backToCommunity")}
          </button>
 
          <div className="card shadow-[0_0_10px_1px_rgba(0,0,0,0.2)] ">
@@ -75,13 +70,15 @@ export default function ProfileReportPage() {
                         <span className="font-medium">{t('status')}</span>
                         <span className={`badge ${getBadgeClass(thisReport.status)} p-3`}>{capitalize(t(thisReport.status) as string)}</span>
                      </div>
-                     <div className="flex justify-between">
-                        <span className="font-medium">{t('visibility')}</span>
-                        <ReportVisibilityToggle
-                           reportId={thisReport.id}
-                           initialPublic={thisReport.isPublic ?? false}
-                        />
-                     </div>
+                     {type === "profile" && 
+                        <div className="flex justify-between">
+                           <span className="font-medium">{t('visibility')}</span>
+                           <ReportVisToggle
+                              reportId={thisReport.id}
+                              initialPublic={thisReport.isPublic}
+                           />
+                        </div>
+                     }
                      <div className="flex justify-between">
                         <span className="font-medium">{t('createdAt')}</span>
                         <span>{createdAt}</span>
@@ -114,63 +111,16 @@ export default function ProfileReportPage() {
                   <p className="whitespace-pre-line bg-base-200 p-4 rounded-lg">{thisReport.remarks ?? t('noRemarks')}</p>
                </div>
 
+               {type === "community" && 
+                  <>
+                     <div className="divider" />
+                     <ReportStats /> 
+                     <CommentSection reportId={reportId} />
+                  </>
+               }
+
             </div>
          </div>
       </div>
    );
 }
-
-function ReportVisibilityToggle({ reportId, initialPublic }: ReportVisibilityToggleProps) {
-   const [isPublic, setIsPublic] = useState(initialPublic);
-   const [loading, setLoading] = useState(false);
-   const { t } = useTranslation();
-
-   const handleToggle = async () => {
-      const newStatus = !isPublic;
-      setLoading(true);
-      try {
-         console.log(`Attempting to set report ${reportId} to ${newStatus ? 'public' : 'private'}...`);
-         await axios.post(`${SERVER_API_URL}/api/reports/set_is_public/${reportId}`,
-            { is_public: newStatus },
-            { withCredentials: true }
-         );
-         setIsPublic(newStatus); // Update UI only after success
-         toast.success(`Your report was updated to be ${newStatus ? 'public' : 'private'}.`);
-      } catch (err) {
-         console.error('Error updating visibility:', err);
-      } finally {
-         setLoading(false);
-      }
-   };
-
-   return (
-      <div className="flex items-center gap-2">
-         <input
-            type="checkbox"
-            checked={isPublic}
-            onChange={handleToggle}
-            disabled={loading}
-            className="toggle toggle-primary"
-         />
-         <span className="text-sm font-medium">{isPublic ? t('public') : t('private')}</span>
-      </div>
-   );
-}
-
-/**
- * 
- *                   {/* <div className="flex justify-between items-center">
-                     <span className="font-medium">Urgency:</span>
-                     <div className="flex items-center gap-2">
-                        <progress className="progress progress-info w-30" value={thisReport.urgency} max="1"></progress>
-                        <span>{thisReport.urgency.toFixed(2)} / 1</span>
-                     </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                     <span className="font-medium">Confidence:</span>
-                     <div className="flex items-center gap-2">
-                        <progress className="progress progress-primary w-30" value={thisReport.reportConfidence} max="1"></progress>
-                        <span>{thisReport.reportConfidence.toFixed(2)} / 1</span>
-                     </div>
-                  </div>
- */
