@@ -14,13 +14,14 @@ async function queryFn(path: string): Promise<Comment[]> {
 
     const comments: Comment[] = res.data.map(
       (comment: {
-        id: string;
+        id: number;
         report_id: string;
         parent_id: string;
         upvote_count: number;
         text: string;
         created_at: string;
-        user: string;
+        deleted: boolean;
+        user_id: number;
       }) => ({
         id: comment.id,
         reportId: comment.report_id,
@@ -28,7 +29,8 @@ async function queryFn(path: string): Promise<Comment[]> {
         upvoteCount: comment.upvote_count,
         text: comment.text,
         createdAt: new Date(comment.created_at),
-        user: comment.user
+        deleted: comment.deleted,
+        userId: comment.user_id
       })
     );
 

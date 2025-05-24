@@ -2,6 +2,7 @@ import { MessageCircle, Trash2, Edit, Plus, Minus } from 'lucide-react';
 import clsx from 'clsx';
 
 interface CommentProps {
+  username: string;
   id: string;
   content: string;
   timeAgo: string;
@@ -9,7 +10,7 @@ interface CommentProps {
   isOwner?: boolean;
   isReply?: boolean;
   onReply?: () => void;
-   username: string;
+  onDelete?: () => void;
 }
 
 export default function CommentComponent({
@@ -20,6 +21,7 @@ export default function CommentComponent({
   isOwner = false,
   isReply = false,
   onReply,
+  onDelete
 }: CommentProps) {
   return (
     <div className={clsx('card shadow-sm bg-base-100', isReply ? 'ml-8' : 'mt-4')}>
@@ -47,7 +49,7 @@ export default function CommentComponent({
             </button>
             {isOwner && (
               <>
-                <button className="btn btn-xs btn-ghost">
+                <button className="btn btn-xs btn-ghost" onClick={onDelete}>
                   <Trash2 size={16} className="mr-1" /> Delete
                 </button>
                 <button className="btn btn-xs btn-ghost">
