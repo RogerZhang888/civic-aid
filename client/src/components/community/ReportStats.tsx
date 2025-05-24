@@ -14,22 +14,24 @@ export default function ReportStats() {
 
   const userId = report?.userId; // Replace with actual logged-in user ID
 
-  // Load upvote count and user's upvote status
-useEffect(() => {
-  if (report && userId) {
-    axios
-      .get(`${SERVER_API_URL}/api/reports/upvote_status`, { withCredentials: true })
-      .then((res) => {
-        const upvotedReportIds: string[] = res.data;
-        const hasUpvoted = upvotedReportIds.includes(reportId);
-        setVoteStatus(hasUpvoted ? "upvoted" : "none");
-      })
-      .catch((err) => {
-        console.error("Failed to fetch vote status:", err);
-      });
-  }
-}, [report, userId, reportId]);
+  useEffect(() => {
+    if (report && userId) {
+      // Set initial vote count
+      setVotes(report.upvoteCount || 0);
 
+      // Check if user has upvoted this report
+      axios
+        .get(`${SERVER_API_URL}/api/reports/upvote_status`, { withCredentials: true })
+        .then((res) => {
+          const upvotedReportIds: string[] = res.data;
+          const hasUpvoted = upvotedReportIds.includes(reportId);
+          setVoteStatus(hasUpvoted ? "upvoted" : "none");
+        })
+        .catch((err) => {
+          console.error("Failed to fetch vote status:", err);
+        });
+    }
+  }, [report, userId, reportId]);
 
   const handleUpvote = async () => {
     try {
@@ -67,7 +69,6 @@ useEffect(() => {
         </button>
         <span>{votes}</span>
       </div>
-
 
       {/* Comments Bubble (static for now) */}
       <div className="flex items-center space-x-2 bg-primary text-neutral-content rounded-full px-4 py-1">
