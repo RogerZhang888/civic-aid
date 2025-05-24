@@ -4,6 +4,7 @@ import useTranslation from "../hooks/useTranslation";
 import LogoutButton from "./auth/LogoutButton";
 import LanguagesDropDown from "./language/LanguageDropdown";
 import useNotifications from "../hooks/useNotifications";
+import { Bell } from "lucide-react";
 import { useState } from "react";
 import { useLanguageContext } from "./language/LanguageContext";
 import axios from "axios";
@@ -218,14 +219,14 @@ export default function Navbar() {
                            <strong>{user.username}</strong>
                        </div>
                        <div className="flex">
-                           <button
-                               className="btn btn-sm btn-outline"
+                           <div
+                           className="cursor-pointer"
                                onMouseEnter={() => {
                                    setShowNotifications(true);
                                }}
                            >
-                               ⓘ
-                           </button>
+                               <Bell />
+                           </div>
                        </div>
                        <LogoutButton />
                    </div>
