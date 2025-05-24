@@ -123,7 +123,9 @@ However I can provide a better report with some additional information. <Follow 
     getQuestionTemplate: (userprompt, chatHistory) => {
         return debug?"5":template(
             preface+questionpreface+"With the help of the context provided, answer the question in the language of the query, giving actionable answers as much as possible. \
-Output how confident you are that you have a complete understanding of the user's question on a scale of 0 to 1, with a higher score representing greater understanding. \
+Be as detailed as possible while maintaining factual accuracy, providing a longer answer if possible. You may ask follow up questions at the end of your answer. \
+Output how confident you are that you have a satisfactory answer of the user's question on a scale of 0 to 1, with a higher score representing a more satisfactory answer. \
+Only give confidence scores below 0.80 if you are unable to provide any level of detail at all. \
 Also indicate which sources you used, both from the context provided and otherwise.",
 `Format your response as a JSON object with the fields 'answer', 'confidence', and 'sources'. \
 Confidence should be a decimal, to 2 decimal places, between 0 and 1 exclusive. \
@@ -131,7 +133,7 @@ Sources should be an array of URL links.
 For example:
 {
     \"answer\": <your answer>,
-    \"confidence\": 0.63,
+    \"confidence\": 0.83,
     \"sources\":[
         <url 1>,
         <url 2>,
@@ -155,10 +157,10 @@ from the user on the infomation required to be more confident of your answer. ",
     clarifyQuestionTemplateMed: (userprompt, chatHistory) => {
         return debug?"7":template(
             preface+reportpreface+"Earlier, the citizen submitted a question, \
-however, your confidence on the answer was low. Provide a short follow-up response in the language of the query to summarise your current answer, and seek clarification \
+however, your confidence on the answer was low. Provide a follow-up response in the language of the query containing your current answer, and seek clarification \
 from the user on the infomation required to be more confident of your answer. ",
             "A single short paragraph of plaintext only. DO NOT use any markdown syntax. DO NOT send your response as a JSON. DO NOT preface the response with headers such as 'RESPONSE'.\n\nFor example:\
-Thank you for the information, this is what I have gathered so far: <summary of answer>. \
+Thank you for the information, this is what I have gathered so far: <current answer>. \
 However I can provide a better answer with some additional information. <Follow up questions>\n\nYou are not expected to follow this format strictly.",
             userprompt,
             chatHistory
