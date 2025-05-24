@@ -37,7 +37,7 @@ export const responseParsers = {
                 valid: true
             }
         }
-        // console.log("Type decision parser validty", r)
+        console.log("Type decision parser confidence:", r.confidence)
         return r
     },
     defaultParser: (res) => {
@@ -62,7 +62,7 @@ export const responseParsers = {
                 valid: true
             }
         }
-
+        console.log("Default parser confidence:", r.confidence)
         return r
     },
     reportParser: (res) => {
@@ -89,6 +89,7 @@ export const responseParsers = {
                 valid: true
             }
         }
+        console.log("Report parser confidence:", r.confidence)
         return r
     },
     noParser: (res) => {
