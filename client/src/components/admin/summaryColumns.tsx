@@ -30,36 +30,58 @@ const summaryColumns: GridColDef<ReportSummary>[] = [
       headerName: 'Urgency',
       width: 100,
       type: 'number',
-      renderCell: (params) => (
-         <span className={`px-2 py-1 rounded-full text-sm ${params.value >= 8 ? 'bg-red-100 text-red-800' :
-            params.value >= 0.5 ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'
-            }`}>
-            {params.value}
-         </span>
-      )
+      renderCell: (params) => {
+
+         const u = params.value;
+         const hueRotate = Math.round(120 - (u * 120));
+         const saturation = 100 - (Math.abs(u - 0.5) * 40);
+
+         return (
+            <span 
+               className="px-2 py-1 rounded-full text-sm font-medium"
+               style={{
+                  backgroundColor: `hsl(${hueRotate}, ${saturation}%, 90%)`,
+                  color: `hsl(${hueRotate}, ${saturation}%, 30%)`
+               }}
+            >
+               {u.toFixed(2)}
+            </span>
+         );
+      }
    },
    {
       field: 'confidence',
       headerName: 'Confidence',
       width: 100,
       type: 'number',
-      renderCell: (params) => (
-         <span className={`px-2 py-1 rounded-full text-sm ${params.value >= 8 ? 'bg-red-100 text-red-800' :
-            params.value < 0.5 ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'
-            }`}>
-            {params.value}
-         </span>
-      )
+      renderCell: (params) => {
+         const conf = params.value;
+         const hueRotate = Math.round(conf * 120);
+         const saturation = 100 - (Math.abs(conf - 0.5) * 40);
+         
+         return (
+            <span 
+               className="px-2 py-1 rounded-full text-sm font-medium"
+               style={{
+                  backgroundColor: `hsl(${hueRotate}, ${saturation}%, 90%)`,
+                  color: `hsl(${hueRotate}, ${saturation}%, 30%)`
+               }}
+            >
+               {conf*100}
+            </span>
+         );
+      }
    },
    {
       field: 'sources',
       headerName: "Sources",
       renderCell: (params: GridRenderCellParams<any, Array<string>>) => (
-         <div>
+         <div className="flex flex-col space-y-1">
             {params.value?.map((src, idx) => 
                <Link
+                  key={idx}
                   to={`/admin/report/${src}`}
-                  className="btn btn-link"
+                  className="btn btn-link btn-sm"
                >
                   Source {idx+1}
                </Link>

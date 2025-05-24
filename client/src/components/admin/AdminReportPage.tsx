@@ -107,8 +107,8 @@ export default function AdminReportPage() {
                      <tr>
                         <th>Confidence</th>
                         <td>
-                           <progress className="progress w-56" value={thisReport.reportConfidence} max="1" />
-                           <span className='ml-3'>{thisReport.reportConfidence.toFixed(2)} / 1</span>
+                           <progress className="progress w-56" value={thisReport.reportConfidence*100} max="100" />
+                           <span className='ml-3'>{thisReport.reportConfidence*100} / 100</span>
                         </td>
                      </tr>
                      <tr>
@@ -144,7 +144,7 @@ export default function AdminReportPage() {
 
                <div className="divider" />
 
-               <h2 className="text-2xl font-semibold mb-2">Edit</h2>
+               <h2 className="text-2xl font-semibold mb-2">Edit this report</h2>
 
                <AdminReportPageEdit report={thisReport}/>
 

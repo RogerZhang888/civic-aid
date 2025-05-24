@@ -6,6 +6,22 @@ import getBadgeClass from "../../hooks/getBadgeClass";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
+function capitalize(word: string) {
+   if (!word) return '';
+   return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+function formatDate(date: Date) {
+   const d = new Date(date);
+   const day = String(d.getDate()).padStart(2, '0');
+   const month = String(d.getMonth() + 1).padStart(2, '0'); // months are 0-based
+   const year = String(d.getFullYear()).slice(-2);
+   const hours = String(d.getHours()).padStart(2, '0');
+   const minutes = String(d.getMinutes()).padStart(2, '0');
+   
+   return `${day}/${month}/${year} ${hours}:${minutes}`;
+}
+
 export default function ReportCard({ report, loc }: { report: Report, loc: string }) {
 
    const navigate = useNavigate();
@@ -21,30 +37,11 @@ export default function ReportCard({ report, loc }: { report: Report, loc: strin
       createdAt,
       status,
       isPublic
-      // urgency
    } = report;
-
-   function formatDate(date: Date) {
-      const d = new Date(date);
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0'); // months are 0-based
-      const year = String(d.getFullYear()).slice(-2);
-      const hours = String(d.getHours()).padStart(2, '0');
-      const minutes = String(d.getMinutes()).padStart(2, '0');
-    
-      return `${day}/${month}/${year} ${hours}:${minutes}`;
-   }
 
    const imgSrc = mediaUrl.length > 0 
       ?  `${SERVER_API_URL}/api/files/${mediaUrl[0]}`
       :  "/placeholderImg.png"
-
-   function capitalize(word: string) {
-      if (!word) return '';
-      return word.charAt(0).toUpperCase() + word.slice(1);
-   }
-
-   // const isUrgent = urgency > 0.75;
 
    return (
       <div className="card shadow-lg h-100 w-75 relative">
@@ -55,11 +52,6 @@ export default function ReportCard({ report, loc }: { report: Report, loc: strin
             <span className={`${isPublic === true ? "" : "hidden"} badge badge-primary p-3 font-semibold shadow-[0_0_2px_1px_rgba(0,0,0,0.3)]`}>
                {t('public')}
             </span>
-            {/* {isUrgent &&
-               <span className="badge badge-error p-3 font-semibold shadow-[0_0_2px_1px_rgba(0,0,0,0.3)]">
-                  Urgent
-               </span>
-            } */}
          </div>
          <figure className="h-40 overflow-hidden rounded-t-xl">
             {imageError ? (
@@ -70,16 +62,16 @@ export default function ReportCard({ report, loc }: { report: Report, loc: strin
                <img
                   src={imgSrc}
                   alt="Preview image"
-                  className="object-cover w-full h-40 min-h-40 max-h-40"
+                  className="object-cover w-full h-full"
                   onError={() => setImageError(true)}
                />
             )}
          </figure>
          <div className="card-body">
-            <h2 className="card-title">
+            <h2 className="card-title line-clamp-2 break-words overflow-hidden max-h-[3em]">
                {title}
             </h2>
-            <p className="text-gray-600 text-sm line-clamp-4">
+            <p className="text-gray-600 text-sm line-clamp-2 break-words overflow-hidden max-h-[3em]">
                {description}
             </p>
             <p className="text-gray-600 text-sm">
