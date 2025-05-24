@@ -11,6 +11,8 @@ export default function ReportStats() {
   const { report, isLoading, error } = useReport(reportId);
   const [votes, setVotes] = useState<number>(0);
   const [voteStatus, setVoteStatus] = useState<"upvoted" | "none">("none");
+  const [commentCount, setCommentCount] = useState<number>(0);
+
 
   const userId = report?.userId; // Replace with actual logged-in user ID
 
@@ -30,6 +32,16 @@ export default function ReportStats() {
         .catch((err) => {
           console.error("Failed to fetch vote status:", err);
         });
+
+            // Fetch comment count
+        axios
+          .get(`${SERVER_API_URL}/api/comments/${reportId}`, { withCredentials: true })
+          .then((res) => {
+            setCommentCount(res.data.length);
+          })
+          .catch((err) => {
+            console.error("Failed to fetch comment count:", err);
+          });
     }
   }, [report, userId, reportId]);
 
@@ -73,7 +85,7 @@ export default function ReportStats() {
       {/* Comments Bubble (static for now) */}
       <div className="flex items-center space-x-2 bg-primary text-neutral-content rounded-full px-4 py-1">
         <MessageCircle size={16} />
-        <span>58</span>
+        <span>{commentCount}</span>
       </div>
     </div>
   );
