@@ -145,3 +145,16 @@ export type ReportSummary = {
    sources: Array<string>
    valid: boolean
 }
+
+export type Notification = {
+    id: number,
+    createdAt: Date,
+    link: string,
+    text: {
+        en: string,
+        zh: string,
+        ms: string,
+        ta: string
+    },
+    read: boolean
+}
