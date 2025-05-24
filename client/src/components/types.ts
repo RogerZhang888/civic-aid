@@ -132,6 +132,8 @@ export type Comment = {
    text: string;
    createdAt: Date;
    username: string;
+   userId: number;
+   deleted: boolean;
 }
 
 export type ReportSummary = {
