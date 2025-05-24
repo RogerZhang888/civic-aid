@@ -53,7 +53,7 @@ export const updateReportsDB = async (params) => {
 // @ Roger: either use a JWT in postman,
 // or remove the authMiddleware from the route
 export async function createReport(req, res) {
-    console.log("MAKING REPORT MANUALLY");
+    console.log("MAKING REPORT MANUALLY (ROUTE DEPRECATED)");
     res.status(400).json({error: "Route deprecated"})
     return
 
@@ -143,7 +143,7 @@ export async function getReport(req, res) {
             [reportId]
         );
 
-        console.log("REPORT", result)
+        // console.log("REPORT", result)
         if (result.length === 0) {
             return res
                 .status(404)
@@ -191,9 +191,9 @@ export async function getUserReports(req, res) {
 // and the new status (in the body)
 export async function updateReportStatus(req, res) {
     // TODO: Check own route
+    console.log("UPDATING REPORT STATUS (ROUTE DEPRECATED)");
     res.json({ error: "Route deprecated" })
     return
-    console.log("UPDATING REPORT STATUS");
 
     try {
         const reportId = req.params.id;
@@ -324,6 +324,8 @@ const updateUpvoteCount = async (reportId) => {
 export async function upvote(req, res) {
     const userId = req.user.id;
     const reportId = req.params.id;
+
+    console.log(`Received vote from userId: ${req.body.userId} for report ${req.params.reportId}`);
 
     if (!reportId) {
         res.status(400).json({error: "Report ID not provided"})

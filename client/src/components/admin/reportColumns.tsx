@@ -2,6 +2,7 @@ import { GridColDef } from "@mui/x-data-grid";
 import { Report } from "../types";
 import MediaRenderCell from "./MediaRenderCell";
 import ActionRenderCell from "./ActionRenderCell";
+import getBadgeClass from "../../hooks/getBadgeClass";
 
 const reportColumns: GridColDef<Report>[] = [
    {
@@ -18,9 +19,9 @@ const reportColumns: GridColDef<Report>[] = [
       field: 'title',
       headerName: 'Title',
       flex: 1,
-      minWidth: 150,
+      minWidth: 120,
       renderCell: (params) => (
-         <div>
+         <div className="text-left">
             {params.value}
          </div>
       )
@@ -37,7 +38,7 @@ const reportColumns: GridColDef<Report>[] = [
       )
    },
    {
-      field: 'recommended_steps',
+      field: 'recommendedSteps',
       headerName: 'Recommended Steps',
       flex: 2,
       minWidth: 200,
@@ -62,15 +63,12 @@ const reportColumns: GridColDef<Report>[] = [
       headerName: 'Status',
       width: 120,
       type: 'string',
+      headerAlign: "center",
       renderCell: (params) => (
          <span 
             className={
-               `px-2 py-1 rounded-full text-sm 
-               ${params.value === 'resolved' ? 'bg-green-100 text-green-800'
-                  : params.value === 'in progress' ? 'bg-yellow-100 text-yellow-800'
-                     : params.value === 'rejected' ? 'bg-red-100 text-red-800'
-                        : 'bg-blue-100 text-blue-800'
-               }`
+               `badge text-white
+               ${getBadgeClass(params.value)}`
             }
          >
             {params.value}
@@ -82,11 +80,12 @@ const reportColumns: GridColDef<Report>[] = [
       headerName: 'Urgency',
       width: 100,
       type: 'number',
+      headerAlign: "center",
       renderCell: (params) => (
          <span className={`px-2 py-1 rounded-full text-sm ${params.value >= 8 ? 'bg-red-100 text-red-800' :
             params.value >= 0.5 ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'
             }`}>
-            {params.value}
+            {params.value.toFixed(2)}
          </span>
       )
    },
@@ -108,6 +107,7 @@ const reportColumns: GridColDef<Report>[] = [
       headerName: 'Date Created',
       width: 150,
       type: 'dateTime',
+      headerAlign: "center",
       valueFormatter: (v: Date) =>
          v?.toLocaleString() || 'N/A'
    },
@@ -124,6 +124,13 @@ const reportColumns: GridColDef<Report>[] = [
       headerName: 'Public Report',
       width: 80,
       type: 'boolean',
+   },
+   {
+      field: 'upvoteCount',
+      headerName: 'Upvotes',
+      width: 80,
+      type: 'number',
+      headerAlign: "center",
    },
    {
       field: 'remarks',

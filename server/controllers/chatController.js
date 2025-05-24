@@ -5,7 +5,7 @@ export const startNewChat = async (req, res) => {
     try {
         const userId = req.user.id; // from auth middleware
 
-        console.log(req.body);
+        // console.log(req.body);
 
         const { id: chatId, title, type, createdAt } = req.body;
 
@@ -128,7 +128,7 @@ export const getSpecificChatHistory = async (req, res) => {
             );
             const chatAge = Date.now() - new Date(chat[0].created_at).getTime();
 
-            if (chatAge < 60000) { // 60 second grace period
+            if (chatAge < 10000) { // 10 second grace period
                console.log(`chat ${chatId} age less than 60 seconds - will not be deleted`);
                return res.status(200).json([]);
             } else {

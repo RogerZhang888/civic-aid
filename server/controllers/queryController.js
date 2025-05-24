@@ -54,7 +54,7 @@ const updateChatType = async (chatId, type, title) => {
 const getConfidence = (score, count) => {
     // TOOD: Confirm boundaries
     if (!score) return 'LOW'
-    const adjustedScore = score + (1 - score) * ( 1 / (1 + Math.exp(4 - 0.57 * count)))
+    const adjustedScore = score + (1 - score) * ( 1 / (1 + Math.exp(4 - 0.57 * count))) // Sigmoid curve
     console.log(`Confidence score adjustments, raw ${score} count ${count}`, adjustedScore)
     if (adjustedScore > 0.8) return 'HIGH'
     else if (adjustedScore > 0.3) return 'MED'
@@ -90,7 +90,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
         while (!parsedRes?.valid && promptcount < repromptLimit) {
             promptcount++
             parsedRes = await callModel({query, prompt, model, imagePath: media, chatHistory}).then((res) => {
-                console.log(`${promptcount}: Received raw LLM response`, res)
+                console.log(`Received raw LLM response`, res)
                 let parsed = parseResponse(res)
                 console.log(`RESPONSE PARSED VALID? ${parsed.valid}`)
                 let queryParams = {
@@ -126,7 +126,7 @@ const userquery = async (userprompt, userId, chatId, chat, location, media) => {
     if (userprompt == "") {
         if (media == "") throw new Error("Invalid prompt")
         // MEDIA ONLY
-        userprompt = await queryLLM({query:"", prompt:"", model:"captioner"}, responseParsers.noParser, reply='ALWAYS').then((res) => {
+        userprompt = await queryLLM({query:"", prompt:"", model:"captioner"}, responseParsers.noParser, 'NEVER').then((res) => {
             return res.answer
         })
     }
@@ -206,7 +206,7 @@ const submitQuery = async (req, res) => {
 
         // console.log("Received prompt:", prompt);
         // console.log("Location:", latitude, longitude);
-        // console.log("User ID:", userId);W
+        // console.log("User ID:", userId);
         // console.log("Uploaded file:", uploadedFile);
 
         if ((!prompt) && (!uploadedFile)) {

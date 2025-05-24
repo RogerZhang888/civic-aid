@@ -1,50 +1,36 @@
-import useReports from '../../hooks/useReports';
 import { DataGrid } from '@mui/x-data-grid';
-import { Report } from '../types';
-import reportColumns from './reportColumns';
+import { ReportSummary } from '../types';
 import CustomToolbar from './CustomToolbar';
+import summaryColumns from './summaryColumns';
 
-export default function AdminReportsTable() {
-
-   const { data: reports } = useReports("/gov/reports");
+export default function AdminSummariesTable({ summaries }: { summaries: ReportSummary[] }) {
 
    return (
-      <DataGrid<Report>
-         rows={reports}
-         columns={reportColumns}
+      <DataGrid<ReportSummary>
+         rows={summaries}
+         columns={summaryColumns}
          getRowHeight={() => 'auto'}
          initialState={{
             pagination: {
-               paginationModel: { pageSize: 20, page: 0 },
+               paginationModel: { pageSize: 5, page: 0 },
             },
             columns: {
                columnVisibilityModel: {
-                  id: false,
-                  userId: false,
-                  description: false,
-                  recommendedSteps: false,
-                  agency: false,
-                  mediaUrl: false,
-                  resolvedAt: false,
-                  reportConfidence: false,
-                  isPublic: false,
-                  remarks: false,
+
                }
             }
          }}
-         pageSizeOptions={[20, 50, 100]}
+         pageSizeOptions={[5, 10, 25, 50, 100]}
          sx={{
             '& .MuiDataGrid-cell': {
                borderRight: '1px solid #f3f4f6',
                fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
-               minHeight: '60px',
+               minHeight: '50px',
                textAlign: 'center',
-               alignContent: 'center',
-               fontSize: "1rem",
+               alignContent: 'center'
             },
             '& .MuiDataGrid-columnHeader': {
                backgroundColor: '#f3f4f6',
-               fontSize: "1rem",
             },
             '& .MuiDataGrid-columnHeaderTitle': {
                fontWeight: '600',

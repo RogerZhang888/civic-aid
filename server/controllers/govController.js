@@ -4,6 +4,7 @@ import parquet from "parquetjs";
 import { callModel } from "../services/llmService.js";
 import { systempromptTemplates } from "../services/promptbook.js";
 import { responseParsers } from "../services/parsers.js";
+import { createReportNotification } from '../services/notifications.js';
 
 export const getGovReports = async (req, res) => {
     try {
@@ -73,7 +74,7 @@ export const patchReport = async (req, res) => {
             `SELECT agency FROM reports WHERE id = $1`,
             [reportId]
         ).then((r) => {
-            console.log("FIND BY AGENCY", r)
+            // console.log("FIND BY AGENCY", r)
             if (r.length === 0) return []
             if (permissions.find((e) => e.agency === r[0].agency)) {
                 return pgsql.query(
@@ -94,8 +95,9 @@ export const patchReport = async (req, res) => {
                 .json({ error: `Report ${reportId} not found` });
         }
 
+        createReportNotification(result[0].title, result[0].id, result[0].status, result[0].user_id)
+        
         res.json(result[0]);
-        pgsql.query(`UPDATE reports SET status = 'resolved', resolved_at = CURRENT_TIMESTAMP WHERE`)
     } catch(e) {
         console.error("Update error:", e);
         res.status(500).json({ error: e.message });
@@ -180,16 +182,19 @@ export async function getReportSummaries(req, res) {
                     response: r
                 }
             }).catch((e) => {
-                res.status(500).json({error: e})
+                return {error:"Failed to call report compiler"}
             })
         )
     }
 
     Promise.all(summaries).then((r) => {
-        console.log("SUMMARY", r)
+        // console.log("SUMMARY", r)
         let compiledSummary = []
         for (let summary of r) {
-            console.log(`Processing summary for ${summary.agency}`, summary.response)
+            if ("error" in summary) {
+                throw new Error({error: summary.error})
+            }
+            // console.log(`Processing summary for ${summary.agency}`, summary.response)
             if (summary.response.length == 0) continue
             for (let subgroup of summary.response) {
                 compiledSummary.push(subgroup.map((reportId) => reports.find((e) => e.id == reportId)))
@@ -206,35 +211,61 @@ export async function getReportSummaries(req, res) {
                 confidence:report.report_confidence,
                 urgency:report.urgency
             })}\n\`\`\`\n`).join("---\n")
-            finalReportPromises.push(callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}))
+            let callModelPromise = new Promise(async (resolve, reject) => {
+                let valid = false
+                const repeatLimit = 3
+                let count = 0
+                while ((!valid) && count < repeatLimit) {
+                    count++
+                    await callModel({query:reportQuery, prompt:systempromptTemplates.checkReportSummaryTemplate(reportQuery), model:"basic"}).then((newReport) => {
+                        let parsedReport = responseParsers.reportParser(newReport)
+                        
+                        // console.log("PARSING REPORT", newReport)
+
+                        if (parsedReport.valid) {
+                            valid = true
+                            resolve({
+                                ...parsedReport,
+                                sources: reportGroup.map((report) => report.id)
+                            })
+                        }
+                    }).catch((e) => {
+                        console.log("Report Compiler callModel Error: ", e)
+                        return reject("Error during report parse")
+                    })
+                }
+                if (!valid) reject("Error generating new report")
+            })
+            finalReportPromises.push(
+                callModelPromise
+            )
         }
         return Promise.all(finalReportPromises)
     }).then((r) => {
-        const reports = r.map((raw) => responseParsers.reportParser(raw))
+        let masterReportsList = []
 
-        let dbUpdatePromises = []
-        for (let report of reports) {
-            if (!report.valid) continue
-            dbUpdatePromises.push(updateReportsDB({
-                userId: -2,
-                chatId: null,
-                title: `Summarised report ${new Date().toISOString()} ${report.agency}`,
-                summary: report.summary,
-                media: [],
-                location: null,
-                agency: report.agency,
-                recommendedSteps: report.recommendedSteps,
-                urgency: report.urgency,
-                confidence: report.confidence
-            }))
+        for (let report of r) {
+            for (let source of report.sources) {
+                masterReportsList.push(source)
+            } 
         }
 
-        Promise.all(dbUpdatePromises).then((r) => {
-            res.json(reports)
-        }).catch((e) => {
-            console.log("Error updating reports DB", e)
-            res.status(500).json({ error: e.message });
-        })
+        for (let report of reports) {
+            if (!masterReportsList.includes(report.id)) {
+                r.push({
+                    title: report.title,
+                    summary: report.summary,
+                    agency: report.agency,
+                    recommendedSteps: report.recommended_steps,
+                    urgency: report.urgency,
+                    confidence: report.report_confidence,
+                    sources: [report.id],
+                    valid: true
+                })
+            }
+        }
+
+        res.json(r)
     }).catch((e) => {
         res.status(500).json({error: e})
     })

@@ -1,41 +1,35 @@
 import ReportCard from "../profile/ReportCard";
 import useReports from "../../hooks/useReports";
+import useTranslation from "../../hooks/useTranslation";
 
 export default function CommunityPage() {
-   const { data: reports, isLoading: isReportsLoading } = useReports("/reports/public");
 
-   // const now = new Date();
-   // const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-   // const formatted = [
-   // lastDay.getFullYear(),
-   // String(lastDay.getMonth() + 1).padStart(2, '0'),
-   // String(lastDay.getDate()).padStart(2, '0')
-   // ].join('-');
+   const { data: reports, isLoading: isReportsLoading } = useReports("/reports/public");
+   const { t } = useTranslation();
 
    return (
-      <section className="w-full h-full flex flex-col items-center space-y-4 p-4">
-         <div className="text-2xl font-semibold">Community</div>
+      <section className="w-full h-full flex flex-col items-center space-y-4 p-4" id="community-page">
+         <div className="text-2xl font-semibold">{t('community')}</div>
 
          {isReportsLoading ? (
-            <div>Loading reports...</div>
+            <div>{t('loadingReports')}</div>
          ) : reports?.length === 0 || !reports ? (
-            <div>There are no public reports.</div>
+            <div>{t('noPublicReports')}</div>
          ) : (
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 justify-items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 justify-items-center pb-4">
 
                {reports.map((report) => (
                   <ReportCard
                      key={report.id}
                      report={report}
+                     loc="/community"
                   />
                ))}
 
             </div>
 
          )}
-
-      
 
       </section>
    );

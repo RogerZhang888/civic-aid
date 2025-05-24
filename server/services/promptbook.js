@@ -167,17 +167,19 @@ However I can provide a better answer with some additional information. <Follow 
     checkReportSummaryTemplate: (userprompt) => {
         return template(
             preface+genericpreface+`A list of similar reports were identified from users where identified. Verify which these reports are indeed of the same issue, and summarise them into a single report if they are. `,
-            `Format your response as a JSON object with the fields 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. Only generate a single report summarising all the reports that are of the same issue. \
+            `Format your response as a JSON object with the fields 'title', 'summary', 'agency', 'recommendedSteps', 'urgency', 'confidence', and 'sources'. Only generate a single report summarising all the reports that are of the same issue. \
 Agency should contain the full name of a government agency only. \
 Urgency and confidence should be a decimal between 0 and 1 exclusive. \
-Sources should be an array of URL links. 
+Sources MUST be an empty array [].
 For example:
 {
-    \"summary\": \"The user reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas.\",
+    \"title\": \"Burst fire hydrant at Lim Chu Kang road\",
+    \"summary\": \"Users reported a burst fire hydrant along Lim Chu Kang road in the vicinity of Sungei Gedong camp, resulting in flooding in the surrounding areas.\",
     \"confidence\": 0.63,
     \"urgency\": 0.94,
     \"recommendedSteps\": \"Inspect and repair the burst fire hydrant at the reported location.\",
-    \"agency\": \"Public Utilities Board\"
+    \"agency\": \"Public Utilities Board\",
+    \"sources\": []
 }`,
             userprompt
         )

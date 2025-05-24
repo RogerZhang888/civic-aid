@@ -77,7 +77,7 @@ export const callModel = async ({ query, prompt, model, imagePath = null }) => {
     }).then((res) => {
         return res.json()
     }).then((res) => {
-        if (res.used_rag) console.log("!! RAG USED !!")
+        if (res.used_rag) console.log("Model called with RAG")
         return res.answer
     })
 };

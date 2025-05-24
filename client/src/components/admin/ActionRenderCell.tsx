@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { Report, ReportStatusTypes } from '../types';
 import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router';
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -13,6 +14,7 @@ export default function ActionRenderCell(params: GridRenderCellParams<Report, an
    const [remarks, setRemarks] = useState(params.row.remarks || "");
    const dialogRef = useRef<HTMLDialogElement>(null);
    const queryClient = useQueryClient();
+   const navigate = useNavigate();
 
    async function handleSave() {
 
@@ -27,7 +29,7 @@ export default function ActionRenderCell(params: GridRenderCellParams<Report, an
             { withCredentials: true }
          );
 
-         queryClient.refetchQueries({ queryKey: ['reports', "/gov/reports"] });
+         await queryClient.refetchQueries({ queryKey: ['/gov/reports'] });
          toast.success('Report updated successfully');
    
       } catch (error) {
@@ -53,12 +55,20 @@ export default function ActionRenderCell(params: GridRenderCellParams<Report, an
 
    return (
       <div id="action-render-cell">
-         <button
-            className="join-item btn btn-sm"
-            onClick={openModal}
-         >
-            Edit status and remarks
-         </button>
+         <div className='join join-horizontal'>
+            <button
+               className="join-item btn btn-sm btn-primary"
+               onClick={openModal}
+            >
+               Edit
+            </button>
+            <button
+               className='join-item btn btn-sm btn-secondary'
+               onClick={() => navigate(`/admin/report/${params.row.id}`)}
+            >
+               View
+            </button>
+         </div>
 
          <dialog ref={dialogRef} className="modal">
             <div className="modal-box">

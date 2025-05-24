@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import useUser from "../../hooks/useUser";
-import LoadingSpinner from "../auth/LoadingSpinner";
+import GenericLoading from "../GenericLoading";
 
 export default function AdminRoutesWrapper() {
    
@@ -8,7 +8,7 @@ export default function AdminRoutesWrapper() {
 
    console.log("Trying to access an admin route...")
 
-   if (isLoading) return <LoadingSpinner/>;
+   if (isLoading) return <GenericLoading str="Loading admin pages..."/>;
 
    if (!user || user.permissions.length === 0) {
       console.log("User is not logged in or is not an admin");
@@ -16,5 +16,6 @@ export default function AdminRoutesWrapper() {
    }
 
    console.log("User is an admin");
+
    return <Outlet />;
 }

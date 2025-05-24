@@ -15,6 +15,9 @@ async function queryFn(path: string): Promise<Report[]> {
          }
       );
 
+      console.log("Reports: ");
+      console.log(res.data);
+
       const reports: Report[] = res.data.map(
          (report: {
             id: string;
@@ -23,8 +26,7 @@ async function queryFn(path: string): Promise<Report[]> {
             title: string;
             description: string;
             media_url: Array<string>;
-            longitude?: number;
-            latitude?: number;
+            incident_address: string | null;
             agency: string;
             recommended_steps: string;
             urgency: number;
@@ -36,23 +38,6 @@ async function queryFn(path: string): Promise<Report[]> {
             remarks: string;
             upvote_count: number;
          }) => {
-            const incidentLocation =
-               report.longitude && report.latitude
-                  ? {
-                       latitude: report.latitude,
-                       longitude: report.longitude,
-                       altitude: 0,
-                       accuracy: 0,
-                       altitudeAccuracy: 0,
-                       heading: 0,
-                       speed: 0,
-                       toJSON() {
-                          return this;
-                       },
-                       [Symbol.toStringTag]: "GeolocationCoordinates",
-                    }
-                  : null;
-
             return {
                id: report.id,
                userId: report.user_id.toString(),
@@ -60,9 +45,9 @@ async function queryFn(path: string): Promise<Report[]> {
                title: report.title,
                description: report.description,
                mediaUrl: report.media_url,
-               incidentLocation,
+               incidentAddress: report.incident_address,
                agency: report.agency,
-               recommended_steps: report.recommended_steps,
+               recommendedSteps: report.recommended_steps,
                urgency: report.urgency,
                reportConfidence: report.report_confidence,
                status: report.status as ReportStatusTypes,
@@ -82,9 +67,9 @@ async function queryFn(path: string): Promise<Report[]> {
    }
 }
 
-export default function useReports(path: string = "/reports") {
+export default function useReports(path: string) {
    return useQuery<Report[], AxiosError>({
-      queryKey: ["reports", path],
+      queryKey: [path],
       queryFn: () => queryFn(path),
       staleTime: 5 * 60 * 1000,
       retry: false,

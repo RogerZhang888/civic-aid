@@ -10,7 +10,7 @@ export default function HomePage() {
 
    useEffect(() => {
       if (!isLoading && user) {
-         navigate("/chatbot");
+         navigate(user.permissions.length === 0 ? "/chatbot" : "/admin");
       }
    }, [user, isLoading, navigate]);
 

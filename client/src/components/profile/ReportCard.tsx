@@ -1,15 +1,15 @@
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate } from "react-router";
 import { Report } from "../types";
 import { useState } from "react";
+import useTranslation from "../../hooks/useTranslation";
+import getBadgeClass from "../../hooks/getBadgeClass";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
-export default function ReportCard({ report }: { report: Report }) {
+export default function ReportCard({ report, loc }: { report: Report, loc: string }) {
 
    const navigate = useNavigate();
-   const location = useLocation();
-   const currentPath = location.pathname;
-   const prefix = currentPath.startsWith("/community") ? "/community" : "/profile";
+   const { t } = useTranslation();
 
    const [imageError, setImageError] = useState(false);
 
@@ -38,8 +38,6 @@ export default function ReportCard({ report }: { report: Report }) {
    const imgSrc = mediaUrl.length > 0 
       ?  `${SERVER_API_URL}/api/files/${mediaUrl[0]}`
       :  "/placeholderImg.png"
-   
-   const statusColor = status === 'resolved' ? 'badge-success' : 'badge-warning';
 
    function capitalize(word: string) {
       if (!word) return '';
@@ -51,11 +49,11 @@ export default function ReportCard({ report }: { report: Report }) {
    return (
       <div className="card shadow-lg h-100 w-75 relative">
          <div className="absolute top-2 left-2 space-x-2">
-            <span className={`badge ${statusColor} p-3 font-semibold shadow-[0_0_2px_1px_rgba(0,0,0,0.3)]`}>
-               {capitalize(status)}
+            <span className={`badge ${getBadgeClass(status)} p-3 font-semibold shadow-[0_0_2px_1px_rgba(0,0,0,0.3)]`}>
+               {capitalize(t(status) as string)}
             </span>
             <span className={`${isPublic === true ? "" : "hidden"} badge badge-primary p-3 font-semibold shadow-[0_0_2px_1px_rgba(0,0,0,0.3)]`}>
-               Public
+               {t('public')}
             </span>
             {/* {isUrgent &&
                <span className="badge badge-error p-3 font-semibold shadow-[0_0_2px_1px_rgba(0,0,0,0.3)]">
@@ -85,14 +83,14 @@ export default function ReportCard({ report }: { report: Report }) {
                {description}
             </p>
             <p className="text-gray-600 text-sm">
-               Report created at: {formatDate(createdAt)}
+               {t('reportCreatedAt')} {formatDate(createdAt)}
             </p>
             <div className="card-actions">
                <button
-                  onClick={() => navigate(`${prefix}/${id}`)}
+                  onClick={() => navigate(`${loc}/${id}`)}
                   className="btn btn-secondary w-full"
                >
-                  View Report
+                  {t('viewReport')}
                </button>
             </div>
          </div>
