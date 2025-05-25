@@ -39,7 +39,12 @@ export const addComment = async (req, res) => {
 export const getComments = async (req, res) => {
     const reportId = req.params.id
 
-    pgsql.query(`SELECT * FROM comments WHERE report_id = $1`, [reportId]).then((qr) => {
+    Promise.all([
+        pgsql.query(`SELECT * FROM comments WHERE report_id = $1`, [reportId]),
+        pgsql.query(`SELECT id, name FROM users`)
+    ]).then((aqr) => {
+        let qr = aqr[0]
+        let users = aqr[1]
         let adjl = {}
         adjl[-1] = []
 
@@ -58,6 +63,7 @@ export const getComments = async (req, res) => {
 
         const generateCommentTreeDFS = (curCommentId) => {
             let curCommentObj = qr.find((e) => e.id === curCommentId) ?? {}
+            curCommentObj.username = users.find((e) => e.id === curCommentObj.user_id)?.name ?? ""
             curCommentObj.children = []
             for (let childId of adjl[curCommentId]) {
                 curCommentObj.children.push(generateCommentTreeDFS(childId))
