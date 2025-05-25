@@ -35,7 +35,7 @@ export default {
 
    uploadImage: "Muat naik imej",
    maxImage: "Maks: 1 imej",
-   messageTooLong: "Mesej mesti ≤400 aksara",
+   messageTooLong: "Mesej mesti ≤5000 aksara",
    emptyForm: "Mesej atau imej diperlukan",
 
    yourReports: "Laporan Anda",
@@ -62,6 +62,7 @@ export default {
    details: "Butiran Laporan",
    status: "Status",
    visibility: "Keterlihatan",
+   visTT: 'Jika anda mahu orang lain melihat, menyokong atau menambah laporan anda dalam tab "Komuniti", lumpuhkan butang "Persendirian".',
    createdAt: "Dibuat pada",
    resolvedAt: "Diselesaikan pada",
    agency: "Agensi",
@@ -69,7 +70,7 @@ export default {
    description: "Keterangan",
    remarks: "Ulasan",
    public: "Awam",
-   private: "Peribadi",
+   private: "Persendirian",
    noLocation: "Tiada data lokasi diberikan.",
    noRemarks: "Tiada ulasan diberikan oleh pentadbir.",
    noMedia: "Anda tidak memuat naik sebarang media untuk laporan ini.",

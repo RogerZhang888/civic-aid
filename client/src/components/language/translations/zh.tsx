@@ -35,7 +35,7 @@ export default {
 
    uploadImage: "上传照片",
    maxImage: "最多上传一张照片",
-   messageTooLong: "文字不可超过400字符",
+   messageTooLong: "文字不可超过5000字符",
    emptyForm: "请输入文字或上传照片",
 
    yourReports: "您的报告",
@@ -62,6 +62,7 @@ export default {
    details: "报告详情",
    status: "状态",
    visibility: "可见性",
+   visTT: '如果您希望其他人在“社区”选项卡中查看、支持或添加您的报告，请禁用“私密”按钮。',
    createdAt: "创建于",
    resolvedAt: "解决于",
    agency: "政府机构",
@@ -73,6 +74,7 @@ export default {
    noLocation: "没有提供位置数据。",
    noRemarks: "管理员未提供备注。",
    noMedia: "此报告未含任何照片。",
+   imgNotAvail: "照片不可用",
 
    pending: "待处理",
    resolved: "已解决",

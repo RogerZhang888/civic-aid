@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ReportSummary } from "../types";
 import toast from "react-hot-toast";
 import AdminSummariesTable from "./AdminSummariesTable";
@@ -10,6 +10,10 @@ export default function AdminSummaryPage() {
 
    const [summaries, setSummaries] = useState<ReportSummary[]>([]);
    const [isfetching, setIsFetching] = useState(false);
+
+   useEffect(() => {
+      fetchSummary();
+   }, [])
 
    async function fetchSummary() {
 
@@ -50,7 +54,7 @@ export default function AdminSummaryPage() {
             className="btn btn-primary btn-outline"
             onClick={fetchSummary}
          >
-            {isfetching ? "Loading..." : "Get Summaries"}
+            {isfetching ? "Loading Summaries..." : "Refetch Summaries"}
          </button>
 
          <div className="w-full">

@@ -83,11 +83,9 @@ const reportColumns: GridColDef<Report>[] = [
       headerAlign: "center",
       renderCell: (params) => {
 
-         const urgency = params.value;
-         // Calculate hue rotation (0° for green, 120° for red)
-         const hueRotate = Math.round(120 - (urgency * 120));
-         // Calculate saturation (100% at extremes, 80% in middle)
-         const saturation = 100 - (Math.abs(urgency - 0.5) * 40);
+         const u = params.value;
+         const hueRotate = Math.round(120 - (u * 120));
+         const saturation = 100 - (Math.abs(u - 0.5) * 40);
 
          return (
             <span 
@@ -97,7 +95,7 @@ const reportColumns: GridColDef<Report>[] = [
                   color: `hsl(${hueRotate}, ${saturation}%, 30%)`
                }}
             >
-               {urgency.toFixed(2)}
+               {u*100}
             </span>
          );
       }
@@ -107,13 +105,23 @@ const reportColumns: GridColDef<Report>[] = [
       headerName: 'Report Confidence',
       width: 100,
       type: 'number',
-      renderCell: (params) => (
-         <span className={`px-2 py-1 rounded-full text-sm ${params.value >= 8 ? 'bg-red-100 text-red-800' :
-            params.value < 0.5 ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'
-            }`}>
-            {params.value}
-         </span>
-      )
+      renderCell: (params) => {
+         const conf = params.value;
+         const hueRotate = Math.round(conf * 120);
+         const saturation = 100 - (Math.abs(conf - 0.5) * 40);
+         
+         return (
+            <span 
+               className="px-2 py-1 rounded-full text-sm font-medium"
+               style={{
+                  backgroundColor: `hsl(${hueRotate}, ${saturation}%, 90%)`,
+                  color: `hsl(${hueRotate}, ${saturation}%, 30%)`
+               }}
+            >
+               {conf*100}
+            </span>
+         );
+      }
    },
    {
       field: 'createdAt',

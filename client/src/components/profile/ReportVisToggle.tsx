@@ -33,13 +33,15 @@ export default function ReportVisToggle({ reportId, initialPublic }: { reportId:
 
    return (
       <div className="flex items-center gap-2">
-         <input
-            type="checkbox"
-            checked={isPublic}
-            onChange={handleToggle}
-            disabled={loading}
-            className="toggle toggle-primary"
-         />
+         <div className='tooltip tooltip-right tooltip-primary' data-tip={t('visTT')}>
+            <input
+               type="checkbox"
+               checked={isPublic}
+               onChange={handleToggle}
+               disabled={loading}
+               className="toggle toggle-primary"
+            />
+         </div>
          <span className="text-sm font-medium">{isPublic ? t('public') : t('private')}</span>
       </div>
    );

@@ -6,7 +6,7 @@ import CustomToolbar from './CustomToolbar';
 
 export default function AdminReportsTable() {
 
-   const { data: reports } = useReports("/gov/reports");
+   const { data: reports, isLoading } = useReports("/gov/reports");
 
    return (
       <DataGrid<Report>
@@ -61,7 +61,12 @@ export default function AdminReportsTable() {
                fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
             }
          }}
-         slots={{ toolbar: CustomToolbar }}
+         slots={{ 
+            toolbar: CustomToolbar
+         }}
+         localeText={{
+            noRowsLabel: isLoading || !reports ? 'Loading reports...' : 'No reports to display.'
+         }}
          showToolbar
       />
    )

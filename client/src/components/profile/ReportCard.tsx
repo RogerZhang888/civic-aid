@@ -3,6 +3,7 @@ import { Report } from "../types";
 import { useState } from "react";
 import useTranslation from "../../hooks/useTranslation";
 import getBadgeClass from "../../hooks/getBadgeClass";
+import { AlertTriangle, Calendar, FileWarning } from "lucide-react";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -22,7 +23,7 @@ function formatDate(date: Date) {
    return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-export default function ReportCard({ report, loc }: { report: Report, loc: string }) {
+export default function ReportCard({ report, loc }: { report: Report, loc: "/community" | "/profile" }) {
 
    const navigate = useNavigate();
    const { t } = useTranslation();
@@ -44,19 +45,22 @@ export default function ReportCard({ report, loc }: { report: Report, loc: strin
       :  "/placeholderImg.png"
 
    return (
-      <div className="card shadow-lg h-100 w-75 relative">
+      <div className="card shadow-lg h-100 w-75 relative hover:shadow-xl duration-300 hover:-translate-y-1 transition">
          <div className="absolute top-2 left-2 space-x-2">
             <span className={`badge ${getBadgeClass(status)} p-3 font-semibold shadow-[0_0_2px_1px_rgba(0,0,0,0.3)]`}>
                {capitalize(t(status) as string)}
             </span>
-            <span className={`${isPublic === true ? "" : "hidden"} badge badge-primary p-3 font-semibold shadow-[0_0_2px_1px_rgba(0,0,0,0.3)]`}>
-               {t('public')}
-            </span>
+            {loc === "/profile" && 
+               <span className={`${isPublic === true ? "" : "hidden"} badge badge-primary p-3 font-semibold shadow-[0_0_2px_1px_rgba(0,0,0,0.3)]`}>
+                  {t('public')}
+               </span>
+            }
          </div>
          <figure className="h-40 overflow-hidden rounded-t-xl">
             {imageError ? (
-               <div className="h-40 w-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500">Unable to load image</span>
+               <div className="h-40 w-full bg-gray-200 flex flex-row items-center justify-center space-x-2 text-gray-500">
+                  <FileWarning size={18}/>
+                  <span>{t('imgNotAvail')}</span>
                </div>
             ) : (
                <img
@@ -74,9 +78,9 @@ export default function ReportCard({ report, loc }: { report: Report, loc: strin
             <p className="text-gray-600 text-sm line-clamp-2 break-words overflow-hidden max-h-[3em]">
                {description}
             </p>
-            <p className="text-gray-600 text-sm">
-               {t('reportCreatedAt')} {formatDate(createdAt)}
-            </p>
+            <div className="text-gray-600 text-sm font-mono flex flex-row space-x-2 items-center">
+               <Calendar size={15}/> <span>{formatDate(createdAt)}</span>
+            </div>
             <div className="card-actions">
                <button
                   onClick={() => navigate(`${loc}/${id}`)}
