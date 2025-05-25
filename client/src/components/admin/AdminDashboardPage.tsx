@@ -23,7 +23,7 @@ export default function AdminDashboardPage() {
             Get Summaries<ArrowRight/>
          </Link>
 
-         <div className="w-[90vw]">
+         <div className="w-full">
             <AdminReportsTable/>
          </div>
       </section>

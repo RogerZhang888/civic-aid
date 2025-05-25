@@ -25,12 +25,14 @@ export default function AdminSummariesTable({ summaries }: { summaries: ReportSu
             '& .MuiDataGrid-cell': {
                borderRight: '1px solid #f3f4f6',
                fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
-               minHeight: '50px',
+               minHeight: '60px',
                textAlign: 'center',
-               alignContent: 'center'
+               alignContent: 'center',
+               fontSize: "1rem",
             },
             '& .MuiDataGrid-columnHeader': {
                backgroundColor: '#f3f4f6',
+               fontSize: "1rem",
             },
             '& .MuiDataGrid-columnHeaderTitle': {
                fontWeight: '600',
@@ -48,6 +50,7 @@ export default function AdminSummariesTable({ summaries }: { summaries: ReportSu
             }
          }}
          slots={{ toolbar: CustomToolbar }}
+         getRowId={(row) => `${row.title} - ${row.agency}`}
          showToolbar
       />
    )

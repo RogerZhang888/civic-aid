@@ -19,7 +19,7 @@ export default function CommunityPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 justify-items-center pb-4">
 
-               {reports.map((report) => (
+               {reports.sort((r1, r2) => r2.createdAt.getTime() - r1.createdAt.getTime()).map((report) => (
                   <ReportCard
                      key={report.id}
                      report={report}
