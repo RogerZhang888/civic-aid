@@ -87,6 +87,8 @@ export default {
    comments: "Comments",
    loadingComments: "Loading comments...",
 
+   notifs: "Notifications",
+
    about1: (
       <>
          👋 Hi there! Welcome to <span className="font-bold text-primary">CivicAId</span>. 

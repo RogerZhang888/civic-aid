@@ -43,7 +43,7 @@ export default function ReportPage({ type }: { type: "profile" | "community" }) 
 
                <h1 className="mb-3 card-title text-3xl">{thisReport.title}</h1>
 
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {thisReport.mediaUrl.length > 0
                      ?  thisReport.mediaUrl.map((url, index) =>
                         <div key={index} className="aspect-square bg-base-200 rounded-lg overflow-hidden">
