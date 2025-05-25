@@ -102,7 +102,7 @@ For example:
         return debug?"3":template(
             preface+reportpreface+"Earlier, the citizen submitted a report, \
 however, your confidence on your understanding was low. Provide a short follow-up response in the language of the user's query to seek clarification \
-from the user, a regular citizen, on the infomation required to be more confident of the report. You should report a single incident only, if multiple incidents are present, request the user to create a new chat.",
+from the user, a regular citizen, on the infomation required to be more confident of the report. Only ask for information a regular citizen can be reasonably expected to know. You should report a single incident only, if multiple incidents are present, request the user to create a new chat.",
             "A single short paragraph of plaintext only. DO NOT use any markdown syntax. DO NOT send your response as a JSON. DO NOT preface the response with headers such as 'RESPONSE'. ",
             userprompt,
             chatHistory
@@ -112,7 +112,7 @@ from the user, a regular citizen, on the infomation required to be more confiden
         return debug?"4":template(
             preface+reportpreface+"Earlier, the citizen submitted a report, \
 however, your confidence on your understanding was low. Provide a short follow-up response in the language of the user's query to summarise what you already know, and seek clarification \
-from the user, a regular citizen, on the infomation required to be more confident of the report.  You should report a single incident only, if multiple incidents are present, request the user to create a new chat.",
+from the user, a regular citizen, on the infomation required to be more confident of the report. Only ask for information a regular citizen can be reasonably expected to know. You should report a single incident only, if multiple incidents are present, request the user to create a new chat.",
             "A single short paragraph of plaintext only. \n\nFor example:\
 Thank you for the information, this is what I have gathered so far: <summary>. \
 However I can provide a better report with some additional information. <Follow up questions>\n\nYou are not expected to follow this format strictly.\n\nDO NOT use any markdown syntax. DO NOT send your response as a JSON. DO NOT preface the response with headers such as 'RESPONSE'.",
