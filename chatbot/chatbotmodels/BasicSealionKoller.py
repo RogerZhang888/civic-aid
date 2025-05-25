@@ -17,7 +17,7 @@ def call_sealion_api(prompt: str, max_tokens: int = 400) -> str:
             {"role": "user", "content": prompt}
         ],
         "temperature": 0.3,
-        "max_tokens": max_tokens,
+        # "max_tokens": max_tokens,
         "top_p": 0.9
     }
     for key in Sealion_API_KEYS:
