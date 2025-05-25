@@ -8,7 +8,7 @@ for file in os.listdir("."):
         with open(file, 'r') as f:
                 Sealion_API_KEYS.append(f.read().strip())
 
-def call_sealion_api(prompt: str, max_tokens: int = 2000) -> str:
+def call_sealion_api(prompt: str, max_tokens: int = 400) -> str:
 
     
     payload = {

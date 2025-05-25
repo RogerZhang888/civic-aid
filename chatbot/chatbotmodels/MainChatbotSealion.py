@@ -251,7 +251,7 @@ def get_query_embedding(query: str = None, image=None):
     return query_embedding.astype('float32')
 
 # 5. RAG Search with DeepSeek API - Updated for cosine similarity
-def call_sealion_api(prompt: str, max_tokens: int = 400) -> str:
+def call_sealion_api(prompt: str, max_tokens: int = 2000) -> str:
 
     
     payload = {
