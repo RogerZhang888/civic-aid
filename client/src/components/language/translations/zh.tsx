@@ -87,6 +87,8 @@ export default {
    comments: "评论",
    loadingComments: "加载评论",
 
+   notifs: "您的通知",
+
    about1: (
       <>
          👋 您好！欢迎来到 <span className="font-bold text-primary">CivicAId</span>. 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { SendHorizontal } from "lucide-react";
 import axios from "axios";
-import CommentComponent from "./CommentComponent";
+import CommentBubble from "./CommentBubble";
 import { Comment } from "../../components/types";
 import { formatDistanceToNow } from "date-fns";
 import useUser from "../../hooks/useUser";
@@ -11,7 +11,6 @@ const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 function timeAgo(date: Date) {
   return formatDistanceToNow(date, { addSuffix: true });
 }
-
 
 export default function AddComment({
   reportId,
@@ -83,15 +82,16 @@ export default function AddComment({
 
       <div className="mt-4">
         {existingComments
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
         .filter((comment) => !comment.deleted)
         .map((comment) => (
-          <CommentComponent
+          <CommentBubble
             key={comment.id}
             id={comment.id}
+            username={comment.username}
             content={comment.text}
             timeAgo={timeAgo(comment.createdAt)} 
             votes={comment.upvoteCount}
-            username={comment.username}
             isOwner={comment.userId === currentUserId}
             onDelete={() => handleDelete(comment.id)}
           />

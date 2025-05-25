@@ -147,14 +147,14 @@ export type ReportSummary = {
 }
 
 export type Notification = {
-    id: number,
-    createdAt: Date,
-    link: string,
-    text: {
-        en: string,
-        zh: string,
-        ms: string,
-        ta: string
-    },
-    read: boolean
+   id: number,
+   createdAt: Date,
+   link: string,
+   text: {
+      en: string,
+      zh: string,
+      ms: string,
+      ta: string
+   },
+   read: boolean
 }

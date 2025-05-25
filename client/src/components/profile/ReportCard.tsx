@@ -3,7 +3,7 @@ import { Report } from "../types";
 import { useState } from "react";
 import useTranslation from "../../hooks/useTranslation";
 import getBadgeClass from "../../hooks/getBadgeClass";
-import { AlertTriangle, Calendar, FileWarning } from "lucide-react";
+import { Calendar, FileWarning } from "lucide-react";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -75,10 +75,10 @@ export default function ReportCard({ report, loc }: { report: Report, loc: "/com
             <h2 className="card-title line-clamp-2 break-words overflow-hidden max-h-[3em]">
                {title}
             </h2>
-            <p className="text-gray-600 text-sm line-clamp-2 break-words overflow-hidden max-h-[3em]">
+            <p className="text-gray-600 text-sm line-clamp-2 break-words overflmssow-hidden max-h-[3em]">
                {description}
             </p>
-            <div className="text-gray-600 text-sm font-mono flex flex-row space-x-2 items-center">
+            <div className="text-gray-600 text-sm font-mono flex flex-row space-x-2 items-center mt-auto">
                <Calendar size={15}/> <span>{formatDate(createdAt)}</span>
             </div>
             <div className="card-actions">
