@@ -6,6 +6,7 @@ import AboutCard from "./AboutCard";
 import mascot from "/mascot.png";
 import mascot1 from "/mascot1.png";
 import mascot2 from "/mascot2.png";
+import mascot3 from "/mascot3.png";
 
 export default function About() {
    const { t } = useTranslation();
@@ -38,7 +39,7 @@ export default function About() {
             {t('about2')}
          </AboutCard>
 
-         <AboutCard imageSrc={mascot} imageAlt="Leo explaining features">
+         <AboutCard imageSrc={mascot3} imageAlt="Leo explaining features">
             {t('about3')}
          </AboutCard>
 
