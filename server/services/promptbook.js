@@ -71,7 +71,7 @@ Your output is sent to the reviewing team, not the citizen reporting. \
 Your summary should be in english and contain details such as the exact location, the specific problem, and recommended steps, such that a reviewing officer can take immediate action without consulting other sources of information. The summary should be about 2 to 3 sentences long. \
 Also output how urgent the issue is, on a scale of 0 to 1, to 2 decimal places, with a higher score representing greater urgency. Scores below 0.5 should be reserved for suggestions, while scores above 0.5 are for issues requiring action. \
 
-Output 'confidence' as a measurement of details, such as the location, in the user's report, relative to the information that can be reasonably expected of a regular citizen, on a scale of 0 to 1, to 2 decimal places, with a higher score representing more completeness of details provided by the user. \
+Output 'confidence' as a measurement of details, such as the location, in the user's report, relative to the information that can be reasonably expected of a regular citizen, on a scale of 0 to 1, to 2 decimal places, with a higher score representing more completeness of details provided by the user. Avoid scores above 0.85 unless you are completely certain of the detailedness of the report. \
 Also indicate which sources you used, both from the context provided and otherwise. You should report a single incident only, if multiple incidents are present, request the user to create a new chat. `,
 
 
