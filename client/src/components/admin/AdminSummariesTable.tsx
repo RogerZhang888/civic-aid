@@ -12,15 +12,15 @@ export default function AdminSummariesTable({ summaries }: { summaries: ReportSu
          getRowHeight={() => 'auto'}
          initialState={{
             pagination: {
-               paginationModel: { pageSize: 5, page: 0 },
+               paginationModel: { pageSize: 20, page: 0 },
             },
             columns: {
                columnVisibilityModel: {
-
+                  agency: false
                }
             }
          }}
-         pageSizeOptions={[5, 10, 25, 50, 100]}
+         pageSizeOptions={[20, 50, 100]}
          sx={{
             '& .MuiDataGrid-cell': {
                borderRight: '1px solid #f3f4f6',
@@ -51,6 +51,9 @@ export default function AdminSummariesTable({ summaries }: { summaries: ReportSu
          }}
          slots={{ toolbar: CustomToolbar }}
          getRowId={(row) => `${row.title} - ${row.agency}`}
+         localeText={{
+            noRowsLabel: 'No summaries to display.'
+         }}
          showToolbar
       />
    )

@@ -20,10 +20,10 @@ export default function ChatbotForm() {
    const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
    // real-time input validation:
-   // text between 0 and 400 charcters, inclusive
+   // text between 0 and 5000 charcters, inclusive
    // must have either text or image, or both, present
    const validationError = useMemo(() => {
-      if (formState.text.length > 400) return t('messageTooLong');
+      if (formState.text.length > 5000) return t('messageTooLong');
       if (!formState.text.trim() && !formState.img) return t('emptyForm');
       return null;
    }, [formState.text, formState.img, t]);

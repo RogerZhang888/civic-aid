@@ -1,6 +1,7 @@
 import ReportCard from "../profile/ReportCard";
 import useReports from "../../hooks/useReports";
 import useTranslation from "../../hooks/useTranslation";
+import { FileX2 } from "lucide-react";
 
 export default function CommunityPage() {
 
@@ -12,9 +13,15 @@ export default function CommunityPage() {
          <div className="text-2xl font-semibold">{t('community')}</div>
 
          {isReportsLoading ? (
-            <div>{t('loadingReports')}</div>
+            <div className="text-center">
+               <div className="loading loading-spinner text-primary"/>
+               <div className="mt-2  text-gray-500">{t('loadingReports')}</div>
+            </div>
          ) : reports?.length === 0 || !reports ? (
-            <div>{t('noPublicReports')}</div>
+            <div className="flex flex-col space-y-2 items-center">
+               <FileX2 className="w-10 h-10 text-red-400" />
+               <div className="text-gray-500">{t('noPublicReports')}</div>
+            </div>
          ) : (
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 justify-items-center pb-4">

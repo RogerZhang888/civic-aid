@@ -100,8 +100,8 @@ export default function AdminReportPage() {
                      <tr>
                         <th>Urgency</th>
                         <td>
-                           <progress className="progress w-56" value={thisReport.urgency} max="1" />
-                           <span className='ml-3'>{thisReport.urgency.toFixed(2)} / 1</span>
+                           <progress className="progress w-56" value={thisReport.urgency*100} max="100" />
+                           <span className='ml-3'>{thisReport.urgency*100} / 100</span>
                         </td>
                      </tr>
                      <tr>

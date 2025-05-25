@@ -2,6 +2,7 @@ import ReportCard from "./ReportCard";
 import useReports from "../../hooks/useReports";
 import useRewards from "../../hooks/useRewards";
 import useTranslation from "../../hooks/useTranslation";
+import { FileX2 } from "lucide-react";
 
 export default function ProfilePage() {
    const { data: reports, isLoading: isReportsLoading } = useReports("/reports");
@@ -27,9 +28,15 @@ export default function ProfilePage() {
          <div className="text-2xl font-semibold">{t('yourReports')}</div>
 
          {isReportsLoading ? (
-            <div>{t('loadingReports')}</div>
+            <div className="text-center">
+               <div className="loading loading-spinner text-primary"/>
+               <div className="mt-2  text-gray-500">{t('loadingReports')}</div>
+            </div>
          ) : reports?.length === 0 || !reports ? (
-            <div>{t('noReports')}</div>
+            <div className="flex flex-col space-y-2 items-center">
+               <FileX2 className="w-10 h-10 text-red-400" />
+               <div className="text-gray-500">{t('noReports')}</div>
+            </div>
          ) : (
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 justify-items-center">
@@ -95,8 +102,8 @@ export default function ProfilePage() {
          <div className="flex justify-center w-full max-w-4xl pb-4">
             {isRewardsLoading ? (
                <div className="text-center">
-                  <span className="loading loading-spinner loading-lg text-primary"></span>
-                  <p className="mt-2 text-gray-500">{t('loadingRewards')}</p>
+                  <div className="loading loading-spinner text-primary"/>
+                  <div className="mt-2 text-gray-500">{t('loadingRewards')}</div>
                </div>
             ) : hasReward ? (
                <div className="card w-full max-w-3xl bg-gradient-to-r from-primary to-secondary text-primary-content shadow-xl">

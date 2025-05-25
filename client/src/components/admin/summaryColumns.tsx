@@ -24,12 +24,18 @@ const summaryColumns: GridColDef<ReportSummary>[] = [
       headerName: 'Recommended Steps',
       flex: 2,
       minWidth: 200,
+      renderCell: (params) => (
+         <div className="text-left">
+            {params.value}
+         </div>
+      )
    },
    {
       field: 'urgency',
       headerName: 'Urgency',
       width: 100,
       type: 'number',
+      headerAlign: "center",
       renderCell: (params) => {
 
          const u = params.value;
@@ -44,7 +50,7 @@ const summaryColumns: GridColDef<ReportSummary>[] = [
                   color: `hsl(${hueRotate}, ${saturation}%, 30%)`
                }}
             >
-               {u.toFixed(2)}
+               {u*100}
             </span>
          );
       }
@@ -54,6 +60,7 @@ const summaryColumns: GridColDef<ReportSummary>[] = [
       headerName: 'Confidence',
       width: 100,
       type: 'number',
+      headerAlign: "center",
       renderCell: (params) => {
          const conf = params.value;
          const hueRotate = Math.round(conf * 120);
@@ -82,6 +89,8 @@ const summaryColumns: GridColDef<ReportSummary>[] = [
                   key={idx}
                   to={`/admin/report/${src}`}
                   className="btn btn-link btn-sm"
+                  target="_blank"
+                  rel="noopener noreferrer"
                >
                   Source {idx+1}
                </Link>

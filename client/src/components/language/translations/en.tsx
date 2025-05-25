@@ -35,7 +35,7 @@ export default {
 
    uploadImage: "Upload an image",
    maxImage: "Max: 1 image",
-   messageTooLong: "Message must be ≤400 characters",
+   messageTooLong: "Message must be ≤5000 characters",
    emptyForm: "Message or image required",
 
    yourReports: "Your Reports",
@@ -62,6 +62,7 @@ export default {
    details: "Report Details",
    status: "Status",
    visibility: "Visibility",
+   visTT: 'If you want others to view, support or add on to your report in the "Community" tab, disable the "Private" button.',
    createdAt: "Created At",
    resolvedAt: "Resolved At",
    agency: "Agency",
@@ -73,6 +74,7 @@ export default {
    noLocation: "No location data provided.",
    noRemarks: "No remarks given by administrator.",
    noMedia: "No media available for this report.",
+   imgNotAvail: "Image not available",
 
    pending: "pending",
    resolved: "resolved",
