@@ -33,7 +33,7 @@ export default function AdminReportPage() {
    }
 
    return (
-      <div className='m-10'>
+      <div className='p-6 max-w-250 mx-auto'>
 
          <button className='btn btn-primary mb-5' onClick={() => navigate("/admin")}>
             Back to Admin Page
@@ -42,9 +42,9 @@ export default function AdminReportPage() {
          <div className="card shadow-[0_0_10px_1px_rgba(0,0,0,0.2)] ">
             <div className="card-body">
 
-               <h1 className="mb-3 card-title text-3xl">{thisReport.title}</h1>
+               <h1 className="mb-3 card-title text-3xl">{thisReport.title}</h1>p
 
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {thisReport.mediaUrl.length > 0
                      ? thisReport.mediaUrl.map((url, index) => (
                         <div key={index} className="aspect-square bg-base-200 rounded-lg overflow-hidden">
