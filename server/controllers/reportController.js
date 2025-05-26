@@ -296,13 +296,16 @@ export async function setIsPublic(req, res) {
 }
 
 export async function getPublicReports(req, res) {
-    try {
-        pgsql.query("SELECT * FROM reports WHERE is_public = TRUE").then((qr) => {
-            res.json(qr)
-        })
-    } catch (e) {
-        return res.status(500).json({error: e})
-    }
+    Promise.all([pgsql.query("SELECT * FROM reports WHERE is_public = TRUE"), pgsql.query("SELECT name, id FROM users")]).then((aqr) => {
+        let qr = aqr[0]
+
+        for (let report of qr) {
+            report.username = aqr[1].find((e) => e.id === report.user_id)?.name ?? ""
+        }
+        res.json(qr)
+    }).catch((e) => {
+        res.status(500).json({error: e})
+    })
 }
 
 const updateUpvoteCount = async (reportId) => {
