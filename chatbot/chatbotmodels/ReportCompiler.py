@@ -64,7 +64,7 @@ def onnx_encode_texts(texts, model_name="optimum/all-MiniLM-L6-v2"):
     return np.concatenate(embeddings, axis=0).astype(np.float64), valid_indices
 
 
-def group_identical_issues(parquet_path, similarity_threshold=0.75):
+def group_identical_issues(parquet_path, similarity_threshold=0.65):
     # 1. Load data
     df = load_data(parquet_path)
     
