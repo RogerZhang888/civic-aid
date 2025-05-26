@@ -22,7 +22,10 @@ export default function ReportVisToggle({ reportId, initialPublic }: { reportId:
             { withCredentials: true }
          );
          setIsPublic(newStatus); // Update UI only after success
-         await queryClient.refetchQueries({ queryKey: ['/reports', 'public-reports'] });
+         await Promise.all([
+            queryClient.refetchQueries({ queryKey: ['/reports'] }),
+            queryClient.refetchQueries({ queryKey: ['public-reports'] }),
+         ]);
          toast.success(`Your report was updated to be ${newStatus ? 'public' : 'private'}.`);
       } catch (err) {
          console.error('Error updating visibility:', err);
