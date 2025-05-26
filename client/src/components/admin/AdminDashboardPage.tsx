@@ -13,6 +13,8 @@ export default function AdminDashboardPage() {
 
    return (
       <section className="w-full h-full flex flex-col items-center space-y-4 p-4" id="admin-dashboard">
+
+         <title>CivicAId - Admin Dashboard</title>
          
          <div className="text-2xl font-semibold">Admin Dashboard</div>
 

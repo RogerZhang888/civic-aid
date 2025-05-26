@@ -37,7 +37,8 @@ export default function ReportPage({ type }: { type: "profile" | "community" }) 
    const resolvedAt = thisReport.resolvedAt ? new Date(thisReport.resolvedAt).toLocaleString() : 'Not resolved yet';
 
    return (
-      <div className='p-6 max-w-250 mx-auto'>
+      <div className='p-6 max-w-250 mx-auto' id="report-page">
+         <title>{`CivicAId - ${thisReport.title}`}</title>
 
          <button className='btn btn-primary mb-5' onClick={() => navigate(type === "profile" ? "/profile" : "/community")}>
             {type === "profile" ? t("backToProfile") : t("backToCommunity")}

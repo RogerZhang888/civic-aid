@@ -88,6 +88,8 @@ export default function Register() {
          className="min-w-1/2 py-5 px-10 bg-white rounded-lg space-y-1 shadow-[0_0_10px_4px_rgba(0,0,0,0.2)]"
       >
 
+         <title>CivicAId - Register</title>
+
          <fieldset className="fieldset">
             <legend className="fieldset-legend text-sm">{t('username')}</legend>
             <input

@@ -16,7 +16,10 @@ export default function About() {
    const navigate = useNavigate();
 
    return (
-      <div className="min-h-screen p-8 flex flex-col items-center bg-base-100 relative z-0 space-y-10">
+      <div className="min-h-screen p-8 flex flex-col items-center bg-base-100 relative z-0 space-y-10" id="about-page">
+
+         <title>CivicAId - About</title>
+
          <div className="fixed inset-0 z-[-1] opacity-20">
             <img
                src="/heartland.avif"

@@ -48,11 +48,14 @@ export default function AdminSummaryPage() {
    return (
       <section className="w-full h-full flex flex-col items-center space-y-4 p-4" id="admin-summary">
 
+         <title>CivicAId - Report Summaries</title>
+
          <div className="text-2xl font-semibold">Report Summaries</div>
 
          <button
             className="btn btn-primary btn-outline"
             onClick={fetchSummary}
+            disabled={isfetching}
          >
             {isfetching 
                ?  <div className="flex flex-row items-center space-x-2">

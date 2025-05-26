@@ -10,6 +10,7 @@ export default function CommunityPage() {
 
    return (
       <section className="w-full h-full flex flex-col items-center space-y-4 p-4" id="community-page">
+         <title>CivicAId - Community</title>
          <div className="text-2xl font-semibold">{t('community')}</div>
 
          {isReportsLoading ? (

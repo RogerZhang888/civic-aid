@@ -6,6 +6,9 @@ export default function ErrorPage() {
 
    return (
       <section className="w-screen h-screen flex flex-col justify-center items-center gap-6" id="error-page">
+
+         <title>Error</title>
+
          <div className="flex flex-col items-center gap-4">
             <AlertCircle className="w-16 h-16 text-red-400" />
             <h1 className="text-4xl font-bold text-gray-700">Oops!</h1>

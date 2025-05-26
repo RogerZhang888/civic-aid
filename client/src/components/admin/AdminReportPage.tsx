@@ -33,7 +33,9 @@ export default function AdminReportPage() {
    }
 
    return (
-      <div className='p-6 max-w-250 mx-auto'>
+      <div className='p-6 max-w-250 mx-auto' id="admin-report-page">
+
+         <title>{`CivicAId - ${thisReport.title} (Admin)`}</title>
 
          <button className='btn btn-primary mb-5' onClick={() => navigate("/admin")}>
             Back to Admin Page

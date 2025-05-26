@@ -25,6 +25,7 @@ export default function ProfilePage() {
 
    return (
       <section className="w-full h-full flex flex-col items-center space-y-4 p-4" id="profile-page">
+         <title>CivicAId - Profile</title>
          <div className="text-2xl font-semibold">{t('yourReports')}</div>
 
          {isReportsLoading ? (
