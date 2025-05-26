@@ -21,6 +21,8 @@ export default function Chatbot() {
    return (
       <div className="h-full flex flex-1 flex-col items-center mx-4 static">
 
+         <title>{`CivicAID - ${currChat ? currChat.title : "New Chat"}`}</title>
+
          {currChat
             ?  <>
                   <div className="hidden sm:block text-lg font-semibold p-2">

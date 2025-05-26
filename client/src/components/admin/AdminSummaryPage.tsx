@@ -59,7 +59,7 @@ export default function AdminSummaryPage() {
          >
             {isfetching 
                ?  <div className="flex flex-row items-center space-x-2">
-                     <div className="loading loading-spinner text-primary"/>
+                     <div className="loading loading-spinner text-gray-700"/>
                      <div>Loading Summaries...</div>
                   </div>
                :  "Refetch Summaries"
