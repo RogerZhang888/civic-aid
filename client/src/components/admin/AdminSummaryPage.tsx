@@ -54,7 +54,13 @@ export default function AdminSummaryPage() {
             className="btn btn-primary btn-outline"
             onClick={fetchSummary}
          >
-            {isfetching ? "Loading Summaries..." : "Refetch Summaries"}
+            {isfetching 
+               ?  <div className="flex flex-row items-center space-x-2">
+                     <div className="loading loading-spinner text-primary"/>
+                     <div>Loading Summaries...</div>
+                  </div>
+               :  "Refetch Summaries"
+            }
          </button>
 
          <div className="w-full">

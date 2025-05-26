@@ -42,7 +42,7 @@ export default function AdminReportPage() {
          <div className="card shadow-[0_0_10px_1px_rgba(0,0,0,0.2)] ">
             <div className="card-body">
 
-               <h1 className="mb-3 card-title text-3xl">{thisReport.title}</h1>p
+               <h1 className="mb-3 card-title text-3xl">{thisReport.title}</h1>
 
                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {thisReport.mediaUrl.length > 0
