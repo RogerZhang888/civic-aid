@@ -83,6 +83,7 @@ export default {
 
    noPublicReports: "没有任何社区报告。",
    backToCommunity: "返回社区报告页",
+   submittedBy: "提交者",
 
    comments: "评论",
    loadingComments: "加载评论",

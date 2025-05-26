@@ -1,11 +1,11 @@
 import ReportCard from "../profile/ReportCard";
-import useReports from "../../hooks/useReports";
 import useTranslation from "../../hooks/useTranslation";
 import { FileX2 } from "lucide-react";
+import usePublicReports from "../../hooks/usePublicReports";
 
 export default function CommunityPage() {
 
-   const { data: reports, isLoading: isReportsLoading } = useReports("/reports/public");
+   const { data: reports, isLoading: isReportsLoading } = usePublicReports();
    const { t } = useTranslation();
 
    return (

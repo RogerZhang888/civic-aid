@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router";
-import { Report } from "../types";
+import { PublicReport, Report } from "../types";
 import { useState } from "react";
 import useTranslation from "../../hooks/useTranslation";
 import getBadgeClass from "../../hooks/getBadgeClass";
-import { Calendar, FileWarning } from "lucide-react";
+import { Calendar, FileWarning, User } from "lucide-react";
+import useUser from "../../hooks/useUser";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -23,10 +24,11 @@ function formatDate(date: Date) {
    return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-export default function ReportCard({ report, loc }: { report: Report, loc: "/community" | "/profile" }) {
+export default function ReportCard({ report, loc }: { report: Report | PublicReport, loc: "/community" | "/profile" }) {
 
    const navigate = useNavigate();
    const { t } = useTranslation();
+   const { data: user } = useUser();
 
    const [imageError, setImageError] = useState(false);
 
@@ -37,8 +39,10 @@ export default function ReportCard({ report, loc }: { report: Report, loc: "/com
       id,
       createdAt,
       status,
-      isPublic
+      isPublic,
    } = report;
+
+   const reportCreator = "username" in report ? report.username : undefined;
 
    const imgSrc = mediaUrl.length > 0 
       ?  `${SERVER_API_URL}/api/files/${mediaUrl[0]}`
@@ -72,10 +76,19 @@ export default function ReportCard({ report, loc }: { report: Report, loc: "/com
             )}
          </figure>
          <div className="card-body">
+            {loc === "/community" &&
+               <div className="flex items-center gap-1 text-sm text-gray-600 -mt-3">
+                  <User size={15} strokeWidth={2}/>
+                  <span>{reportCreator}</span>
+                  {user?.username === reportCreator &&
+                     <span className="badge badge-primary text-white text-xs font-semibold">You</span>
+                  }
+               </div>
+            }
             <h2 className="card-title line-clamp-2 break-words overflow-hidden max-h-[3em]">
                {title}
             </h2>
-            <p className="text-gray-600 text-sm line-clamp-2 break-words overflmssow-hidden max-h-[3em]">
+            <p className="text-gray-600 text-sm line-clamp-2 break-words overflow-hidden max-h-[3em]">
                {description}
             </p>
             <div className="text-gray-600 text-sm font-mono flex flex-row space-x-2 items-center mt-auto">

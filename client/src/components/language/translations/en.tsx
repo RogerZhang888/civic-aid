@@ -83,6 +83,7 @@ export default {
 
    noPublicReports: "There are no public reports.",
    backToCommunity: "Back to Community Page",
+   submittedBy: "Submitted by",
 
    comments: "Comments",
    loadingComments: "Loading comments...",

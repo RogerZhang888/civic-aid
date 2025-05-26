@@ -7,6 +7,8 @@ import useTranslation from '../../hooks/useTranslation';
 import ReportStats from '../community/ReportStats';
 import CommentSection from '../community/CommentSection';
 import ReportVisToggle from './ReportVisToggle';
+import usePublicReports from '../../hooks/usePublicReports';
+import { PublicReport, Report } from '../types';
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL!;
 
@@ -17,13 +19,16 @@ function capitalize(word: string) {
 
 export default function ReportPage({ type }: { type: "profile" | "community" }) {
    const { reportId } = useParams() as { reportId: string };
-   const { data: reports, isLoading: isReportsLoading } = useReports(type === "profile" ? "/reports" : "/reports/public");
+   const { data: ownReports, isLoading: isOwnReportsLoading } = useReports('/reports');
+   const { data: publicReports, isLoading: isPublicReportsLoading } = usePublicReports();
    const navigate = useNavigate();
    const { t } = useTranslation();
 
-   if (isReportsLoading) return <GenericLoading str='Loading report...'/>;
+   if (isOwnReportsLoading || isPublicReportsLoading) return <GenericLoading str='Loading report...'/>;
 
-   const thisReport = reports!.find(report => report.id === reportId);
+   const thisReport: Report | PublicReport | undefined = type === "community" 
+      ?  publicReports!.find(report => report.id === reportId)
+      :  ownReports!.find(report => report.id === reportId);
 
    if (!thisReport) return <NotFoundPage />;
 
@@ -66,6 +71,12 @@ export default function ReportPage({ type }: { type: "profile" | "community" }) 
 
                <div className='max-w-100'>
                   <div className="space-y-3">
+                     {type === "community" &&
+                        <div className="flex justify-between">
+                           <span className="font-medium">{t('submittedBy')}</span>
+                           <span>{(thisReport as PublicReport).username}</span>
+                        </div>
+                     }
                      <div className="flex justify-between">
                         <span className="font-medium">{t('status')}</span>
                         <span className={`badge ${getBadgeClass(thisReport.status)} p-3`}>{capitalize(t(thisReport.status) as string)}</span>

@@ -71,6 +71,10 @@ export type Report = {
    upvoteCount: number;
 }
 
+export type PublicReport = Report & {
+   username: string;
+};
+
 export type FormState = {
    text: string;
    img: File | null;
